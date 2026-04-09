@@ -28,7 +28,9 @@ export default function Navbar({ user, navItems }: NavbarProps) {
         <nav className="backdrop-blur-sm px-5 py-2">
             <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3">
                 <div className="flex items-center gap-2">
-                    <img src="/logo.png" height="48" width="48" alt="" />
+                    <Link href="/">
+                        <img src="/logo.png" height="48" width="48" alt="Logo" />
+                    </Link>
                 </div>
 
                 <div className="flex items-center justify-center gap-1">
@@ -36,16 +38,17 @@ export default function Navbar({ user, navItems }: NavbarProps) {
                         const isActive = pathname === item.path;
                         const Icon = item.icon;
                         return (
-                            <Button
-                                key={item.path}
-                                size="sm"
-                                variant="ghost"
-                                className={`text-sm flex items-center gap-1 ${isActive ? "bg-white/5" : "hover:bg-white/5"
-                                    }`}
-                            >
-                                {Icon && <Icon className="h-4 w-4" />}
-                                {item.label}
-                            </Button>
+                            <Link href={item.path} key={item.path}>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className={`text-sm flex items-center gap-1 ${isActive ? "bg-white/5" : "hover:bg-white/5"
+                                        }`}
+                                >
+                                    {Icon && <Icon className="h-4 w-4" />}
+                                    {item.label}
+                                </Button>
+                            </Link>
                         );
                     })}
                 </div>

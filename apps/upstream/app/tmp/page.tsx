@@ -1,8 +1,9 @@
 "use client";
 
-import { Button } from "@workspace/ui/components/button"
 import { authClient } from "@/client/auth"
 import { redirect } from "next/navigation";
+import { Folder, GalleryVerticalEnd, Settings } from "lucide-react";
+import Navbar from "@/components/navbar";
 
 export default function Page() {
     const { data: session, isPending } = authClient.useSession();
@@ -16,21 +17,28 @@ export default function Page() {
     }
 
     return (
-        <div className="flex min-h-svh p-6">
-            <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-                <div>
-                    <h1 className="font-medium">Project ready!</h1>
-                    <p>You may now add components and start building.</p>
-                    <p>We&apos;ve already added the button component for you.</p>
-                    <Button className="mt-2">Button</Button>
+        <div className="flex min-h-screen flex-col bg-background text-white">
+            <Navbar
+                navItems={
+                    [
+                        { label: "Projects", path: "/", icon: Folder },
+                        { label: "Events", path: "/events", icon: GalleryVerticalEnd },
+                        { label: "Settings", path: "/settings", icon: Settings },
+                    ]
+                }
+                user={{
+                    name: session.user.name,
+                    email: session.user.email,
+                    image: session.user.image || "",
+                }}
+            />
+
+            <main className="flex-1 flex justify-center">
+                <div className="w-full max-w-2xl p-6 overflow-auto">
+
+
                 </div>
-                <div>
-                    Welcome, {session.user.name} ({session.user.email})
-                </div>
-                <div className="text-muted-foreground font-mono text-xs">
-                    (Press <kbd>d</kbd> to toggle dark mode)
-                </div>
-            </div>
+            </main>
         </div>
     )
 }

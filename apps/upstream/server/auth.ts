@@ -41,6 +41,15 @@ export const auth = betterAuth(
             },
         },
 
+        user: {
+            additionalFields: {
+                accountPlan: {
+                    type: "string",
+                    defaultValue: "Hobby",
+                },
+            }
+        },
+
         emailAndPassword: {
             enabled: true,
             sendResetPassword: async ({ user, url, token }, request) => {
