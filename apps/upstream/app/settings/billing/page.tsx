@@ -26,6 +26,8 @@ export default function Page() {
         redirect("/login");
     }
 
+    const accountPlan = (session.user as { accountPlan?: string }).accountPlan || "Hobby";
+
     return (
         <div className="flex min-h-screen flex-col bg-background text-white">
             <Navbar
@@ -69,7 +71,7 @@ export default function Page() {
                         <div className="space-y-3">
                             <div>
                                 <p className="text-xs text-eventcontent/65">Current Plan</p>
-                                    <p className="text-lg font-semibold text-white">Hobby</p>
+                                <p className="text-lg font-semibold text-white">{accountPlan}</p>
                             </div>
                         </div>
 
