@@ -48,10 +48,14 @@
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
     --font-sans: var(--font-sans);
+    --color-eventbg: var(--eventbg);
+    --color-eventcontent: var(--eventcontent);
 }
 
 :root {
     --background: oklch(1 0 0);
+    --eventbg: #242627;
+    --eventcontent: #E5E2E1;
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -87,6 +91,8 @@
 
 .dark {
     --background: #131415;
+    --eventbg: #242627;
+    --eventcontent: #E5E2E1;
     --foreground: oklch(0.985 0 0);
     --card: #1D1E20;
     --card-foreground: oklch(0.985 0 0);
