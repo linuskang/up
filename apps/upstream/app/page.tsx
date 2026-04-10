@@ -106,7 +106,7 @@ export default function Page() {
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-sm font-semibold">Your Projects</h2>
                             <Link href="/new-project">
-                                <Button>Create Project</Button>
+                                <Button className="cursor-pointer">Create Project</Button>
                             </Link>
                         </div>
                         {projects.length === 0 ? (
@@ -135,12 +135,27 @@ export default function Page() {
                                 </Empty>
                             </div>
                         ) : (
-                            <div className="space-y-2">
-                                {projects.map((project) => (
-                                    <div key={project.id} className="rounded-lg bg-card p-3 ring-1 ring-white/5">
-                                        <p className="text-sm font-semibold">{project.name}</p>
-                                    </div>
-                                ))}
+                            <div className="overflow-hidden bg-card rounded-lg ring-1 ring-white/5">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-muted/50 text-left">
+                                        <tr>
+                                            <th className="px-4 py-2 font-semibold">Project</th>
+                                            <th className="px-4 py-2 font-semibold">ID</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {projects.map((project) => (
+                                            <tr
+                                                key={project.id}
+                                                onClick={() => redirect(`/projects/${project.id}`)}
+                                                className="cursor-pointer border-t border-white/5 hover:bg-muted/40 transition"
+                                            >
+                                                <td className="px-4 py-3 font-medium">{project.name}</td>
+                                                <td className="px-4 py-3 text-muted-foreground">{project.id}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         )}
                     </div>
@@ -148,8 +163,15 @@ export default function Page() {
                     <div>
                         <h2 className="text-sm font-semibold mb-3 mt-8">Recent Activity</h2>
                         <div className="space-y-2">
-                            <div className="rounded-lg bg-card p-3 ring-1 ring-white/5">
-                                <p className="text-sm text-eventcontent/65">No recent activity</p>
+                            <div className="rounded-lg bg-card p-4 ring-1 ring-white/5 text-center">
+                                <Empty>
+                                    <EmptyHeader>
+                                        <EmptyTitle>No Activity Yet</EmptyTitle>
+                                        <EmptyDescription>
+                                            There hasn&apos;t been any activity in your account yet.
+                                        </EmptyDescription>
+                                    </EmptyHeader>
+                                </Empty>
                             </div>
                         </div>
                     </div>
