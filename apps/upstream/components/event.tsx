@@ -36,7 +36,7 @@ export default function Event({ title, icon, time, content, fields, events, data
     const hasDrawerContent = Boolean(content || actions?.length || hasData || fields?.length || events?.length);
 
     return (
-        <div className="rounded-xl bg-card p-3 text-white shadow-sm ring-1 ring-white/5">
+        <div className="rounded-xl bg-card p-2 text-white shadow-sm ring-1 ring-white/5">
             <div className="flex items-center gap-3">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-background text-xl">
                     {icon}
