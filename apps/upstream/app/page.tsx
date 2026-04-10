@@ -80,8 +80,12 @@ export default function Page() {
 
             <main className="flex-1 flex justify-center">
                 <div className="w-full max-w-2xl p-6 overflow-auto">
+
+                    <div className="mb-4">
+                        <h1 className="text-3xl font-semibold tracking-tight mb-1">Welcome, {session.user.name}</h1>
+                    </div>
+
                     <div className="mb-8">
-                        <h2 className="text-sm font-semibold mb-3">Account Statistics</h2>
                         <div className="grid grid-cols-3 gap-3">
                             <div className="rounded-lg bg-card p-3 ring-1 ring-white/5">
                                 <p className="text-xs text-eventcontent/65">Total Projects</p>

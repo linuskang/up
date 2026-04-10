@@ -49,12 +49,6 @@ export default function Page() {
                         <BreadcrumbList>
                             <BreadcrumbItem>
                                 <BreadcrumbLink asChild>
-                                    <Link href="/">Dashboard</Link>
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <BreadcrumbLink asChild>
                                     <Link href="/settings">Settings</Link>
                                 </BreadcrumbLink>
                             </BreadcrumbItem>

@@ -437,23 +437,8 @@ export default function Page({ params }: PageProps) {
                 }}
             />
 
-            <main className="flex-1 px-4 pb-6 pt-4 sm:px-6">
+            <main className="flex-1 px-4 pb-6 sm:px-6">
                 <div className="mx-auto w-full max-w-2xl">
-                    <Breadcrumb className="mb-4">
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink asChild>
-                                    <Link href="/">Project</Link>
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <BreadcrumbLink asChild>
-                                    <Link href={`/projects/${id}`}>kng</Link>
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
 
                     <div className="mb-4 flex items-center gap-2">
                         <h1 className="text-3xl font-semibold tracking-tight">Events</h1>
