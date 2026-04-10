@@ -11,6 +11,7 @@ const dummyEventsFull: ComponentProps<typeof Event>[] = [
         icon: "🔥",
         time: "09:04 pm",
         content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        category: "login",
         fields: [
             { name: "Name", value: "Linus Kang" },
             { name: "Browser", value: "Chrome on Windows 10" },

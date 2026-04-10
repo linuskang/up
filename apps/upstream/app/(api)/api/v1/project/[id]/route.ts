@@ -53,3 +53,42 @@ export async function GET(
 
     return NextResponse.json({ project }, { status: 200 });
 }
+
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const session = await auth.api.getSession(request);
+    const { id } = await params;
+
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const membership = await db.projectMember.findFirst({
+        where: {
+            projectId: id,
+            userId: session.user.id,
+            role: "ADMIN",
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    if (!membership) {
+        return NextResponse.json({ error: "Only admins can delete projects" }, { status: 403 });
+    }
+
+    const deleted = await db.project.deleteMany({
+        where: {
+            id,
+        },
+    });
+
+    if (!deleted.count) {
+        return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 });
+}

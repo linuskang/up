@@ -22,6 +22,29 @@ model User {
   @@unique([email])
 }
 
+model Event {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  apiKey    ApiKey?  @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  apiKeyId  String?
+  title     String
+  icon      String
+  time      String
+  content   String?
+  fields    Json?
+  events    Json?
+  data      Json?
+  actions   Json?
+  category  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([apiKeyId])
+  @@index([createdAt])
+}
+
 model Project {
   id        String          @id @default(cuid())
   name      String
@@ -29,6 +52,7 @@ model Project {
   updatedAt DateTime        @updatedAt
   members   ProjectMember[]
   apiTokens ApiKey[]
+  events    Event[]
 }
 
 model ProjectMember {
@@ -66,6 +90,7 @@ model ApiKey {
   createdById String
   createdAt   DateTime  @default(now())
   expiresAt   DateTime?
+  events      Event[]
 
   @@index([projectId])
   @@index([createdById])

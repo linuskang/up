@@ -29,7 +29,6 @@ export default function Page() {
         let isCancelled = false;
 
         async function loadProjects() {
-            try {
                 const response = await fetch("/api/v1/project", { method: "GET" });
 
                 if (!response.ok) {
@@ -41,9 +40,6 @@ export default function Page() {
                 if (!isCancelled && data.projects) {
                     setProjects(data.projects);
                 }
-            } catch {
-                // Keep UI usable even if project fetch fails.
-            }
         }
 
         loadProjects();
@@ -105,7 +101,7 @@ export default function Page() {
                     <div>
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-sm font-semibold">Your Projects</h2>
-                            <Link href="/new-project">
+                            <Link href="/settings/projects/new-project">
                                 <Button className="cursor-pointer">Create Project</Button>
                             </Link>
                         </div>
@@ -158,22 +154,6 @@ export default function Page() {
                                 </table>
                             </div>
                         )}
-                    </div>
-
-                    <div>
-                        <h2 className="text-sm font-semibold mb-3 mt-8">Recent Activity</h2>
-                        <div className="space-y-2">
-                            <div className="rounded-lg bg-card p-4 ring-1 ring-white/5 text-center">
-                                <Empty>
-                                    <EmptyHeader>
-                                        <EmptyTitle>No Activity Yet</EmptyTitle>
-                                        <EmptyDescription>
-                                            There hasn&apos;t been any activity in your account yet.
-                                        </EmptyDescription>
-                                    </EmptyHeader>
-                                </Empty>
-                            </div>
-                        </div>
                     </div>
 
                 </div>

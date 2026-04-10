@@ -96,7 +96,7 @@
     --foreground: oklch(0.985 0 0);
     --card: #1D1E20;
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
+    --popover: #1D1E20;
     --popover-foreground: oklch(0.985 0 0);
     --primary: #186DDC;
     --primary-foreground: oklch(0.97 0.014 254.604);

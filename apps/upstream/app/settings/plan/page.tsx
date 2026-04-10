@@ -66,7 +66,6 @@ export default function Page() {
                     </Breadcrumb>
 
                     <section className="rounded-xl bg-card p-4 ring-1 ring-white/5">
-                        <h1 className="mb-4 text-xl font-semibold text-white">Billing</h1>
 
                         <div className="space-y-3">
                             <div>
@@ -74,10 +73,6 @@ export default function Page() {
                                 <p className="text-lg font-semibold text-white">{accountPlan}</p>
                             </div>
                         </div>
-
-                        <p className="text-sm text-eventcontent/65">
-                            Please contact support to upgrade your account plan.
-                        </p>
                     </section>
                 </div>
             </main>

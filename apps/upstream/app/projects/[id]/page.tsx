@@ -42,6 +42,18 @@ export default function Page({ params }: PageProps) {
     const { id } = use(params);
     const { data: session, isPending } = authClient.useSession();
     const [project, setProject] = useState<Project | null>(null);
+    const quickLinks = [
+        {
+            label: "API Keys",
+            description: "Create, rotate, and revoke keys",
+            href: `/projects/${id}/keys`,
+        },
+        {
+            label: "Events",
+            description: "View project event stream",
+            href: `/projects/${id}/events`,
+        },
+    ];
 
     useEffect(() => {
 
@@ -130,119 +142,7 @@ export default function Page({ params }: PageProps) {
                         </div>
                     </div>
 
-                    <div>
-                        <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-sm font-semibold">Recent Events</h2>
-                            <Link href={`/projects/${id}/events`}>
-                                <Button className="cursor-pointer">Go to Events</Button>
-                            </Link>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="rounded-lg bg-card p-4 ring-1 ring-white/5 text-center">
-                                <Empty>
-                                    <EmptyHeader>
-                                        <EmptyTitle>No Events Yet</EmptyTitle>
-                                        <EmptyDescription>
-                                            There hasn&apos;t been any events in this project yet.
-                                        </EmptyDescription>
-                                    </EmptyHeader>
-                                </Empty>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div>
-                        <div className="flex items-center justify-between mb-3 mt-8">
-                            <h2 className="text-sm font-semibold">Members</h2>
-                            <Link href={`/projects/${id}/invite`}>
-                                <Button className="cursor-pointer">Invite Members</Button>
-                            </Link>
-                        </div>
-                        <div className="space-y-2">
-                            {project.members.length === 0 ? (
-                                <div className="rounded-lg bg-card p-4 ring-1 ring-white/5 text-center">
-                                    <Empty>
-                                        <EmptyHeader>
-                                            <EmptyTitle>No Members Yet</EmptyTitle>
-                                            <EmptyDescription>
-                                                There are no members assigned to this project yet.
-                                            </EmptyDescription>
-                                        </EmptyHeader>
-                                    </Empty>
-                                </div>
-                            ) : (
-                                <div className="rounded-lg bg-card ring-1 ring-white/5">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="border-white/10">
-                                                <TableHead className="px-4">Member</TableHead>
-                                                <TableHead>Email</TableHead>
-                                                <TableHead className="w-28">Role</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {project.members.map((member) => {
-                                                const initial = member.user.name?.charAt(0).toUpperCase() || "U";
-                                                return (
-                                                    <TableRow key={member.id} className="border-white/10 hover:bg-white/5">
-                                                        <TableCell className="px-4">
-                                                            <div className="flex min-w-0 items-center gap-3">
-                                                                <Avatar className="size-8">
-                                                                    <AvatarImage src={member.user.image || undefined} alt={member.user.name} />
-                                                                    <AvatarFallback>{initial}</AvatarFallback>
-                                                                </Avatar>
-                                                                <p className="truncate text-sm font-medium text-white">{member.user.name}</p>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <p className="truncate text-xs text-eventcontent/65">{member.user.email}</p>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] font-medium text-white/80">
-                                                                {member.role}
-                                                            </span>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                );
-                                            })}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h2 className="text-sm font-semibold mb-3 mt-8">API Keys</h2>
-                        <div className="space-y-2">
-                            <div className="rounded-lg bg-card p-4 ring-1 ring-white/5 text-center">
-                                <Empty>
-                                    <EmptyHeader>
-                                        <EmptyTitle>No API Keys Yet</EmptyTitle>
-                                        <EmptyDescription>
-                                            There are no API keys for this project yet.
-                                        </EmptyDescription>
-                                    </EmptyHeader>
-                                </Empty>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h2 className="text-sm font-semibold mb-3 mt-8">Recent Activity</h2>
-                        <div className="space-y-2">
-                            <div className="rounded-lg bg-card p-4 ring-1 ring-white/5 text-center">
-                                <Empty>
-                                    <EmptyHeader>
-                                        <EmptyTitle>No Activity Yet</EmptyTitle>
-                                        <EmptyDescription>
-                                            There hasn&apos;t been any activity in your account yet.
-                                        </EmptyDescription>
-                                    </EmptyHeader>
-                                </Empty>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
             </main >
