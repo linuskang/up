@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import {
     Empty,
-    EmptyContent,
     EmptyDescription,
     EmptyHeader,
     EmptyMedia,

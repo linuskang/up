@@ -12,6 +12,7 @@ export const env = createEnv(
             GOOGLE_CLIENT_SECRET: z.string(),
             RESEND_API_KEY: z.string(),
             RESEND_EMAIL_FROM: z.string().email(),
+            VERSION: z.string(),
         },
 
         clientPrefix: "PUBLIC_",

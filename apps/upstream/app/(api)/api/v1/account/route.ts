@@ -3,6 +3,7 @@ import { auth } from "@/server/auth";
 
 import { NextRequest, NextResponse } from "next/server";
 
+// Fetches user account data.
 export async function GET(request: NextRequest) {
     const session = await auth.api.getSession(request);
 
@@ -23,6 +24,7 @@ export async function GET(request: NextRequest) {
     );
 }
 
+// Modify account profile.
 export async function PATCH(request: NextRequest) {
     const session = await auth.api.getSession(request);
 
@@ -52,7 +54,7 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json(
-        { user: updatedUser },
+        { success: true, user: updatedUser },
         { status: 200 }
     );
 }
