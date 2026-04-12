@@ -23,7 +23,7 @@ export type Project = {
     name: string;
     members: {
         id: string;
-        role: "ADMIN" | "MEMBER";
+        role: "OWNER" | "ADMIN" | "MEMBER";
         user: {
             id: string;
             name: string;

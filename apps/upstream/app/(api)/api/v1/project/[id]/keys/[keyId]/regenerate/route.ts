@@ -18,7 +18,9 @@ export async function POST(
         where: {
             projectId: id,
             userId: session.user.id,
-            role: "ADMIN",
+            role: {
+                in: ["OWNER", "ADMIN"],
+            },
         },
         select: {
             id: true,
@@ -26,7 +28,7 @@ export async function POST(
     });
 
     if (!membership) {
-        return NextResponse.json({ error: "Only admins can regenerate API keys" }, { status: 403 });
+        return NextResponse.json({ error: "Only owners and admins can regenerate API keys" }, { status: 403 });
     }
 
     const token = generateApiKeySecret();

@@ -18,7 +18,9 @@ export async function GET(
         where: {
             projectId: id,
             userId: session.user.id,
-            role: "ADMIN",
+            role: {
+                in: ["OWNER", "ADMIN"],
+            },
         },
         select: {
             id: true,
@@ -26,7 +28,7 @@ export async function GET(
     });
 
     if (!membership) {
-        return NextResponse.json({ error: "Only admins can view API keys" }, { status: 403 });
+        return NextResponse.json({ error: "Only owners and admins can view API keys" }, { status: 403 });
     }
 
     const apiKeys = await db.apiKey.findMany({
@@ -69,7 +71,9 @@ export async function POST(
         where: {
             projectId: id,
             userId: session.user.id,
-            role: "ADMIN",
+            role: {
+                in: ["OWNER", "ADMIN"],
+            },
         },
         select: {
             id: true,
@@ -77,7 +81,7 @@ export async function POST(
     });
 
     if (!membership) {
-        return NextResponse.json({ error: "Only admins can create API keys" }, { status: 403 });
+        return NextResponse.json({ error: "Only owners and admins can create API keys" }, { status: 403 });
     }
 
     let body: unknown;

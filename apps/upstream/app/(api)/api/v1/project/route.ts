@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
             data: {
                 projectId: created.id,
                 userId: session.user.id,
-                role: "ADMIN",
+                role: "OWNER",
             },
         });
 

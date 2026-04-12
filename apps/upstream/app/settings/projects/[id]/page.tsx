@@ -40,7 +40,7 @@ type Project = {
     name: string;
     members: {
         id: string;
-        role: "ADMIN" | "MEMBER";
+        role: "OWNER" | "ADMIN" | "MEMBER";
         user: {
             id: string;
             name: string;
@@ -106,7 +106,7 @@ export default function Page({ params }: PageProps) {
     const [isConfirming, setIsConfirming] = useState(false);
 
     const currentMembership = project?.members.find((member) => member.user.id === session?.user.id) || null;
-    const isCurrentUserAdmin = currentMembership?.role === "ADMIN";
+    const isCurrentUserManager = currentMembership?.role === "OWNER" || currentMembership?.role === "ADMIN";
     const hasTokenName = useMemo(() => tokenName.trim().length > 0, [tokenName]);
 
     useEffect(() => {
@@ -428,7 +428,7 @@ export default function Page({ params }: PageProps) {
         setConfirmState({
             open: true,
             title: "Leave project?",
-            description: "You will lose access and must be re-added by an admin.",
+            description: "You will lose access and must be re-added by an owner or admin.",
             actionLabel: "Leave Project",
             variant: "destructive",
             onConfirm: async () => {
@@ -517,7 +517,7 @@ export default function Page({ params }: PageProps) {
                             <h2 className="text-sm font-semibold">API Tokens</h2>
                             <Dialog open={isCreateTokenDialogOpen} onOpenChange={setIsCreateTokenDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className="cursor-pointer" disabled={!isCurrentUserAdmin}>Create API Key</Button>
+                                    <Button className="cursor-pointer" disabled={!isCurrentUserManager}>Create API Key</Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-lg">
                                     <DialogHeader>
@@ -615,7 +615,7 @@ export default function Page({ params }: PageProps) {
                                                             variant="secondary"
                                                             className="cursor-pointer h-8"
                                                             onClick={() => regenerateApiKey(key.id)}
-                                                            disabled={!isCurrentUserAdmin}
+                                                            disabled={!isCurrentUserManager}
                                                         >
                                                             Regenerate
                                                         </Button>
@@ -634,7 +634,7 @@ export default function Page({ params }: PageProps) {
                                                                     },
                                                                 });
                                                             }}
-                                                            disabled={!isCurrentUserAdmin}
+                                                            disabled={!isCurrentUserManager}
                                                         >
                                                             Revoke
                                                         </Button>
@@ -653,7 +653,7 @@ export default function Page({ params }: PageProps) {
                             <h2 className="text-sm font-semibold">Members</h2>
                             <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className="cursor-pointer" disabled={!isCurrentUserAdmin}>
+                                    <Button className="cursor-pointer" disabled={!isCurrentUserManager}>
                                         Invite Member
                                     </Button>
                                 </DialogTrigger>
@@ -729,8 +729,10 @@ export default function Page({ params }: PageProps) {
                                             {project.members.map((member) => {
                                                 const initial = member.user.name?.charAt(0).toUpperCase() || "U";
                                                 const isSelf = member.user.id === session.user.id;
-                                                const canManageOthers = isCurrentUserAdmin && !isSelf;
-                                                const hasActions = canManageOthers || isSelf;
+                                                const isOwner = member.role === "OWNER";
+                                                const canManageOthers = isCurrentUserManager && !isSelf && !isOwner;
+                                                const canLeaveSelf = isSelf && !isOwner;
+                                                const hasActions = canManageOthers || canLeaveSelf;
                                                 const isRowActionBusy =
                                                     isProcessingMemberAction &&
                                                     activeMemberAction?.memberId === member.id;
@@ -777,7 +779,7 @@ export default function Page({ params }: PageProps) {
                                                                                 Kick Member
                                                                             </DropdownMenuItem>
                                                                         )}
-                                                                        {isSelf && (
+                                                                        {canLeaveSelf && (
                                                                             <DropdownMenuItem
                                                                                 onSelect={() => openLeaveConfirm(member.id)}
                                                                                 className="text-red-300 focus:text-red-200"
@@ -810,7 +812,7 @@ export default function Page({ params }: PageProps) {
                             <Button
                                 variant="destructive"
                                 className="cursor-pointer"
-                                disabled={!isCurrentUserAdmin}
+                                disabled={!isCurrentUserManager}
                                 onClick={() => {
                                     setConfirmState({
                                         open: true,

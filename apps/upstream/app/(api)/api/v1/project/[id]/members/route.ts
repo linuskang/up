@@ -17,7 +17,9 @@ export async function POST(
         where: {
             projectId: id,
             userId: session.user.id,
-            role: "ADMIN",
+            role: {
+                in: ["OWNER", "ADMIN"],
+            },
         },
         select: {
             id: true,
@@ -25,7 +27,7 @@ export async function POST(
     });
 
     if (!adminMembership) {
-        return NextResponse.json({ error: "Only admins can invite members" }, { status: 403 });
+        return NextResponse.json({ error: "Only owners and admins can invite members" }, { status: 403 });
     }
 
     let body: unknown;

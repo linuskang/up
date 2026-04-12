@@ -17,7 +17,9 @@ export async function DELETE(
         where: {
             projectId: id,
             userId: session.user.id,
-            role: "ADMIN",
+            role: {
+                in: ["OWNER", "ADMIN"],
+            },
         },
         select: {
             id: true,
@@ -25,7 +27,7 @@ export async function DELETE(
     });
 
     if (!membership) {
-        return NextResponse.json({ error: "Only admins can revoke API keys" }, { status: 403 });
+        return NextResponse.json({ error: "Only owners and admins can revoke API keys" }, { status: 403 });
     }
 
     const deleted = await db.apiKey.deleteMany({

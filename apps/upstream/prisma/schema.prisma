@@ -70,6 +70,7 @@ model ProjectMember {
 }
 
 enum Role {
+  OWNER
   ADMIN
   MEMBER
 }
