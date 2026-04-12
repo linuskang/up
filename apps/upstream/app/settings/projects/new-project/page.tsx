@@ -2,7 +2,7 @@
 
 import { authClient } from "@/client/auth"
 import { redirect } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Folder, GalleryVerticalEnd, Settings } from "lucide-react";
 import Navbar from "@/components/navbar";
@@ -19,11 +19,20 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import Link from "next/link";
 
+type ProjectLimits = {
+    maxProjects: number;
+    usedProjects: number;
+    remainingProjects: number;
+    canCreateProject: boolean;
+};
+
 export default function Page() {
     const { data: session, isPending } = authClient.useSession();
     const [projectName, setProjectName] = useState("");
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [limits, setLimits] = useState<ProjectLimits | null>(null);
+    const [isLoadingLimits, setIsLoadingLimits] = useState(true);
     const router = useRouter();
 
     if (isPending) {
@@ -34,6 +43,38 @@ export default function Page() {
         redirect("/login");
     }
 
+    const canCreateProject = limits?.canCreateProject ?? true;
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        async function loadLimits() {
+            try {
+                const response = await fetch("/api/v1/project", { method: "GET" });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const data = (await response.json()) as { limits?: ProjectLimits };
+
+                if (!isCancelled) {
+                    setLimits(data.limits ?? null);
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsLoadingLimits(false);
+                }
+            }
+        }
+
+        loadLimits();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
+
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setError("");
@@ -42,6 +83,11 @@ export default function Page() {
 
         if (!trimmedName) {
             setError("Project name is required.");
+            return;
+        }
+
+        if (!canCreateProject) {
+            setError("Project limit reached.");
             return;
         }
 
@@ -110,6 +156,12 @@ export default function Page() {
                             Create a new project and start logging your events.
                         </p>
 
+                        {!isLoadingLimits && limits && (
+                            <p className="mb-4 text-sm text-eventcontent/70">
+                                Projects used: {limits.usedProjects}/{limits.maxProjects}
+                            </p>
+                        )}
+
                         <form onSubmit={onSubmit} className="space-y-4">
                             <div>
                                 <Label htmlFor="project-name" className="mb-1 text-eventcontent/75">
@@ -134,7 +186,7 @@ export default function Page() {
                                 <Button type="button" variant="secondary" asChild disabled={isSubmitting}>
                                     <Link className="cursor-pointer" href="/">Cancel</Link>
                                 </Button>
-                                <Button className="cursor-pointer" type="submit" disabled={isSubmitting}>
+                                <Button className="cursor-pointer" type="submit" disabled={isSubmitting || !canCreateProject}>
                                     {isSubmitting ? "Creating..." : "Create Project"}
                                 </Button>
                             </div>

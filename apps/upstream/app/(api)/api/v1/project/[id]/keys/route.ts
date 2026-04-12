@@ -1,35 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
-import { auth } from "@/server/auth";
-import { generateApiKeySecret, hashApiKeySecret } from "@/lib/api-keys";
+import { generateApiKeySecret, hashApiKeySecret } from "@/server/api-keys";
+import { getProjectAdminMembership } from "@/server/projects";
 
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const session = await auth.api.getSession(request);
     const { id } = await params;
 
-    if (!session) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const access = await getProjectAdminMembership(request, id);
+
+    if ("error" in access) {
+        return access.error;
     }
 
-    const membership = await db.projectMember.findFirst({
-        where: {
-            projectId: id,
-            userId: session.user.id,
-            role: {
-                in: ["OWNER", "ADMIN"],
-            },
-        },
-        select: {
-            id: true,
-        },
-    });
-
-    if (!membership) {
-        return NextResponse.json({ error: "Only owners and admins can view API keys" }, { status: 403 });
-    }
+    const { session } = access;
 
     const apiKeys = await db.apiKey.findMany({
         where: {
@@ -60,29 +46,15 @@ export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const session = await auth.api.getSession(request);
     const { id } = await params;
 
-    if (!session) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const access = await getProjectAdminMembership(request, id);
+
+    if ("error" in access) {
+        return access.error;
     }
 
-    const membership = await db.projectMember.findFirst({
-        where: {
-            projectId: id,
-            userId: session.user.id,
-            role: {
-                in: ["OWNER", "ADMIN"],
-            },
-        },
-        select: {
-            id: true,
-        },
-    });
-
-    if (!membership) {
-        return NextResponse.json({ error: "Only owners and admins can create API keys" }, { status: 403 });
-    }
+    const { session } = access;
 
     let body: unknown;
 

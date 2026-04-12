@@ -1,21 +1,4 @@
-import { ReactNode } from "react";
-
-export type Project = {
-    id: string;
-    name: string;
-    members: {
-        id: string;
-        role: "OWNER" | "ADMIN" | "MEMBER";
-        user: {
-            id: string;
-            name: string;
-            email: string;
-            image: string | null;
-        };
-    }[];
-    createdAt: string;
-    updatedAt: string;
-};
+import type { ReactNode } from "react";
 
 export type EventProps = {
     icon: string;
@@ -26,16 +9,16 @@ export type EventProps = {
     fields?: {
         name: string;
         value: string;
-    }[]
+    }[];
     events?: {
         icon: string;
         time: string;
         content: ReactNode;
-    }[]
+    }[];
     data?: unknown;
     actions?: {
         label: string;
         type: "primary" | "secondary";
         url: string;
-    }[]
-}
+    }[];
+};

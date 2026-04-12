@@ -1,34 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
-import { auth } from "@/server/auth";
+import { getProjectAdminMembership } from "@/server/projects";
 
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const session = await auth.api.getSession(request);
     const { id } = await params;
 
-    if (!session) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const access = await getProjectAdminMembership(request, id);
+
+    if ("error" in access) {
+        return access.error;
     }
 
-    const adminMembership = await db.projectMember.findFirst({
-        where: {
-            projectId: id,
-            userId: session.user.id,
-            role: {
-                in: ["OWNER", "ADMIN"],
-            },
-        },
-        select: {
-            id: true,
-        },
-    });
-
-    if (!adminMembership) {
-        return NextResponse.json({ error: "Only owners and admins can invite members" }, { status: 403 });
-    }
+    const { session } = access;
 
     let body: unknown;
 

@@ -2,33 +2,9 @@
 
 import { useState } from "react";
 
-import type { ReactNode } from "react";
-
 import { Open } from "@/components/icons"
 import { Button } from "@workspace/ui/components/button";
-
-interface EventProps {
-    icon: string;
-    time: string;
-    title: string;
-    content?: ReactNode;
-    category?: string;
-    fields?: {
-        name: string;
-        value: string;
-    }[]
-    events?: {
-        icon: string;
-        time: string;
-        content: ReactNode;
-    }[]
-    data?: unknown;
-    actions?: {
-        label: string;
-        type: "primary" | "secondary";
-        url: string;
-    }[]
-}
+import type { EventProps } from "@/types";
 
 export default function Event({ title, icon, time, content, fields, events, data, actions, category }: EventProps) {
     const [isOpen, setIsOpen] = useState(false);

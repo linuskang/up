@@ -1,5 +1,6 @@
 import db from "@/server/prisma";
 import { auth } from "@/server/auth";
+import { getProjectUsageForUser, normalizeProjectName } from "@/server/projects";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -26,11 +27,32 @@ export async function GET(request: NextRequest) {
             name: true,
             createdAt: true,
             updatedAt: true,
-            members: true,
+            members: {
+                select: {
+                    id: true,
+                    role: true,
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
+                        },
+                    },
+                },
+            },
         },
     });
 
-    return NextResponse.json({ projects }, { status: 200 });
+    const usage = await getProjectUsageForUser(session.user.id);
+
+    return NextResponse.json(
+        {
+            projects,
+            limits: usage,
+        },
+        { status: 200 }
+    );
 }
 
 export async function POST(request: NextRequest) {
@@ -48,9 +70,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const name = typeof (body as { name?: unknown })?.name === "string"
-        ? (body as { name: string }).name.trim()
-        : "";
+    const name = normalizeProjectName((body as { name?: unknown })?.name);
 
     if (!name) {
         return NextResponse.json({ error: "Project name is required" }, { status: 400 });
@@ -60,6 +80,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             { error: "Project name must be 80 characters or less" },
             { status: 400 }
+        );
+    }
+
+    const usage = await getProjectUsageForUser(session.user.id);
+
+    if (!usage.canCreateProject) {
+        return NextResponse.json(
+            {
+                error: `Project limit reached (${usage.usedProjects}/${usage.maxProjects}).`,
+                limits: usage,
+            },
+            { status: 403 }
         );
     }
 

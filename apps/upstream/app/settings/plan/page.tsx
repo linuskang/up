@@ -4,6 +4,7 @@ import { authClient } from "@/client/auth";
 import Navbar from "@/components/navbar";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -13,8 +14,40 @@ import {
     BreadcrumbSeparator,
 } from "@workspace/ui/components/breadcrumb";
 
+type ProjectLimits = {
+    maxProjects: number;
+    usedProjects: number;
+    remainingProjects: number;
+    canCreateProject: boolean;
+};
+
 export default function Page() {
     const { data: session, isPending } = authClient.useSession();
+    const [limits, setLimits] = useState<ProjectLimits | null>(null);
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        async function loadLimits() {
+            const response = await fetch("/api/v1/project", { method: "GET" });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = (await response.json()) as { limits?: ProjectLimits };
+
+            if (!isCancelled) {
+                setLimits(data.limits ?? null);
+            }
+        }
+
+        loadLimits();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
 
     if (isPending) {
         return <div>Loading...</div>;
@@ -59,6 +92,14 @@ export default function Page() {
                                 <p className="text-xs text-eventcontent/65">Current Plan</p>
                                 <p className="text-lg font-semibold text-white">{accountPlan}</p>
                             </div>
+                            {limits && (
+                                <div>
+                                    <p className="text-xs text-eventcontent/65">Project Limit</p>
+                                    <p className="text-lg font-semibold text-white">
+                                        {limits.usedProjects}/{limits.maxProjects}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </section>
                 </div>

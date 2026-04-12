@@ -1,9 +1,11 @@
 "use client";
 
 import { authClient } from "@/client/auth"
+import type { Project } from "@/types";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import {
     Empty,
     EmptyDescription,
@@ -15,11 +17,17 @@ import { ArrowUpRightIcon, Folder } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 
-import { Project } from "@/types";
+type ProjectLimits = {
+    maxProjects: number;
+    usedProjects: number;
+    remainingProjects: number;
+    canCreateProject: boolean;
+};
 
 export default function Page() {
     const { data: session, isPending } = authClient.useSession();
     const [projects, setProjects] = useState<Project[]>([]);
+    const [limits, setLimits] = useState<ProjectLimits | null>(null);
 
     useEffect(() => {
         let isCancelled = false;
@@ -31,10 +39,11 @@ export default function Page() {
                     return;
                 }
 
-                const data = (await response.json()) as { projects?: Project[] };
+                const data = (await response.json()) as { projects?: Project[]; limits?: ProjectLimits };
 
                 if (!isCancelled && data.projects) {
                     setProjects(data.projects);
+                    setLimits(data.limits ?? null);
                 }
         }
 
@@ -54,6 +63,47 @@ export default function Page() {
     }
 
     const accountPlan = (session.user as { accountPlan?: string }).accountPlan || "Hobby";
+    const canCreateProject = limits?.canCreateProject ?? true;
+    const projectUsageLabel = limits
+        ? `${limits.usedProjects}/${limits.maxProjects}`
+        : `${projects.length}`;
+
+    function getMyRole(project: Project) {
+        return project.members.find((member) => member.user.id === session?.user.id)?.role;
+    }
+
+    const ownedProjects = projects.filter((project) => getMyRole(project) === "OWNER");
+    const invitedProjects = projects.filter((project) => {
+        const role = getMyRole(project);
+        return role === "ADMIN" || role === "MEMBER";
+    });
+
+    function getOwner(project: Project) {
+        return project.members.find((member) => member.role === "OWNER");
+    }
+
+    function renderOwnerCell(project: Project) {
+        const owner = getOwner(project);
+
+        if (!owner) {
+            return <span className="text-muted-foreground">Unknown owner</span>;
+        }
+
+        return (
+            <div className="flex items-center gap-3">
+                <Avatar className="size-8 rounded-md">
+                    <AvatarImage src={owner.user.image ?? undefined} alt={owner.user.name} />
+                    <AvatarFallback className="rounded-md text-xs">
+                        {owner.user.name?.charAt(0).toUpperCase() || owner.user.email.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                    <div className="truncate font-medium">{owner.user.name}</div>
+                    <div className="truncate text-xs text-muted-foreground">{owner.user.email}</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen flex-col bg-background text-white">
@@ -75,8 +125,8 @@ export default function Page() {
                     <div className="mb-8">
                         <div className="grid grid-cols-3 gap-3">
                             <div className="rounded-lg bg-card p-3 ring-1 ring-white/5">
-                                <p className="text-xs text-eventcontent/65">Total Projects</p>
-                                <p className="text-2xl font-bold">{projects.length}</p>
+                                <p className="text-xs text-eventcontent/65">Projects Used</p>
+                                <p className="text-2xl font-bold">{projectUsageLabel}</p>
                             </div>
                             <div className="rounded-lg bg-card p-3 ring-1 ring-white/5">
                                 <p className="text-xs text-eventcontent/65">Events Today</p>
@@ -89,13 +139,14 @@ export default function Page() {
                         </div>
                     </div>
 
-                    <div>
+                    <div className="space-y-5">
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-sm font-semibold">Your Projects</h2>
+                            <h2 className="text-sm font-semibold">Projects</h2>
                             <Link href="/settings/projects/new-project">
-                                <Button className="cursor-pointer">Create Project</Button>
+                                <Button className="cursor-pointer" disabled={!canCreateProject}>Create Project</Button>
                             </Link>
                         </div>
+
                         {projects.length === 0 ? (
                             <div className="rounded-lg bg-card p-4 ring-1 ring-white/5 text-center">
                                 <Empty>
@@ -122,28 +173,79 @@ export default function Page() {
                                 </Empty>
                             </div>
                         ) : (
-                            <div className="overflow-hidden bg-card rounded-lg ring-1 ring-white/5">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-muted/50 text-left">
-                                        <tr>
-                                            <th className="px-4 py-2 font-semibold">Project</th>
-                                            <th className="px-4 py-2 font-semibold">ID</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {projects.map((project) => (
-                                            <tr
-                                                key={project.id}
-                                                onClick={() => redirect(`/projects/${project.id}`)}
-                                                className="cursor-pointer border-t border-white/5 hover:bg-muted/40 transition"
-                                            >
-                                                <td className="px-4 py-3 font-medium">{project.name}</td>
-                                                <td className="px-4 py-3 text-muted-foreground">{project.id}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <>
+                                <section>
+                                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-eventcontent/65">
+                                        Owned Projects
+                                    </h3>
+                                    {ownedProjects.length === 0 ? (
+                                        <p className="rounded-lg bg-card p-3 text-xs text-eventcontent/70 ring-1 ring-white/5">
+                                            You do not own any projects yet.
+                                        </p>
+                                    ) : (
+                                        <div className="overflow-hidden bg-card rounded-lg ring-1 ring-white/5">
+                                            <table className="w-full text-sm">
+                                                <thead className="bg-muted/50 text-left">
+                                                    <tr>
+                                                        <th className="px-4 py-2 font-semibold">Project</th>
+                                                        <th className="px-4 py-2 font-semibold">Owner</th>
+                                                        <th className="px-4 py-2 font-semibold">ID</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {ownedProjects.map((project) => (
+                                                        <tr
+                                                            key={project.id}
+                                                            onClick={() => redirect(`/projects/${project.id}`)}
+                                                            className="cursor-pointer border-t border-white/5 hover:bg-muted/40 transition"
+                                                        >
+                                                            <td className="px-4 py-3 font-medium">{project.name}</td>
+                                                            <td className="px-4 py-3">{renderOwnerCell(project)}</td>
+                                                            <td className="px-4 py-3 text-muted-foreground">{project.id}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </section>
+
+                                <section>
+                                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-eventcontent/65">
+                                        Invited Projects
+                                    </h3>
+                                    {invitedProjects.length === 0 ? (
+                                        <p className="rounded-lg bg-card p-3 text-xs text-eventcontent/70 ring-1 ring-white/5">
+                                            You are not an admin or member in any invited projects.
+                                        </p>
+                                    ) : (
+                                        <div className="overflow-hidden bg-card rounded-lg ring-1 ring-white/5">
+                                            <table className="w-full text-sm">
+                                                <thead className="bg-muted/50 text-left">
+                                                    <tr>
+                                                        <th className="px-4 py-2 font-semibold">Project</th>
+                                                        <th className="px-4 py-2 font-semibold">Owner</th>
+                                                        <th className="px-4 py-2 font-semibold">ID</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {invitedProjects.map((project) => (
+                                                        <tr
+                                                            key={project.id}
+                                                            onClick={() => redirect(`/projects/${project.id}`)}
+                                                            className="cursor-pointer border-t border-white/5 hover:bg-muted/40 transition"
+                                                        >
+                                                            <td className="px-4 py-3 font-medium">{project.name}</td>
+                                                            <td className="px-4 py-3">{renderOwnerCell(project)}</td>
+                                                            <td className="px-4 py-3 text-muted-foreground">{project.id}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </section>
+                            </>
                         )}
                     </div>
 
