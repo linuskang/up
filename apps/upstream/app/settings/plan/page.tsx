@@ -4,7 +4,6 @@ import { authClient } from "@/client/auth";
 import Navbar from "@/components/navbar";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Folder, GalleryVerticalEnd, Settings } from "lucide-react";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -13,7 +12,6 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@workspace/ui/components/breadcrumb";
-import { Button } from "@workspace/ui/components/button";
 
 export default function Page() {
     const { data: session, isPending } = authClient.useSession();
@@ -31,11 +29,6 @@ export default function Page() {
     return (
         <div className="flex min-h-screen flex-col bg-background text-white">
             <Navbar
-                navItems={[
-                    { label: "Projects", path: "/", icon: Folder },
-                    { label: "Events", path: "/events", icon: GalleryVerticalEnd },
-                    { label: "Settings", path: "/settings", icon: Settings },
-                ]}
                 user={{
                     name: session.user.name,
                     email: session.user.email,

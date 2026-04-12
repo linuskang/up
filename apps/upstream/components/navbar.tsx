@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ElementType } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import Link from "next/link";
+import { Folder, Settings } from "lucide-react";
 
 interface NavItem {
     label: string;
@@ -18,10 +19,14 @@ interface NavbarProps {
         email?: string;
         image?: string;
     };
-    navItems: NavItem[];
 }
 
-export default function Navbar({ user, navItems }: NavbarProps) {
+const navItems: NavItem[] = [
+    { label: "Projects", path: "/", icon: Folder },
+    { label: "Settings", path: "/settings", icon: Settings },
+];
+
+export default function Navbar({ user }: NavbarProps) {
     const pathname = usePathname();
 
     return (

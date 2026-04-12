@@ -11,14 +11,11 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from "@workspace/ui/components/empty"
-import { ArrowUpRightIcon, Folder, GalleryVerticalEnd, Settings } from "lucide-react";
+import { ArrowUpRightIcon, Folder } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 
-type Project = {
-    id: string;
-    name: string;
-};
+import { Project } from "@/types";
 
 export default function Page() {
     const { data: session, isPending } = authClient.useSession();
@@ -58,18 +55,9 @@ export default function Page() {
 
     const accountPlan = (session.user as { accountPlan?: string }).accountPlan || "Hobby";
 
-
-
     return (
         <div className="flex min-h-screen flex-col bg-background text-white">
             <Navbar
-                navItems={
-                    [
-                        { label: "Projects", path: "/", icon: Folder },
-                        { label: "Events", path: "/events", icon: GalleryVerticalEnd },
-                        { label: "Settings", path: "/settings", icon: Settings },
-                    ]
-                }
                 user={{
                     name: session.user.name,
                     email: session.user.email,

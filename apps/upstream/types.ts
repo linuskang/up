@@ -1,22 +1,4 @@
-export interface Event {
-    id: string;
-    title: string;
-    icon: string;
-    time: string;
-    content?: string;
-    category?: string;
-    fields: {
-        name: string;
-        value: string;
-    }[];
-    data?: Record<string, unknown>;
-    events?: Omit<Event, "events">[];
-    actions?: {
-        label: string;
-        type: "primary" | "secondary";
-        url: string;
-    }[];
-}
+import { ReactNode } from "react";
 
 export type Project = {
     id: string;
@@ -31,4 +13,29 @@ export type Project = {
             image: string | null;
         };
     }[];
+    createdAt: string;
+    updatedAt: string;
 };
+
+export type EventProps = {
+    icon: string;
+    time: string;
+    title: string;
+    content?: ReactNode;
+    category?: string;
+    fields?: {
+        name: string;
+        value: string;
+    }[]
+    events?: {
+        icon: string;
+        time: string;
+        content: ReactNode;
+    }[]
+    data?: unknown;
+    actions?: {
+        label: string;
+        type: "primary" | "secondary";
+        url: string;
+    }[]
+}

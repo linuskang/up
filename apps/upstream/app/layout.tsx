@@ -13,11 +13,6 @@ export const metadata = {
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
-const fontMono = Geist_Mono({
-    subsets: ["latin"],
-    variable: "--font-mono",
-})
-
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -27,7 +22,7 @@ export default function RootLayout({
         <html
             lang="en"
             suppressHydrationWarning
-            className={cn("antialiased", fontMono.variable, "font-sans", inter.variable)}
+            className={cn("antialiased", "font-sans", inter.variable)}
         >
             <body>
                 <ThemeProvider>

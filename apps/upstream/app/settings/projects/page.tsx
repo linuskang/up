@@ -2,7 +2,7 @@
 
 import { authClient } from "@/client/auth";
 import { redirect, useRouter } from "next/navigation";
-import { Folder, GalleryVerticalEnd, Settings, ArrowUpRightIcon } from "lucide-react";
+import { Folder, ArrowUpRightIcon } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import {
@@ -57,11 +57,6 @@ export default function Page() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-white">
       <Navbar
-        navItems={[
-          { label: "Projects", path: "/", icon: Folder },
-          { label: "Events", path: "/events", icon: GalleryVerticalEnd },
-          { label: "Settings", path: "/settings", icon: Settings },
-        ]}
         user={{
           name: session.user.name,
           email: session.user.email,
@@ -71,8 +66,6 @@ export default function Page() {
 
       <main className="flex-1 flex justify-center">
         <div className="w-full max-w-2xl p-6 space-y-6">
-
-          {/* Breadcrumb */}
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -87,7 +80,6 @@ export default function Page() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          {/* Header */}
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Your Projects</h2>
 
