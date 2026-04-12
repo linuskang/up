@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
 import { auth } from "@/server/auth";
+import { createProjectAuditLog } from "@/server/project-audit";
 
 export async function DELETE(
     request: NextRequest,
@@ -40,6 +41,17 @@ export async function DELETE(
     if (!deleted.count) {
         return NextResponse.json({ error: "API key not found" }, { status: 404 });
     }
+
+    await createProjectAuditLog({
+        projectId: id,
+        actorUserId: session.user.id,
+        action: "api_key.revoked",
+        title: "API key revoked",
+        description: `Revoked API key ${keyId}.`,
+        metadata: {
+            keyId,
+        },
+    });
 
     return NextResponse.json({ success: true }, { status: 200 });
 }

@@ -4,9 +4,46 @@ import { auth } from "@/server/auth";
 
 type ProjectRole = "OWNER" | "ADMIN" | "MEMBER";
 
-const MAX_PROJECTS_PER_USER = 3;
+const DEFAULT_MAX_PROJECTS = 3;
+
+function readMaxProjectsFromConfig(value: unknown) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return null;
+    }
+
+    const maxProjects = (value as { max_projects?: unknown }).max_projects;
+
+    if (typeof maxProjects !== "number" || !Number.isFinite(maxProjects)) {
+        return null;
+    }
+
+    const normalized = Math.floor(maxProjects);
+    return normalized > 0 ? normalized : null;
+}
 
 export async function getProjectUsageForUser(userId: string) {
+    const user = await db.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: {
+            accountPlan: true,
+        },
+    });
+
+    const configKey = user?.accountPlan === "Pro" ? "pro_plan" : "free_plan";
+
+    const planConfig = await db.config.findUnique({
+        where: {
+            key: configKey,
+        },
+        select: {
+            value: true,
+        },
+    });
+
+    const maxProjects = readMaxProjectsFromConfig(planConfig?.value) ?? DEFAULT_MAX_PROJECTS;
+
     const usedProjects = await db.projectMember.count({
         where: {
             userId,
@@ -15,10 +52,10 @@ export async function getProjectUsageForUser(userId: string) {
     });
 
     return {
-        maxProjects: MAX_PROJECTS_PER_USER,
+        maxProjects,
         usedProjects,
-        remainingProjects: Math.max(MAX_PROJECTS_PER_USER - usedProjects, 0),
-        canCreateProject: usedProjects < MAX_PROJECTS_PER_USER,
+        remainingProjects: Math.max(maxProjects - usedProjects, 0),
+        canCreateProject: usedProjects < maxProjects,
     };
 }
 

@@ -1,6 +1,7 @@
 import db from "@/server/prisma";
 import { auth } from "@/server/auth";
 import { getProjectUsageForUser, normalizeProjectName } from "@/server/projects";
+import { createProjectAuditLog } from "@/server/project-audit";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -117,6 +118,14 @@ export async function POST(request: NextRequest) {
         });
 
         return created;
+    });
+
+    await createProjectAuditLog({
+        projectId: project.id,
+        actorUserId: session.user.id,
+        action: "project.created",
+        title: "Project created",
+        description: `Created project ${project.name}.`,
     });
 
     return NextResponse.json({ success: true, project }, { status: 201 });

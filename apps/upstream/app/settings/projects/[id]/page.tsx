@@ -48,6 +48,20 @@ type Project = {
             image: string | null;
         };
     }[];
+    auditLogs: {
+        id: string;
+        action: string;
+        title: string;
+        description: string | null;
+        createdAt: string;
+        actor: {
+            id: string;
+            name: string;
+            email: string;
+            image: string | null;
+        } | null;
+        metadata: Record<string, unknown> | null;
+    }[];
 };
 
 type ApiKey = {
@@ -64,6 +78,18 @@ type ApiKey = {
 
 interface PageProps {
     params: Promise<{ id: string }>;
+}
+
+function normalizeProject(project: Project | null | undefined): Project | null {
+    if (!project) {
+        return null;
+    }
+
+    return {
+        ...project,
+        members: Array.isArray(project.members) ? project.members : [],
+        auditLogs: Array.isArray(project.auditLogs) ? project.auditLogs : [],
+    };
 }
 
 export default function Page({ params }: PageProps) {
@@ -88,6 +114,10 @@ export default function Page({ params }: PageProps) {
     const [createdToken, setCreatedToken] = useState<string | null>(null);
     const [hasCopiedToken, setHasCopiedToken] = useState(false);
 
+    const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+    const [renameName, setRenameName] = useState("");
+    const [isRenamingProject, setIsRenamingProject] = useState(false);
+
     const [activeMemberAction, setActiveMemberAction] = useState<{
         memberId: string;
         kind: "role" | "remove";
@@ -105,9 +135,35 @@ export default function Page({ params }: PageProps) {
 
     const [isConfirming, setIsConfirming] = useState(false);
 
-    const currentMembership = project?.members.find((member) => member.user.id === session?.user.id) || null;
+    const currentMembership = project?.members?.find((member) => member.user.id === session?.user.id) || null;
     const isCurrentUserManager = currentMembership?.role === "OWNER" || currentMembership?.role === "ADMIN";
     const hasTokenName = useMemo(() => tokenName.trim().length > 0, [tokenName]);
+    const hasRenameName = useMemo(() => renameName.trim().length > 0, [renameName]);
+
+    function getAuditActionLabel(action: string) {
+        switch (action) {
+            case "project.created":
+                return "Project created";
+            case "project.renamed":
+                return "Project renamed";
+            case "member.invited":
+                return "Member invited";
+            case "member.role_updated":
+                return "Member role updated";
+            case "member.removed":
+                return "Member removed";
+            case "member.left":
+                return "Member left";
+            case "api_key.created":
+                return "API key created";
+            case "api_key.regenerated":
+                return "API key regenerated";
+            case "api_key.revoked":
+                return "API key revoked";
+            default:
+                return action;
+        }
+    }
 
     useEffect(() => {
         let cancelled = false;
@@ -124,10 +180,10 @@ export default function Page({ params }: PageProps) {
                     return;
                 }
 
-                const data = (await response.json()) as { project: Project };
+                const data = (await response.json()) as { project?: Project | null };
 
                 if (!cancelled) {
-                    setProject(data.project || null);
+                    setProject(normalizeProject(data.project));
                 }
             } finally {
                 if (!cancelled) {
@@ -184,8 +240,47 @@ export default function Page({ params }: PageProps) {
             return;
         }
 
-        const data = (await response.json()) as { project: Project };
-        setProject(data.project || null);
+        const data = (await response.json()) as { project?: Project | null };
+        setProject(normalizeProject(data.project));
+    }
+
+    function openRenameDialog() {
+        setRenameName(project?.name || "");
+        setIsRenameDialogOpen(true);
+    }
+
+    async function renameProject() {
+        const name = renameName.trim();
+
+        if (!name || isRenamingProject) {
+            return;
+        }
+
+        setIsRenamingProject(true);
+
+        try {
+            const response = await fetch(`/api/v1/project/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name }),
+            });
+
+            if (!response.ok) {
+                const errorData = (await response.json().catch(() => ({}))) as { error?: string };
+                toast.error(errorData.error || "Failed to rename project");
+                return;
+            }
+
+            const data = (await response.json()) as { project?: Project | null };
+            setProject(normalizeProject(data.project));
+            setIsRenameDialogOpen(false);
+            toast("Project renamed");
+            await refreshProject();
+        } finally {
+            setIsRenamingProject(false);
+        }
     }
 
     async function refreshApiKeys() {
@@ -501,8 +596,47 @@ export default function Page({ params }: PageProps) {
                         </BreadcrumbList>
                     </Breadcrumb>
 
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-2xl font-bold">{project.name}</h1>
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                            <h1 className="truncate text-2xl font-bold">{project.name}</h1>
+                        </div>
+                        <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="secondary"
+                                    className="cursor-pointer"
+                                    disabled={!isCurrentUserManager}
+                                    onClick={openRenameDialog}
+                                >
+                                    Rename Project
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Rename Project</DialogTitle>
+                                    <DialogDescription>
+                                        Update the project name shown across the dashboard and settings pages.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-3">
+                                    <Input
+                                        placeholder="Project name"
+                                        value={renameName}
+                                        onChange={(event) => setRenameName(event.target.value)}
+                                        disabled={isRenamingProject}
+                                    />
+                                </div>
+                                <DialogFooter>
+                                    <Button
+                                        className="cursor-pointer"
+                                        onClick={renameProject}
+                                        disabled={!hasRenameName || isRenamingProject}
+                                    >
+                                        {isRenamingProject ? "Renaming..." : "Save Changes"}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
 
                     <div className="mb-8 mt-4">
@@ -790,6 +924,71 @@ export default function Page({ params }: PageProps) {
                                         </TableBody>
                                     </Table>
                                 </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-8">
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-sm font-semibold">Audit Logs</h2>
+                        </div>
+
+                        <div className="rounded-lg bg-card ring-1 ring-white/5">
+                            {project.auditLogs.length === 0 ? (
+                                <div className="p-4 text-center">
+                                    <Empty>
+                                        <EmptyHeader>
+                                            <EmptyTitle>No Audit Logs Yet</EmptyTitle>
+                                            <EmptyDescription>
+                                                Project changes, member actions, and API key updates will appear here.
+                                            </EmptyDescription>
+                                        </EmptyHeader>
+                                    </Empty>
+                                </div>
+                            ) : (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="border-white/10">
+                                            <TableHead className="px-4">Action</TableHead>
+                                            <TableHead>Actor</TableHead>
+                                            <TableHead>Details</TableHead>
+                                            <TableHead className="w-40">When</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {project.auditLogs.map((log) => {
+                                            const actorName = log.actor?.name || "System";
+                                            const actorEmail = log.actor?.email || "Automated";
+                                            const actorInitial = actorName.charAt(0).toUpperCase();
+
+                                            return (
+                                                <TableRow key={log.id} className="border-white/10 hover:bg-white/5">
+                                                    <TableCell className="px-4 font-medium">
+                                                        {getAuditActionLabel(log.action)}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-3">
+                                                            <Avatar className="size-8">
+                                                                <AvatarImage src={log.actor?.image || undefined} alt={actorName} />
+                                                                <AvatarFallback>{actorInitial}</AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="min-w-0">
+                                                                <p className="truncate text-sm font-medium text-white">{actorName}</p>
+                                                                <p className="truncate text-xs text-eventcontent/65">{actorEmail}</p>
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-xs text-eventcontent/65 max-w-64 truncate">
+                                                        {log.description || "-"}
+                                                    </TableCell>
+                                                    <TableCell className="text-xs text-eventcontent/65">
+                                                        {new Date(log.createdAt).toLocaleString()}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
                             )}
                         </div>
                     </div>

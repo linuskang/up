@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
 import { generateApiKeySecret, hashApiKeySecret } from "@/server/api-keys";
 import { getProjectAdminMembership } from "@/server/projects";
+import { createProjectAuditLog } from "@/server/project-audit";
 
 export async function POST(
     request: NextRequest,
@@ -33,6 +34,17 @@ export async function POST(
     if (!updated.count) {
         return NextResponse.json({ error: "API key not found" }, { status: 404 });
     }
+
+    await createProjectAuditLog({
+        projectId: id,
+        actorUserId: session.user.id,
+        action: "api_key.regenerated",
+        title: "API key regenerated",
+        description: `Regenerated API key ${keyId}.`,
+        metadata: {
+            keyId,
+        },
+    });
 
     return NextResponse.json({ keyId, token }, { status: 200 });
 }

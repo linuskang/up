@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
 import { generateApiKeySecret, hashApiKeySecret } from "@/server/api-keys";
 import { getProjectAdminMembership } from "@/server/projects";
+import { createProjectAuditLog } from "@/server/project-audit";
 
 export async function GET(
     request: NextRequest,
@@ -101,6 +102,17 @@ export async function POST(
             description: true,
             createdAt: true,
             expiresAt: true,
+        },
+    });
+
+    await createProjectAuditLog({
+        projectId: id,
+        actorUserId: session.user.id,
+        action: "api_key.created",
+        title: "API key created",
+        description: `${name} was created.`,
+        metadata: {
+            keyName: name,
         },
     });
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
 import { getProjectAdminMembership } from "@/server/projects";
+import { createProjectAuditLog } from "@/server/project-audit";
 
 export async function POST(
     request: NextRequest,
@@ -126,6 +127,19 @@ export async function POST(
                 },
             },
         });
+
+    await createProjectAuditLog({
+        projectId: id,
+        actorUserId: session.user.id,
+        action: existingMembership ? "member.role_updated" : "member.invited",
+        title: existingMembership ? "Member role updated" : "Member invited",
+        description: `${user.email} was added as ${role}.`,
+        metadata: {
+            memberEmail: user.email,
+            role,
+            updated: Boolean(existingMembership),
+        },
+    });
 
     return NextResponse.json(
         {

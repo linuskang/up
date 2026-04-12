@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
 import { getProjectAdminMembership, getProjectMembership, normalizeProjectName } from "@/server/projects";
+import { createProjectAuditLog } from "@/server/project-audit";
 
 export async function GET(
     request: NextRequest,
@@ -48,6 +49,28 @@ export async function GET(
                 },
                 orderBy: {
                     createdAt: "asc",
+                },
+            },
+            auditLogs: {
+                take: 20,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                select: {
+                    id: true,
+                    action: true,
+                    title: true,
+                    description: true,
+                    metadata: true,
+                    createdAt: true,
+                    actor: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
+                        },
+                    },
                 },
             },
         },
@@ -122,6 +145,17 @@ export async function PATCH(
             name: true,
             createdAt: true,
             updatedAt: true,
+        },
+    });
+
+    await createProjectAuditLog({
+        projectId: id,
+        actorUserId: access.session.user.id,
+        action: "project.renamed",
+        title: "Project renamed",
+        description: `Renamed project to ${project.name}.`,
+        metadata: {
+            name: project.name,
         },
     });
 

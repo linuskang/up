@@ -25,6 +25,7 @@ model User {
   accounts      Account[]
   memberships   ProjectMember[]
   apiKeys       ApiKey[]
+  auditLogs     ProjectAuditLog[]
   accountPlan   Plan @default(Hobby)
   @@unique([email])
 }
@@ -60,6 +61,7 @@ model Project {
   members   ProjectMember[]
   apiTokens ApiKey[]
   events    Event[]
+  auditLogs ProjectAuditLog[]
 }
 
 model ProjectMember {
@@ -102,6 +104,22 @@ model ApiKey {
 
   @@index([projectId])
   @@index([createdById])
+}
+
+model ProjectAuditLog {
+  id           String   @id @default(cuid())
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId    String
+  actor        User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorUserId  String?
+  action       String
+  title        String
+  description  String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([projectId, createdAt])
+  @@index([actorUserId])
 }
 
 model Session {

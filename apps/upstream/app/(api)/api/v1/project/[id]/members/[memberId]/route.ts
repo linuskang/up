@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
 import { auth } from "@/server/auth";
+import { createProjectAuditLog } from "@/server/project-audit";
 
 type MemberRole = "OWNER" | "ADMIN" | "MEMBER";
 
@@ -125,6 +126,18 @@ export async function PATCH(
         },
     });
 
+    await createProjectAuditLog({
+        projectId: id,
+        actorUserId: membership.userId,
+        action: "member.role_updated",
+        title: "Member role updated",
+        description: `${updated.user.email} was changed to ${role}.`,
+        metadata: {
+            memberId: updated.id,
+            role,
+        },
+    });
+
     return NextResponse.json({ success: true, member: updated }, { status: 200 });
 }
 
@@ -178,6 +191,20 @@ export async function DELETE(
     await db.projectMember.delete({
         where: {
             id: target.id,
+        },
+    });
+
+    await createProjectAuditLog({
+        projectId: id,
+        actorUserId: session.user.id,
+        action: isSelf ? "member.left" : "member.removed",
+        title: isSelf ? "Member left" : "Member removed",
+        description: isSelf
+            ? `${session.user.email} left the project.`
+            : `Removed member ${target.userId} from the project.`,
+        metadata: {
+            memberId: target.id,
+            selfRemoved: isSelf,
         },
     });
 
