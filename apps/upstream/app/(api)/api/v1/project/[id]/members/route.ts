@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
 import { getProjectAdminMembership } from "@/server/projects";
 import { createProjectAuditLog } from "@/server/project-audit";
+import { sendProjectInviteEmail } from "@/server/email";
+import { env } from "@/env";
+import { randomBytes } from "crypto";
+import { addDays } from "date-fns";
 
 export async function POST(
     request: NextRequest,
@@ -10,15 +14,11 @@ export async function POST(
     const { id } = await params;
 
     const access = await getProjectAdminMembership(request, id);
-
-    if ("error" in access) {
-        return access.error;
-    }
+    if ("error" in access) return access.error;
 
     const { session } = access;
 
     let body: unknown;
-
     try {
         body = await request.json();
     } catch {
@@ -35,118 +35,87 @@ export async function POST(
         return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const user = await db.user.findUnique({
-        where: { email },
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-        },
-    });
-
-    if (!user) {
-        return NextResponse.json(
-            { error: "No account found for that email. The person needs to sign up first." },
-            { status: 404 }
-        );
-    }
-
     const project = await db.project.findFirst({
-        where: {
-            id,
-            members: {
-                some: {
-                    userId: session.user.id,
-                },
-            },
-        },
-        select: {
-            id: true,
-            name: true,
-        },
+        where: { id },
+        select: { id: true, name: true },
     });
 
     if (!project) {
         return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const existingMembership = await db.projectMember.findUnique({
-        where: {
-            userId_projectId: {
-                userId: user.id,
-                projectId: id,
-            },
-        },
-        select: {
-            id: true,
-            role: true,
-        },
+    // If the user is already a member, just update their role
+    const targetUser = await db.user.findUnique({
+        where: { email },
+        select: { id: true },
     });
 
-    const membership = existingMembership
-        ? await db.projectMember.update({
-            where: {
-                userId_projectId: {
-                    userId: user.id,
-                    projectId: id,
-                },
-            },
-            data: {
-                role,
-            },
-            select: {
-                id: true,
-                role: true,
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        image: true,
-                    },
-                },
-            },
-        })
-        : await db.projectMember.create({
-            data: {
-                projectId: id,
-                userId: user.id,
-                role,
-            },
-            select: {
-                id: true,
-                role: true,
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        image: true,
-                    },
-                },
-            },
+    if (targetUser) {
+        const existingMembership = await db.projectMember.findUnique({
+            where: { userId_projectId: { userId: targetUser.id, projectId: id } },
         });
+
+        if (existingMembership) {
+            const updated = await db.projectMember.update({
+                where: { userId_projectId: { userId: targetUser.id, projectId: id } },
+                data: { role },
+                select: {
+                    id: true, role: true,
+                    user: { select: { id: true, name: true, email: true, image: true } },
+                },
+            });
+
+            await createProjectAuditLog({
+                projectId: id,
+                actorUserId: session.user.id,
+                action: "member.role_updated",
+                title: "Member role updated",
+                description: `${email} role updated to ${role}.`,
+                metadata: { memberEmail: email, role },
+            });
+
+            return NextResponse.json({ success: true, project, member: updated }, { status: 200 });
+        }
+    }
+
+    // Not already a member — cancel any existing pending invitation for this email+project
+    await db.projectInvitation.deleteMany({
+        where: { projectId: id, email, acceptedAt: null },
+    });
+
+    const token = randomBytes(32).toString("hex");
+    const expiresAt = addDays(new Date(), 7);
+
+    const invitation = await db.projectInvitation.create({
+        data: {
+            projectId: id,
+            email,
+            role,
+            token,
+            invitedById: session.user.id,
+            expiresAt,
+        },
+        select: { id: true, email: true, role: true, expiresAt: true },
+    });
+
+    const inviteUrl = `${env.BETTER_AUTH_URL}/invite/${token}`;
+
+    await sendProjectInviteEmail({
+        to: email,
+        inviterName: session.user.name,
+        projectName: project.name,
+        role,
+        inviteUrl,
+    });
 
     await createProjectAuditLog({
         projectId: id,
         actorUserId: session.user.id,
-        action: existingMembership ? "member.role_updated" : "member.invited",
-        title: existingMembership ? "Member role updated" : "Member invited",
-        description: `${user.email} was added as ${role}.`,
-        metadata: {
-            memberEmail: user.email,
-            role,
-            updated: Boolean(existingMembership),
-        },
+        action: "member.invited",
+        title: "Member invited",
+        description: `Invitation sent to ${email} as ${role}.`,
+        metadata: { memberEmail: email, role },
     });
 
-    return NextResponse.json(
-        {
-            success: true,
-            project,
-            member: membership,
-        },
-        { status: existingMembership ? 200 : 201 }
-    );
+    return NextResponse.json({ success: true, invited: true, invitation }, { status: 201 });
 }

@@ -5,12 +5,16 @@ export type ProjectAuditAction =
     | "project.created"
     | "project.renamed"
     | "member.invited"
+    | "member.invitation_accepted"
     | "member.role_updated"
     | "member.removed"
     | "member.left"
     | "api_key.created"
     | "api_key.regenerated"
-    | "api_key.revoked";
+    | "api_key.revoked"
+    | "webhook.created"
+    | "webhook.updated"
+    | "webhook.deleted";
 
 type CreateProjectAuditLogInput = {
     projectId: string;

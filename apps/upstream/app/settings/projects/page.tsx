@@ -2,7 +2,8 @@
 
 import { authClient } from "@/client/auth";
 import { redirect, useRouter } from "next/navigation";
-import { Folder, ArrowUpRightIcon } from "lucide-react";
+import { Folder, ArrowUpRightIcon, Plus } from "lucide-react";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import {
@@ -61,7 +62,20 @@ export default function Page() {
     };
   }, []);
 
-  if (isPending) return <div>Loading...</div>;
+  if (isPending) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background text-white">
+        <Navbar user={{}} />
+        <main className="flex-1 flex justify-center">
+          <div className="w-full max-w-2xl p-6 space-y-4">
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-9 w-36" />
+            <Skeleton className="h-40 rounded-lg" />
+          </div>
+        </main>
+      </div>
+    );
+  }
   if (!session) redirect("/login");
 
   const canCreateProject = limits?.canCreateProject ?? true;

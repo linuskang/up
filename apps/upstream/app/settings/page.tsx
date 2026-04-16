@@ -3,7 +3,8 @@
 import { authClient } from "@/client/auth"
 import { redirect } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
-import { ChevronRight, Folder, GalleryVerticalEnd, Settings, UserRound, BriefcaseBusiness, CreditCard } from "lucide-react";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { ChevronRight, UserRound, BriefcaseBusiness, CreditCard } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/navbar";
 import { useRouter } from "next/navigation";
@@ -27,7 +28,18 @@ export default function Page() {
     const [open, setOpen] = useState(false);
 
     if (isPending) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex min-h-screen flex-col bg-background text-white">
+                <Navbar user={{}} />
+                <main className="flex-1 flex justify-center">
+                    <div className="w-full max-w-2xl p-6 space-y-4">
+                        <Skeleton className="h-9 w-32" />
+                        <Skeleton className="h-20 rounded-xl" />
+                        <Skeleton className="h-40 rounded-xl" />
+                    </div>
+                </main>
+            </div>
+        );
     }
 
     if (!session) {

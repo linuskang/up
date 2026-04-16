@@ -29,7 +29,9 @@ import {
     EmptyHeader,
     EmptyTitle,
 } from "@workspace/ui/components/empty"
-import { EllipsisVertical, Folder, GalleryVerticalEnd, Settings, Shield, Trash2, UserPlus } from "lucide-react";
+import { EllipsisVertical, Trash2, Globe, ToggleLeft, ToggleRight, Copy, Check, MailX } from "lucide-react";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { Switch } from "@workspace/ui/components/switch";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@workspace/ui/components/breadcrumb";
@@ -76,6 +78,22 @@ type ApiKey = {
     };
 };
 
+type Webhook = {
+    id: string;
+    name: string;
+    url: string;
+    enabled: boolean;
+    createdAt: string;
+};
+
+type Invitation = {
+    id: string;
+    email: string;
+    role: "ADMIN" | "MEMBER";
+    createdAt: string;
+    expiresAt: string;
+};
+
 interface PageProps {
     params: Promise<{ id: string }>;
 }
@@ -100,6 +118,18 @@ export default function Page({ params }: PageProps) {
     const [isProjectLoading, setIsProjectLoading] = useState(true);
     const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
     const [isApiKeysLoading, setIsApiKeysLoading] = useState(true);
+
+    const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+    const [isWebhooksLoading, setIsWebhooksLoading] = useState(true);
+    const [isCreateWebhookOpen, setIsCreateWebhookOpen] = useState(false);
+    const [isWebhookSecretOpen, setIsWebhookSecretOpen] = useState(false);
+    const [webhookName, setWebhookName] = useState("");
+    const [webhookUrl, setWebhookUrl] = useState("");
+    const [isCreatingWebhook, setIsCreatingWebhook] = useState(false);
+    const [createdWebhookSecret, setCreatedWebhookSecret] = useState<string | null>(null);
+    const [hasCopiedWebhookSecret, setHasCopiedWebhookSecret] = useState(false);
+
+    const [invitations, setInvitations] = useState<Invitation[]>([]);
 
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
     const [inviteEmail, setInviteEmail] = useState("");
@@ -160,6 +190,14 @@ export default function Page({ params }: PageProps) {
                 return "API key regenerated";
             case "api_key.revoked":
                 return "API key revoked";
+            case "member.invitation_accepted":
+                return "Invitation accepted";
+            case "webhook.created":
+                return "Webhook created";
+            case "webhook.updated":
+                return "Webhook updated";
+            case "webhook.deleted":
+                return "Webhook deleted";
             default:
                 return action;
         }
@@ -234,6 +272,35 @@ export default function Page({ params }: PageProps) {
         };
     }, [id]);
 
+    useEffect(() => {
+        let cancelled = false;
+        async function loadWebhooks() {
+            setIsWebhooksLoading(true);
+            try {
+                const res = await fetch(`/api/v1/project/${id}/webhooks`);
+                if (!res.ok) return;
+                const data = (await res.json()) as { webhooks?: Webhook[] };
+                if (!cancelled) setWebhooks(data.webhooks ?? []);
+            } finally {
+                if (!cancelled) setIsWebhooksLoading(false);
+            }
+        }
+        loadWebhooks();
+        return () => { cancelled = true; };
+    }, [id]);
+
+    useEffect(() => {
+        let cancelled = false;
+        async function loadInvitations() {
+            const res = await fetch(`/api/v1/project/${id}/invitations`);
+            if (!res.ok) return;
+            const data = (await res.json()) as { invitations?: Invitation[] };
+            if (!cancelled) setInvitations(data.invitations ?? []);
+        }
+        loadInvitations();
+        return () => { cancelled = true; };
+    }, [id]);
+
     async function refreshProject() {
         const response = await fetch(`/api/v1/project/${id}`, { method: "GET" });
         if (!response.ok) {
@@ -291,6 +358,77 @@ export default function Page({ params }: PageProps) {
 
         const data = (await response.json()) as { apiKeys?: ApiKey[] };
         setApiKeys(data.apiKeys || []);
+    }
+
+    async function refreshWebhooks() {
+        const res = await fetch(`/api/v1/project/${id}/webhooks`);
+        if (!res.ok) return;
+        const data = (await res.json()) as { webhooks?: Webhook[] };
+        setWebhooks(data.webhooks ?? []);
+    }
+
+    async function refreshInvitations() {
+        const res = await fetch(`/api/v1/project/${id}/invitations`);
+        if (!res.ok) return;
+        const data = (await res.json()) as { invitations?: Invitation[] };
+        setInvitations(data.invitations ?? []);
+    }
+
+    async function createWebhook() {
+        if (!webhookName.trim() || !webhookUrl.trim() || isCreatingWebhook) return;
+        setIsCreatingWebhook(true);
+        try {
+            const res = await fetch(`/api/v1/project/${id}/webhooks`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: webhookName, url: webhookUrl }),
+            });
+            const data = (await res.json()) as { webhook?: Webhook; secret?: string; error?: string };
+            if (!res.ok) { toast.error(data.error ?? "Failed to create webhook"); return; }
+            setCreatedWebhookSecret(data.secret ?? null);
+            setHasCopiedWebhookSecret(false);
+            setWebhookName("");
+            setWebhookUrl("");
+            setIsCreateWebhookOpen(false);
+            setIsWebhookSecretOpen(true);
+            toast("Webhook created");
+            await refreshWebhooks();
+        } finally {
+            setIsCreatingWebhook(false);
+        }
+    }
+
+    async function toggleWebhook(webhookId: string, enabled: boolean) {
+        const res = await fetch(`/api/v1/project/${id}/webhooks/${webhookId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ enabled }),
+        });
+        if (!res.ok) { toast.error("Failed to update webhook"); return; }
+        await refreshWebhooks();
+    }
+
+    async function deleteWebhook(webhookId: string) {
+        setConfirmState({
+            open: true,
+            title: "Delete webhook?",
+            description: "Events will no longer be delivered to this endpoint.",
+            actionLabel: "Delete",
+            variant: "destructive",
+            onConfirm: async () => {
+                const res = await fetch(`/api/v1/project/${id}/webhooks/${webhookId}`, { method: "DELETE" });
+                if (!res.ok) { toast.error("Failed to delete webhook"); return; }
+                toast("Webhook deleted");
+                await refreshWebhooks();
+            },
+        });
+    }
+
+    async function revokeInvitation(invitationId: string) {
+        const res = await fetch(`/api/v1/project/${id}/invitations/${invitationId}`, { method: "DELETE" });
+        if (!res.ok) { toast.error("Failed to revoke invitation"); return; }
+        toast("Invitation revoked");
+        await refreshInvitations();
     }
 
     async function createApiKey() {
@@ -402,26 +540,28 @@ export default function Page({ params }: PageProps) {
         try {
             const response = await fetch(`/api/v1/project/${id}/members`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email,
-                    role: inviteRole,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, role: inviteRole }),
             });
 
+            const data = (await response.json().catch(() => ({}))) as { invited?: boolean; error?: string };
+
             if (!response.ok) {
-                const errorData = (await response.json().catch(() => ({}))) as { error?: string };
-                toast.error(errorData.error || "Failed to invite member");
+                toast.error(data.error || "Failed to invite member");
                 return;
             }
 
-            toast("Member invited");
+            if (data.invited) {
+                toast(`Invitation sent to ${email}`);
+                await refreshInvitations();
+            } else {
+                toast("Member role updated");
+                await refreshProject();
+            }
+
             setInviteEmail("");
             setInviteRole("MEMBER");
             setIsInviteDialogOpen(false);
-            await refreshProject();
         } finally {
             setIsSubmittingInvite(false);
         }
@@ -547,20 +687,47 @@ export default function Page({ params }: PageProps) {
         }
     }
 
-    if (isPending) {
-        return <div>Loading...</div>;
+    if (isPending || isProjectLoading) {
+        return (
+            <div className="flex min-h-screen flex-col bg-background text-white">
+                <Navbar user={{}} />
+                <main className="flex-1 flex justify-center">
+                    <div className="w-full max-w-2xl p-6 space-y-4">
+                        <Skeleton className="h-4 w-56" />
+                        <Skeleton className="h-9 w-48" />
+                        <Skeleton className="h-48 rounded-xl" />
+                        <Skeleton className="h-48 rounded-xl" />
+                    </div>
+                </main>
+            </div>
+        );
     }
 
     if (!session) {
         redirect("/login");
     }
 
-    if (isProjectLoading) {
-        return <div>Loading...</div>;
-    }
-
     if (!project) {
-        return <div>404</div>;
+        return (
+            <div className="flex min-h-screen flex-col bg-background text-white">
+                <Navbar
+                    user={{
+                        name: session.user.name,
+                        email: session.user.email,
+                        image: session.user.image || "",
+                    }}
+                />
+                <main className="flex-1 flex items-center justify-center">
+                    <div className="text-center space-y-2">
+                        <p className="text-2xl font-semibold">Project not found</p>
+                        <p className="text-sm text-eventcontent/65">This project doesn&apos;t exist or you don&apos;t have access.</p>
+                        <Link href="/settings/projects" className="inline-block mt-4">
+                            <Button variant="secondary" size="sm">Back to projects</Button>
+                        </Link>
+                    </div>
+                </main>
+            </div>
+        );
     }
 
     return (
@@ -928,6 +1095,150 @@ export default function Page({ params }: PageProps) {
                         </div>
                     </div>
 
+                    {/* ── Pending Invitations ── */}
+                    {invitations.length > 0 && (
+                        <div className="mt-4">
+                            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-eventcontent/65">
+                                Pending Invitations
+                            </h3>
+                            <div className="rounded-lg bg-card ring-1 ring-white/5">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="border-white/10">
+                                            <TableHead className="px-4">Email</TableHead>
+                                            <TableHead className="w-28">Role</TableHead>
+                                            <TableHead className="w-36">Expires</TableHead>
+                                            <TableHead className="w-24 text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {invitations.map((inv) => (
+                                            <TableRow key={inv.id} className="border-white/10 hover:bg-white/5">
+                                                <TableCell className="px-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <MailX className="size-3.5 text-eventcontent/40 shrink-0" />
+                                                        <span className="text-sm text-eventcontent/80">{inv.email}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] font-medium text-white/80">{inv.role}</span>
+                                                </TableCell>
+                                                <TableCell className="text-xs text-eventcontent/65">
+                                                    {new Date(inv.expiresAt).toLocaleDateString()}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button variant="ghost" size="sm" className="cursor-pointer h-8 text-eventcontent/60 hover:text-red-300" onClick={() => revokeInvitation(inv.id)} disabled={!isCurrentUserManager}>
+                                                        Revoke
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── Webhooks ── */}
+                    <div className="mt-8">
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-sm font-semibold">Webhooks</h2>
+                            <Dialog open={isCreateWebhookOpen} onOpenChange={setIsCreateWebhookOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="cursor-pointer" disabled={!isCurrentUserManager}>Add Webhook</Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-lg">
+                                    <DialogHeader>
+                                        <DialogTitle>Add Webhook</DialogTitle>
+                                        <DialogDescription>
+                                            Upstream will POST a signed payload to this URL every time an event is tracked.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-3">
+                                        <Input placeholder="Name (e.g. Slack alerts)" value={webhookName} onChange={(e) => setWebhookName(e.target.value)} disabled={isCreatingWebhook} />
+                                        <Input placeholder="https://your-server.com/webhook" value={webhookUrl} onChange={(e) => setWebhookUrl(e.target.value)} disabled={isCreatingWebhook} />
+                                    </div>
+                                    <DialogFooter>
+                                        <Button onClick={createWebhook} disabled={!webhookName.trim() || !webhookUrl.trim() || isCreatingWebhook} className="cursor-pointer">
+                                            {isCreatingWebhook ? "Creating..." : "Create Webhook"}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+
+                        {/* Webhook secret one-time reveal */}
+                        <Dialog open={isWebhookSecretOpen} onOpenChange={setIsWebhookSecretOpen}>
+                            <DialogContent className="sm:max-w-xl">
+                                <DialogHeader>
+                                    <DialogTitle>Webhook Secret</DialogTitle>
+                                    <DialogDescription>
+                                        Use this to verify the <code>X-Upstream-Signature</code> header on incoming requests. This is shown only once.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="rounded-md bg-black/30 p-3 font-mono text-xs break-all select-all">{createdWebhookSecret}</div>
+                                <DialogFooter>
+                                    <Button onClick={async () => { if (createdWebhookSecret) { await navigator.clipboard.writeText(createdWebhookSecret); setHasCopiedWebhookSecret(true); } }} className="cursor-pointer">
+                                        {hasCopiedWebhookSecret ? "Copied" : "Copy Secret"}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        <div className="rounded-lg bg-card ring-1 ring-white/5">
+                            {isWebhooksLoading ? (
+                                <div className="p-4 text-sm text-eventcontent/65">Loading webhooks...</div>
+                            ) : webhooks.length === 0 ? (
+                                <div className="p-4 text-center">
+                                    <Empty>
+                                        <EmptyHeader>
+                                            <EmptyTitle>No Webhooks Yet</EmptyTitle>
+                                            <EmptyDescription>Add a webhook to receive HTTP callbacks when events are tracked.</EmptyDescription>
+                                        </EmptyHeader>
+                                    </Empty>
+                                </div>
+                            ) : (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="border-white/10">
+                                            <TableHead className="px-4">Endpoint</TableHead>
+                                            <TableHead className="w-24 text-center">Enabled</TableHead>
+                                            <TableHead className="w-24">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {webhooks.map((wh) => (
+                                            <TableRow key={wh.id} className="border-white/10 hover:bg-white/5">
+                                                <TableCell className="px-4">
+                                                    <p className="font-medium">{wh.name}</p>
+                                                    <p className="text-xs text-eventcontent/55 flex items-center gap-1 mt-0.5">
+                                                        <Globe className="size-3" />{wh.url}
+                                                    </p>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <Switch
+                                                        checked={wh.enabled}
+                                                        onCheckedChange={(enabled) => toggleWebhook(wh.id, enabled)}
+                                                        disabled={!isCurrentUserManager}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button variant="destructive" size="sm" className="cursor-pointer h-8" onClick={() => deleteWebhook(wh.id)} disabled={!isCurrentUserManager}>
+                                                        Delete
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            )}
+                        </div>
+                        <p className="mt-2 text-xs text-eventcontent/45">
+                            Each request includes <code className="text-eventcontent/65">X-Upstream-Signature</code> (HMAC-SHA256) and <code className="text-eventcontent/65">X-Upstream-Timestamp</code> headers.
+                        </p>
+                    </div>
+
+                    {/* ── Audit Logs ── */}
                     <div className="mt-8">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-sm font-semibold">Audit Logs</h2>

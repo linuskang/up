@@ -25,6 +25,11 @@ export default function Event({ title, icon, time, content, fields, events, data
                     <p className="truncate text-md font-semibold leading-snug text-white">
                         {title}
                     </p>
+                    {category && (
+                        <span className="shrink-0 rounded-full bg-white/8 px-2 py-0.5 text-[10px] font-medium text-eventcontent/60 capitalize hidden sm:inline-block">
+                            {category}
+                        </span>
+                    )}
                 </div>
 
                 {hasDrawerContent && (

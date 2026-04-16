@@ -15,6 +15,7 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Button } from "@workspace/ui/components/button";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useState } from "react";
 import { useEffect } from "react";
 import { toast } from "sonner"
@@ -35,7 +36,17 @@ export default function Page() {
     }, [session]);
 
     if (isPending) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex min-h-screen flex-col bg-background text-white">
+                <Navbar user={{}} />
+                <main className="flex-1 flex justify-center">
+                    <div className="w-full max-w-2xl p-6 space-y-4">
+                        <Skeleton className="h-4 w-40" />
+                        <Skeleton className="h-56 rounded-xl" />
+                    </div>
+                </main>
+            </div>
+        );
     }
 
     if (!session) {

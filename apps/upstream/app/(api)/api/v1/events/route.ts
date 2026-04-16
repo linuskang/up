@@ -2,6 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/prisma";
 import { auth } from "@/server/auth";
 import { hashApiKeySecret, readApiKeyFromRequest } from "@/server/api-keys";
+import { createHmac } from "crypto";
+
+async function fireWebhooks(projectId: string, event: Record<string, unknown>) {
+    const webhooks = await db.webhook.findMany({
+        where: { projectId, enabled: true },
+        select: { url: true, secret: true },
+    });
+
+    if (webhooks.length === 0) return;
+
+    const payload = JSON.stringify({ event });
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+
+    await Promise.allSettled(
+        webhooks.map(async (wh) => {
+            const signature = createHmac("sha256", wh.secret)
+                .update(`${timestamp}.${payload}`)
+                .digest("hex");
+
+            try {
+                await fetch(wh.url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Upstream-Timestamp": timestamp,
+                        "X-Upstream-Signature": `sha256=${signature}`,
+                    },
+                    body: payload,
+                    signal: AbortSignal.timeout(10_000),
+                });
+            } catch {
+                // Swallow — webhook delivery is best-effort
+            }
+        })
+    );
+}
 
 type EventField = {
     name: string;
@@ -263,6 +299,9 @@ export async function POST(request: NextRequest) {
             updatedAt: true,
         },
     });
+
+    // Fire webhooks async — don't await, don't block response
+    void fireWebhooks(key.projectId, event as Record<string, unknown>);
 
     return NextResponse.json({ success: true, event }, { status: 201 });
 }
