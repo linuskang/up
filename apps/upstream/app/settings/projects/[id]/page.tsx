@@ -83,6 +83,7 @@ type Webhook = {
     name: string;
     url: string;
     enabled: boolean;
+    events: string[];
     createdAt: string;
 };
 
@@ -111,6 +112,17 @@ function normalizeProject(project: Project | null | undefined): Project | null {
 }
 
 export default function Page({ params }: PageProps) {
+    const WEBHOOK_EVENT_PLACEHOLDER = "*";
+
+    function parseWebhookEventsInput(value: string): string[] {
+        const parsed = value
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+
+        return parsed.length > 0 ? parsed : [WEBHOOK_EVENT_PLACEHOLDER];
+    }
+
     const { id } = use(params);
     const router = useRouter();
     const { data: session, isPending } = authClient.useSession();
@@ -125,9 +137,14 @@ export default function Page({ params }: PageProps) {
     const [isWebhookSecretOpen, setIsWebhookSecretOpen] = useState(false);
     const [webhookName, setWebhookName] = useState("");
     const [webhookUrl, setWebhookUrl] = useState("");
+    const [webhookEventsInput, setWebhookEventsInput] = useState(WEBHOOK_EVENT_PLACEHOLDER);
     const [isCreatingWebhook, setIsCreatingWebhook] = useState(false);
     const [createdWebhookSecret, setCreatedWebhookSecret] = useState<string | null>(null);
     const [hasCopiedWebhookSecret, setHasCopiedWebhookSecret] = useState(false);
+    const [isEditWebhookEventsOpen, setIsEditWebhookEventsOpen] = useState(false);
+    const [editingWebhook, setEditingWebhook] = useState<Webhook | null>(null);
+    const [editingWebhookEventsInput, setEditingWebhookEventsInput] = useState(WEBHOOK_EVENT_PLACEHOLDER);
+    const [isSavingWebhookEvents, setIsSavingWebhookEvents] = useState(false);
 
     const [invitations, setInvitations] = useState<Invitation[]>([]);
 
@@ -381,7 +398,11 @@ export default function Page({ params }: PageProps) {
             const res = await fetch(`/api/v1/project/${id}/webhooks`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: webhookName, url: webhookUrl }),
+                body: JSON.stringify({
+                    name: webhookName,
+                    url: webhookUrl,
+                    events: parseWebhookEventsInput(webhookEventsInput),
+                }),
             });
             const data = (await res.json()) as { webhook?: Webhook; secret?: string; error?: string };
             if (!res.ok) { toast.error(data.error ?? "Failed to create webhook"); return; }
@@ -389,12 +410,47 @@ export default function Page({ params }: PageProps) {
             setHasCopiedWebhookSecret(false);
             setWebhookName("");
             setWebhookUrl("");
+            setWebhookEventsInput(WEBHOOK_EVENT_PLACEHOLDER);
             setIsCreateWebhookOpen(false);
             setIsWebhookSecretOpen(true);
             toast("Webhook created");
             await refreshWebhooks();
         } finally {
             setIsCreatingWebhook(false);
+        }
+    }
+
+    function openEditWebhookEventsDialog(webhook: Webhook) {
+        setEditingWebhook(webhook);
+        setEditingWebhookEventsInput((webhook.events && webhook.events.length > 0 ? webhook.events : [WEBHOOK_EVENT_PLACEHOLDER]).join(", "));
+        setIsEditWebhookEventsOpen(true);
+    }
+
+    async function saveWebhookEvents() {
+        if (!editingWebhook || isSavingWebhookEvents) {
+            return;
+        }
+
+        setIsSavingWebhookEvents(true);
+        try {
+            const res = await fetch(`/api/v1/project/${id}/webhooks/${editingWebhook.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ events: parseWebhookEventsInput(editingWebhookEventsInput) }),
+            });
+
+            if (!res.ok) {
+                toast.error("Failed to update webhook events");
+                return;
+            }
+
+            toast("Webhook events updated");
+            setIsEditWebhookEventsOpen(false);
+            setEditingWebhook(null);
+            setEditingWebhookEventsInput(WEBHOOK_EVENT_PLACEHOLDER);
+            await refreshWebhooks();
+        } finally {
+            setIsSavingWebhookEvents(false);
         }
     }
 
@@ -1157,6 +1213,17 @@ export default function Page({ params }: PageProps) {
                                     <div className="space-y-3">
                                         <Input placeholder="Name (e.g. Slack alerts)" value={webhookName} onChange={(e) => setWebhookName(e.target.value)} disabled={isCreatingWebhook} />
                                         <Input placeholder="https://your-server.com/webhook" value={webhookUrl} onChange={(e) => setWebhookUrl(e.target.value)} disabled={isCreatingWebhook} />
+                                        <div className="space-y-1">
+                                            <Input
+                                                placeholder="Event categories (comma-separated, e.g. deploy, security)"
+                                                value={webhookEventsInput}
+                                                onChange={(e) => setWebhookEventsInput(e.target.value)}
+                                                disabled={isCreatingWebhook}
+                                            />
+                                            <p className="text-xs text-eventcontent/55">
+                                                Use <code>*</code> to subscribe to all categories.
+                                            </p>
+                                        </div>
                                     </div>
                                     <DialogFooter>
                                         <Button onClick={createWebhook} disabled={!webhookName.trim() || !webhookUrl.trim() || isCreatingWebhook} className="cursor-pointer">
@@ -1185,6 +1252,33 @@ export default function Page({ params }: PageProps) {
                             </DialogContent>
                         </Dialog>
 
+                        <Dialog open={isEditWebhookEventsOpen} onOpenChange={setIsEditWebhookEventsOpen}>
+                            <DialogContent className="sm:max-w-lg">
+                                <DialogHeader>
+                                    <DialogTitle>Edit Webhook Events</DialogTitle>
+                                    <DialogDescription>
+                                        Choose categories this webhook should receive. Separate multiple values with commas.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-1">
+                                    <Input
+                                        placeholder="*, deploy, security"
+                                        value={editingWebhookEventsInput}
+                                        onChange={(e) => setEditingWebhookEventsInput(e.target.value)}
+                                        disabled={isSavingWebhookEvents}
+                                    />
+                                    <p className="text-xs text-eventcontent/55">
+                                        Use <code>*</code> to subscribe to all categories.
+                                    </p>
+                                </div>
+                                <DialogFooter>
+                                    <Button onClick={saveWebhookEvents} disabled={isSavingWebhookEvents} className="cursor-pointer">
+                                        {isSavingWebhookEvents ? "Saving..." : "Save"}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
                         <div className="rounded-lg bg-card ring-1 ring-white/5">
                             {isWebhooksLoading ? (
                                 <div className="p-4 text-sm text-eventcontent/65">Loading webhooks...</div>
@@ -1202,8 +1296,9 @@ export default function Page({ params }: PageProps) {
                                     <TableHeader>
                                         <TableRow className="border-white/10">
                                             <TableHead className="px-4">Endpoint</TableHead>
+                                            <TableHead>Subscriptions</TableHead>
                                             <TableHead className="w-24 text-center">Enabled</TableHead>
-                                            <TableHead className="w-24">Actions</TableHead>
+                                            <TableHead className="w-44">Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -1215,6 +1310,11 @@ export default function Page({ params }: PageProps) {
                                                         <Globe className="size-3" />{wh.url}
                                                     </p>
                                                 </TableCell>
+                                                <TableCell>
+                                                    <p className="text-xs text-eventcontent/65 break-words">
+                                                        {(wh.events && wh.events.length > 0 ? wh.events : [WEBHOOK_EVENT_PLACEHOLDER]).join(", ")}
+                                                    </p>
+                                                </TableCell>
                                                 <TableCell className="text-center">
                                                     <Switch
                                                         checked={wh.enabled}
@@ -1222,7 +1322,10 @@ export default function Page({ params }: PageProps) {
                                                         disabled={!isCurrentUserManager}
                                                     />
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="space-x-2">
+                                                    <Button variant="secondary" size="sm" className="cursor-pointer h-8" onClick={() => openEditWebhookEventsDialog(wh)} disabled={!isCurrentUserManager}>
+                                                        Edit Events
+                                                    </Button>
                                                     <Button variant="destructive" size="sm" className="cursor-pointer h-8" onClick={() => deleteWebhook(wh.id)} disabled={!isCurrentUserManager}>
                                                         Delete
                                                     </Button>

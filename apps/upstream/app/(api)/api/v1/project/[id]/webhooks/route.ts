@@ -25,6 +25,7 @@ export async function GET(
             name: true,
             url: true,
             enabled: true,
+            events: true,
             createdAt: true,
         },
     });
@@ -65,6 +66,12 @@ export async function POST(
         return NextResponse.json({ error: "URL must be a valid HTTPS URL" }, { status: 400 });
     }
 
+    const rawEvents = (body as { events?: unknown })?.events;
+    const parsedEvents: string[] = Array.isArray(rawEvents)
+        ? rawEvents.filter((e): e is string => typeof e === "string" && e.trim().length > 0).map((e) => e.trim())
+        : ["*"];
+    const webhookEvents = parsedEvents.length > 0 ? parsedEvents : ["*"];
+
     const secret = generateWebhookSecret();
 
     const webhook = await db.webhook.create({
@@ -74,12 +81,14 @@ export async function POST(
             url,
             secret,
             enabled: true,
+            events: webhookEvents,
         },
         select: {
             id: true,
             name: true,
             url: true,
             enabled: true,
+            events: true,
             createdAt: true,
         },
     });

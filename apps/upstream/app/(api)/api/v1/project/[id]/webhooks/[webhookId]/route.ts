@@ -26,7 +26,7 @@ export async function PATCH(
         return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const updates: { name?: string; url?: string; enabled?: boolean } = {};
+    const updates: { name?: string; url?: string; enabled?: boolean; events?: string[] } = {};
 
     if (typeof (body as { name?: unknown })?.name === "string") {
         const name = (body as { name: string }).name.trim();
@@ -47,10 +47,18 @@ export async function PATCH(
         updates.enabled = (body as { enabled: boolean }).enabled;
     }
 
+    const rawEvents = (body as { events?: unknown })?.events;
+    if (rawEvents !== undefined) {
+        const parsed: string[] = Array.isArray(rawEvents)
+            ? rawEvents.filter((e): e is string => typeof e === "string" && e.trim().length > 0).map((e) => e.trim())
+            : ["*"];
+        updates.events = parsed.length > 0 ? parsed : ["*"];
+    }
+
     const webhook = await db.webhook.update({
         where: { id: webhookId },
         data: updates,
-        select: { id: true, name: true, url: true, enabled: true, createdAt: true },
+        select: { id: true, name: true, url: true, enabled: true, events: true, createdAt: true },
     });
 
     await createProjectAuditLog({

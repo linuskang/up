@@ -5,9 +5,18 @@ import { hashApiKeySecret, readApiKeyFromRequest } from "@/server/api-keys";
 import { createHmac } from "crypto";
 
 async function fireWebhooks(projectId: string, event: Record<string, unknown>) {
-    const webhooks = await db.webhook.findMany({
+    const category = typeof event.category === "string" ? event.category : null;
+
+    const allWebhooks = await db.webhook.findMany({
         where: { projectId, enabled: true },
-        select: { url: true, secret: true },
+        select: { url: true, secret: true, events: true },
+    });
+
+    // Keep only webhooks subscribed to this event's category
+    const webhooks = allWebhooks.filter((wh) => {
+        if (wh.events.includes("*")) return true;
+        if (category && wh.events.includes(category)) return true;
+        return false;
     });
 
     if (webhooks.length === 0) return;
