@@ -1,0 +1,23 @@
+@baseUrl = http://localhost:3001
+@apiKey = test
+
+### Create an event
+POST {{baseUrl}}/api/v1/events
+Content-Type: application/json
+Authorization: Bearer {{apiKey}}
+
+{
+  "title": "Deployment finished",
+  "content": "Production deploy completed",
+  "category": "deploy",
+  "icon": "🚀"
+}
+
+### Create an event with X-API-Key instead
+POST {{baseUrl}}/api/v1/events
+Content-Type: application/json
+X-API-Key: {{apiKey}}
+
+{
+  "title": "Deployment finished"
+}
