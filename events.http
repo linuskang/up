@@ -1,5 +1,5 @@
-@baseUrl = http://localhost:3001
-@apiKey = test
+@baseUrl = https://upstream.linus.my
+@apiKey = up_4XyjCtQWhWoNi1U75lGaaSsc5M0E-qQN
 
 ### Create an event
 POST {{baseUrl}}/api/v1/events
@@ -20,4 +20,52 @@ X-API-Key: {{apiKey}}
 
 {
   "title": "Deployment finished"
+}
+
+### Complex event — payment pipeline failure
+POST {{baseUrl}}/api/v1/events
+Content-Type: application/json
+Authorization: Bearer {{apiKey}}
+
+{
+  "title": "Payment processing failed",
+  "icon": "💳",
+  "category": "billing",
+  "content": "Stripe charge attempt for subscription renewal failed after 3 retries. Customer will be notified and moved to grace period.",
+  "fields": [
+    { "name": "Customer ID",     "value": "cus_Qk29mXzA4bNp" },
+    { "name": "Invoice ID",      "value": "inv_1PqR8tLkMnBv7c" },
+    { "name": "Amount",          "value": "$149.00 USD" },
+    { "name": "Failure reason",  "value": "insufficient_funds" },
+    { "name": "Retry attempts",  "value": "3" },
+    { "name": "Next retry",      "value": "2026-05-27T09:00:00Z" }
+  ],
+  "events": [
+    { "icon": "🔄", "time": "2026-05-20T08:00:00Z", "content": "Subscription renewal triggered" },
+    { "icon": "💳", "time": "2026-05-20T08:00:02Z", "content": "Charge attempt 1 — declined: insufficient_funds" },
+    { "icon": "⏳", "time": "2026-05-20T08:30:00Z", "content": "Retry backoff: 30 minutes" },
+    { "icon": "💳", "time": "2026-05-20T09:00:00Z", "content": "Charge attempt 2 — declined: insufficient_funds" },
+    { "icon": "⏳", "time": "2026-05-20T10:00:00Z", "content": "Retry backoff: 60 minutes" },
+    { "icon": "💳", "time": "2026-05-20T11:00:00Z", "content": "Charge attempt 3 — declined: insufficient_funds" },
+    { "icon": "🚨", "time": "2026-05-20T11:00:01Z", "content": "All retries exhausted — customer moved to grace period" }
+  ],
+  "actions": [
+    { "label": "View invoice",    "type": "primary",   "url": "https://dashboard.stripe.com/invoices/inv_1PqR8tLkMnBv7c" },
+    { "label": "View customer",   "type": "secondary", "url": "https://dashboard.stripe.com/customers/cus_Qk29mXzA4bNp" }
+  ],
+  "data": {
+    "stripe": {
+      "charge_id": "ch_3PqR8tLkMnBv7c00",
+      "error_code": "insufficient_funds",
+      "payment_method": "pm_1PqR5aLkMnBv7c00",
+      "card_last4": "4242",
+      "idempotency_key": "renewal_cus_Qk29mXzA4bNp_2026-05"
+    },
+    "subscription": {
+      "id": "sub_1OmN3pLkMnBv7c00",
+      "plan": "pro",
+      "period_end": "2026-05-20T00:00:00Z",
+      "grace_period_end": "2026-05-27T00:00:00Z"
+    }
+  }
 }

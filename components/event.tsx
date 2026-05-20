@@ -6,6 +6,16 @@ import { Open } from "@/components/icons"
 import { Button } from "@/components/ui/button";
 import type { EventProps } from "@/types";
 
+function relativeTime(iso: string): string {
+    const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (s < 60) return `${s}s`;
+    const m = Math.floor(s / 60);
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}hr`;
+    return `${Math.floor(h / 24)}d`;
+}
+
 export default function Event({ title, icon, time, content, fields, events, data, actions, category }: EventProps) {
     const [isOpen, setIsOpen] = useState(false);
     const hasData = data !== null && data !== undefined;
@@ -84,7 +94,7 @@ export default function Event({ title, icon, time, content, fields, events, data
                                             </div>
                                             <div className="min-w-0 flex-1 flex flex-wrap items-center gap-2">
                                                 <p className="text-sm font-medium leading-none text-eventcontent/65">
-                                                    {event.time}
+                                                    {relativeTime(event.time)}
                                                 </p>
                                                 <p className="text-sm leading-relaxed text-white">
                                                     {event.content}
@@ -96,8 +106,8 @@ export default function Event({ title, icon, time, content, fields, events, data
                             )}
 
                             {hasData && (
-                                <div className="relative max-h-48 rounded-md bg-eventbg">
-                                    <pre className="overflow-auto p-2 text-sm text-eventcontent/80">
+                                <div className="relative rounded-md bg-eventbg">
+                                    <pre className="max-h-48 overflow-auto p-2 pr-16 text-sm text-eventcontent/80">
                                         {JSON.stringify(data, null, 2)}
                                     </pre>
                                     <button
