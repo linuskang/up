@@ -29,3 +29,7 @@ prisma/generated/
 
 # Docker
 docker-compose.override.yml
+
+# Mobile app
+
+mobile/
