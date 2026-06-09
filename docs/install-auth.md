@@ -1,0 +1,1 @@
+https://better-auth.com/docs/installation
