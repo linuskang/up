@@ -13,6 +13,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import Navbar from '@/components/navbar';
 
 export default function RootLayout({
     children,
@@ -110,5 +111,12 @@ export default function RootLayout({
         );
     }
 
-    return <>{children}</>;
+    return (
+        <>
+            <Navbar user={session.user} />
+            <div className="mx-auto w-full max-w-lg px-4">
+                {children}
+            </div>
+        </>
+    );
 }

@@ -18,7 +18,7 @@ export default function RootLayout({
             lang="en"
             suppressHydrationWarning
         >
-            <body className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
+            <body className="min-h-screen bg-background flex flex-col">
                 <main className={GeistSans.className}>
                     <ThemeProvider attribute="class" defaultTheme="dark">
                         <TooltipProvider>

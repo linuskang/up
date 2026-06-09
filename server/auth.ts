@@ -17,6 +17,23 @@ export const auth = betterAuth(
             }
         ),
         baseURL: env.BETTER_AUTH_URL,
+        databaseHooks: {
+            user: {
+                create: {
+                    before: async (user) => {
+                        if (!user.image && user.name) {
+                            const seed = encodeURIComponent(user.name);
+                            return {
+                                data: {
+                                    ...user,
+                                    image: `https://api.dicebear.com/9.x/glass/svg?seed=${seed}`,
+                                },
+                            };
+                        }
+                    },
+                },
+            },
+        },
         emailVerification: {
             sendOnSignUp: true,
             sendOnSignIn: false,
