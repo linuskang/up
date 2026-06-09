@@ -12,7 +12,7 @@ export const env = createEnv(
             GITHUB_CLIENT_SECRET: z.string(),
 
             RESEND_API_KEY: z.string(),
-            RESEND_EMAIL_FROM: z.email(),
+            RESEND_EMAIL_FROM: z.string(),
         },
 
         clientPrefix: "PUBLIC_",

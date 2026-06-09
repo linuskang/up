@@ -1,7 +1,11 @@
+'use client';
+
 import { EventsList } from "@/components/event";
 import { CategorySelector } from "@/components/category-selector";
+import { authClient } from "@/client/auth";
 
 export default function Page() {
+    const { data: session, isPending } = authClient.useSession();
     return (
         <main>
             <div className="flex min-h-svh justify-center gap-3 p-6 pt-12">

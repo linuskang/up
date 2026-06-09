@@ -28,13 +28,18 @@ export default function Page() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [needsVerification, setNeedsVerification] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [resendSent, setResendSent] = useState(false);
 
     const login = async (form: React.FormEvent<HTMLFormElement>) => {
         form.preventDefault();
         setError(null);
+        setNeedsVerification(false);
+        setResendSent(false);
         setLoading(true);
 
-        const { data, error } = await authClient.signIn.email(
+        const { error } = await authClient.signIn.email(
             {
                 email,
                 password,
@@ -43,14 +48,38 @@ export default function Page() {
         )
 
         if (error) {
-            setError(error.message || 'An error occurred');
-            console.log(error);
-
+            if (error.code === 'EMAIL_NOT_VERIFIED') {
+                setNeedsVerification(true);
+            } else {
+                setError(error.message || 'An error occurred');
+            }
             setLoading(false);
             return;
         }
 
         setLoading(false);
+    }
+
+    const resendVerification = async () => {
+        setResendLoading(true);
+        setResendSent(false);
+        setError(null);
+
+        const { error } = await authClient.sendVerificationEmail(
+            {
+                email,
+                callbackURL: '/',
+            }
+        );
+
+        if (error) {
+            setError(error.message || 'An error occurred');
+            setResendLoading(false);
+            return;
+        }
+
+        setResendSent(true);
+        setResendLoading(false);
     }
 
     const github = async () => {
@@ -153,8 +182,34 @@ export default function Page() {
                                 </div>
                             )}
                         </Field>
+
+                        {needsVerification && (
+                            <div className="flex flex-col max-w-sm gap-3 rounded-lg bg-card p-4">
+                                <div className="flex flex-col gap-1">
+                                    <p className="text-sm font-medium">Email not verified</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Please check your inbox for a verification link. If you need a new one, click the button below.
+                                    </p>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    disabled={resendLoading || resendSent}
+                                    onClick={resendVerification}
+                                    className="h-9 text-sm w-full cursor-pointer font-bold border-none"
+                                >
+                                    {resendSent ? "Email sent!" : (resendLoading ? "Sending..." : "Resend verification email")}
+                                </Button>
+                                {resendSent && (
+                                    <p className="text-center text-xs text-green-600">
+                                        Check your inbox for the verification link.
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
                         <FieldDescription className="flex text-sm justify-center">
-                            Don't have an account?{" "}
+                            Don&apos;t have an account?{" "}
                             <Link href="/register" className="font-bold ml-1 underline-none transition hover:text-white !no-underline">
                                 Create an account
                             </Link>
