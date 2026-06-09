@@ -56,7 +56,7 @@ export type EventProps = {
         time: string;
         content: ReactNode;
     }[];
-    data?: any;
+    data?: unknown;
     actions?: {
         title: string;
         type: "default" | "secondary" | "ghost";
@@ -201,7 +201,7 @@ export function Event(
                             ))}
                         </div>
                     )}
-                    {data && (
+                    {!!data && (
                         <div className="relative mt-4 group">
 
                             <Button
