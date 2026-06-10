@@ -25,6 +25,7 @@ export default function Page() {
     const { data: session, isPending } = authClient.useSession();
 
     const [name, setName] = useState(session?.user?.name ?? '');
+    const [image, setImage] = useState(session?.user?.image ?? '');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -52,6 +53,7 @@ export default function Page() {
 
         const { error } = await authClient.updateUser({
             name,
+            image,
         });
 
         if (error) {
@@ -124,6 +126,33 @@ export default function Page() {
                                     placeholder="Your name"
                                     className="h-10 text-base border-0 !text-sm"
                                 />
+                            </FieldGroup>
+                        </Field>
+                        <Field>
+                            <FieldGroup>
+                                <FieldLabel className="text-sm">Image URL</FieldLabel>
+                                <Input
+                                    type="url"
+                                    value={image}
+                                    onChange={(e) => setImage(e.target.value)}
+                                    placeholder="https://example.com/avatar.png"
+                                    className="h-10 text-base border-0 !text-sm"
+                                />
+                                {image && (
+                                    <div className="mt-2 flex items-center gap-3">
+                                        <div className="relative size-12 overflow-hidden rounded-md border border-border/60 bg-secondary">
+                                            <img
+                                                src={image}
+                                                alt="Avatar preview"
+                                                className="size-full object-cover"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                }}
+                                            />
+                                        </div>
+                                        <span className="text-xs text-muted-foreground">Preview</span>
+                                    </div>
+                                )}
                             </FieldGroup>
                         </Field>
                         <Field>
