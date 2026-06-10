@@ -59,7 +59,7 @@ export default function Page() {
                     <div className="flex flex-col gap-1">
                         <p className="text-sm font-semibold text-foreground">No Projects Yet</p>
                         <p className="max-w-sm text-xs text-muted-foreground">
-                            You haven't created any projects yet. Get started by creating your first project to start tracking events.
+                            You haven&apos;t created any projects yet. Get started by creating your first project to start tracking events.
                         </p>
                     </div>
                     <a
