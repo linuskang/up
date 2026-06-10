@@ -65,7 +65,7 @@ export default function Navbar({ user }: NavbarProps) {
                             <Link href={item.path} key={item.path}>
                                 <Button
                                     variant="ghost"
-                                    className={`flex items-center gap-2 px-4 py-4 text-base font-medium rounded-base transition-colors ${isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    className={`flex items-center gap-2 px-4 py-4 text-sm font-medium rounded-base transition-colors ${isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                         }`}
                                 >
                                     {Icon && <Icon className="size-5" />}
