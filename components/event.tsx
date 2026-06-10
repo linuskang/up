@@ -125,7 +125,7 @@ export function Event(
 
     return (
         <Card
-            className="w-[450px] bg-card p-3 ring-0 gap-0"
+            className="w-[450px] bg-muted/40 p-3 ring-0 gap-0"
         >
             <CardHeader
                 className={`flex flex-row items-center space-y-0 p-0 transition-opacity group ${extras ? "cursor-pointer select-none hover:opacity-80" : ""}`}
@@ -186,7 +186,7 @@ export function Event(
                         <div className="mt-3 space-y-3">
                             {events.map((event, index) => (
                                 <div key={index} className="flex items-center gap-3">
-                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted/20 text-xs">
                                         {event.icon}
                                     </div>
                                     <div className="min-w-0 flex-1 flex flex-row items-center gap-2">
@@ -214,7 +214,7 @@ export function Event(
                                 {copied ? <Check className="size-4" /> : <Copy className="size-3" />}
                             </Button>
 
-                            <div className={`relative rounded bg-muted text-xs ${showFullJson ? "" : "max-h-48 overflow-hidden"}`}>
+                            <div className={`relative rounded bg-muted/60 text-xs ${showFullJson ? "" : "max-h-48 overflow-hidden"}`}>
                                 <SyntaxHighlighter
                                     language="json"
                                     style={vscDarkPlus}
@@ -227,12 +227,12 @@ export function Event(
                                     <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-muted to-transparent pointer-events-none" />
                                 )}
 
-                                <div className="absolute bottom-2 left-0 right-0 flex justify-center z-10">
+                                <div className="absolute bottom-0 left-0 right-0 z-10">
                                     <Button
                                         variant="secondary"
                                         size="sm"
                                         onClick={() => setShowFullJson(!showFullJson)}
-                                        className="h-6 text-xs shadow-sm"
+                                        className="h-9 w-full rounded-none rounded-b text-xs shadow-none border-0 bg-muted hover:bg-muted"
                                     >
                                         {showFullJson ? "Show less" : "Show all JSON"}
                                     </Button>

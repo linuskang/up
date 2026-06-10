@@ -25,7 +25,7 @@ export function CategorySelector(
     }
 ) {
     return (
-        <Card className="w-[180px] rounded-xl bg-card ring-0">
+        <Card className="w-[180px] rounded-xl bg-muted/40 ring-0">
             <CardHeader className="px-4 pt-0 pb-0">
                 <CardTitle className="text-lg font-semibold text-foreground">
                     Categories

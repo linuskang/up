@@ -45,7 +45,7 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
-    --radius: 0.90rem;
+    --radius: 0.60rem;
 }
 
 :root {
@@ -72,7 +72,7 @@
     --chart-3: oklch(0.546 0.245 262.881);
     --chart-4: oklch(0.488 0.243 264.376);
     --chart-5: oklch(0.424 0.199 265.638);
-    --radius: 0.90rem;
+    --radius: 0.60rem;
     --sidebar: oklch(94% 0 0);
     --sidebar-foreground: oklch(9% 0 0);
     --sidebar-primary: oklch(50% 0.21 264.376);
