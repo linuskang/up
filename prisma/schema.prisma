@@ -22,9 +22,33 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  projects      Project[]
+  apiKeys ApiKey[]
 
   @@unique([email])
   @@map("user")
+}
+
+model Project {
+  id        String @id @default(uuid())
+  name      String
+  ownerId   String
+  owner     User   @relation(fields: [ownerId], references: [id])
+  apiKeys ApiKey[]
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  lastUsed  DateTime?
+  addedById String
+  addedBy   User     @relation(fields: [addedById], references: [id])
+  active  Boolean  @default(true)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Session {
