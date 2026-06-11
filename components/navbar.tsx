@@ -22,7 +22,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
     Folder,
-    Calendar,
+    Layers,
     Settings
 } from "lucide-react";
 
@@ -43,7 +43,7 @@ interface NavbarProps {
 
 const navItems: NavItem[] = [
     { label: "Projects", path: "/", icon: Folder },
-    { label: "Events", path: "/viewer", icon: Calendar },
+    { label: "Events", path: "/viewer", icon: Layers },
     { label: "Settings", path: "/settings", icon: Settings },
 ];
 

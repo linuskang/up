@@ -31,15 +31,15 @@ export default function Page() {
                 <div className="grid grid-cols-3 gap-3">
                     <div className="rounded-lg bg-muted/40 p-4">
                         <p className="text-xs text-muted-foreground">Total Projects</p>
-                        <p className="text-2xl font-bold text-foreground">0</p>
+                        <p className="text-2xl font-bold text-foreground">0 <span className="text-sm font-normal text-muted-foreground">/ 1</span></p>
                     </div>
                     <div className="rounded-lg bg-muted/40 p-4">
                         <p className="text-xs text-muted-foreground">Events Today</p>
-                        <p className="text-2xl font-bold text-foreground">0</p>
+                        <p className="text-2xl font-bold text-foreground">0 <span className="text-sm font-normal text-muted-foreground">/ 100</span></p>
                     </div>
                     <div className="rounded-lg bg-muted/40 p-4">
                         <p className="text-xs text-muted-foreground">Account Plan</p>
-                        <p className="text-2xl font-bold text-foreground">Pro</p>
+                        <p className="text-2xl font-bold text-foreground">Free</p>
                     </div>
                 </div>
             </div>
