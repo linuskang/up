@@ -16,6 +16,7 @@
 // Libraries
 import { usePathname } from "next/navigation";
 import type { ElementType } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 // Components
@@ -55,7 +56,7 @@ export default function Navbar({ user }: NavbarProps) {
             <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3">
                 <div className="flex items-center gap-2">
                     <Link href="/">
-                        <img src="/logo.png" height="48" width="48" alt="Logo" />
+                        <Image src="/logo.png" width={48} height={48} alt="Logo" />
                     </Link>
                 </div>
 
@@ -90,10 +91,13 @@ export default function Navbar({ user }: NavbarProps) {
                                 </span>
                             </span>
                             <div className="-ml-1 relative size-8 overflow-hidden rounded-md border border-border/60 bg-secondary">
-                                <img
+                                <Image
                                     src={user.image || ""}
                                     alt={user.name || "Avatar"}
-                                    className="size-full object-cover"
+                                    width={32}
+                                    height={32}
+                                    unoptimized
+                                    className="object-cover"
                                 />
                             </div>
                         </Button>

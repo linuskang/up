@@ -1,7 +1,8 @@
 'use client';
 
 // Libraries
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { authClient } from '@/client/auth';
 import { redirect } from 'next/navigation';
 
@@ -28,13 +29,12 @@ export default function Page() {
 
     const [name, setName] = useState(session?.user?.name ?? '');
     const [image, setImage] = useState(session?.user?.image ?? '');
-
-    useEffect(() => {
-        if (session?.user) {
-            setName(session.user.name ?? '');
-            setImage(session.user.image ?? '');
-        }
-    }, [session?.user?.name, session?.user?.image]);
+    const userRef = useRef(session?.user);
+    if (session?.user !== userRef.current) {
+        userRef.current = session?.user;
+        setName(session?.user?.name ?? '');
+        setImage(session?.user?.image ?? '');
+    }
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -150,11 +150,13 @@ export default function Page() {
                                 {image && (
                                     <div className="mt-2 flex items-center gap-3">
                                         <div className="relative size-12 overflow-hidden rounded-md border border-border/60 bg-secondary">
-                                            <img
+                                            <Image
                                                 key={image}
                                                 src={image}
                                                 alt="Avatar preview"
-                                                className="size-full object-cover"
+                                                fill
+                                                unoptimized
+                                                className="object-cover"
                                                 onError={(e) => {
                                                     (e.target as HTMLImageElement).style.display = 'none';
                                                 }}

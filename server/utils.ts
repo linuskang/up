@@ -5,7 +5,8 @@ import crypto from 'crypto';
 
 export class Api {
     static async validateKey(apiKey: string): Promise<boolean> {
-        return false
+        void apiKey;
+        return false;
     }
 
 }

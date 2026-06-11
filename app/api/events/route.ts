@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Api } from '@/server/utils';
-import { prisma } from '@/server/prisma';
+
 
 export async function POST(req: NextRequest) {
     const apiKey = req.headers.get('x-api-key');

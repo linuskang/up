@@ -39,7 +39,7 @@ export default function Page() {
         setError(null);
         setLoading(true);
 
-        const { data, error } = await authClient.signUp.email(
+        const { error } = await authClient.signUp.email(
             {
                 name,
                 email,
