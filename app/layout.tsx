@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={`flex min-h-screen flex-col bg-background ${GeistSans.className}`}>
+            <body className={`flex min-h-screen flex-col bg-background dark ${GeistSans.className}`}>
                 <main className="flex-1">
                     <ThemeProvider attribute="class" defaultTheme="dark">
                         <TooltipProvider>
