@@ -3,8 +3,8 @@
 // Libraries
 import { authClient } from "@/client/auth"
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 // Components
 import {
@@ -27,96 +27,12 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 
-type ProjectLimits = {
-    maxProjects: number;
-    usedProjects: number;
-    remainingProjects: number;
-    canCreateProject: boolean;
-};
-
-function CreateProjectForm() {
-    const [projectName, setProjectName] = useState("");
-    const [error, setError] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [limits, setLimits] = useState<ProjectLimits | null>(null);
-    const [isLoadingLimits, setIsLoadingLimits] = useState(true);
-    const router = useRouter();
-
-    useEffect(() => {
-        let isCancelled = false;
-
-        async function loadLimits() {
-            try {
-                const response = await fetch("/api/v1/project", { method: "GET" });
-                if (!response.ok) return;
-                const data = (await response.json()) as { limits?: ProjectLimits };
-                if (!isCancelled) setLimits(data.limits ?? null);
-            } finally {
-                if (!isCancelled) setIsLoadingLimits(false);
-            }
-        }
-
-        loadLimits();
-        return () => { isCancelled = true; };
-    }, []);
-
-    return (
-        <Card className="bg-card ring-0">
-            <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-white">Create Project</CardTitle>
-                <CardDescription>
-                    Create a new project and start logging your events.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form id="create-project-form" className="space-y-4">
-                    {!isLoadingLimits && limits && (
-                        <div className="mb-4 flex items-center justify-between rounded-lg bg-white/5 px-3 py-2">
-                            <span className="text-xs text-muted-foreground">Projects used</span>
-                            <span className="text-xs font-semibold text-white">
-                                {limits.usedProjects}/{limits.maxProjects}
-                            </span>
-                        </div>
-                    )}
-
-                    <div>
-                        <Label htmlFor="project-name" className="mb-2">
-                            Project Name
-                        </Label>
-                        <Input
-                            id="project-name"
-                            placeholder="My App"
-                            className="bg-input border-0 text-white"
-                            value={projectName}
-                            onChange={(e) => setProjectName(e.target.value)}
-                            maxLength={80}
-                            autoFocus
-                        />
-                    </div>
-
-                    {error && (
-                        <p className="text-sm text-destructive">{error}</p>
-                    )}
-                </form>
-            </CardContent>
-            <CardFooter className="justify-end gap-2">
-                <Button type="button" variant="secondary" asChild disabled={isSubmitting}>
-                    <Link href="/settings/projects">Cancel</Link>
-                </Button>
-                <Button
-                    className="cursor-pointer"
-                    type="submit"
-                    form="create-project-form"
-                >
-                    {isSubmitting ? "Creating..." : "Create Project"}
-                </Button>
-            </CardFooter>
-        </Card>
-    );
-}
-
 export default function Page() {
     const { data: session, isPending } = authClient.useSession();
+
+    // States
+    const [projectName, setProjectName] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (isPending) {
         return (
@@ -157,6 +73,34 @@ export default function Page() {
         return null;
     }
 
+    async function create(e: React.FormEvent) {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        const response = await fetch("/api/project", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify(
+                {
+                    name: projectName,
+                }
+            )
+        })
+
+        if (response.ok) {
+            const d = await response.json();
+            toast.success("Project created successfully!");
+            window.location.href = `/project/${d.projectId}`;
+
+        } else {
+            toast.error("Failed to create project. Please try again.");
+        }
+    }
+
     return (
         <div className="flex min-h-svh flex-col gap-8 py-6">
             <div className="flex flex-col gap-1">
@@ -175,7 +119,44 @@ export default function Page() {
                 </Breadcrumb>
             </div>
 
-            <CreateProjectForm />
+            <Card className="bg-card ring-0">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-semibold text-white">Create Project</CardTitle>
+                    <CardDescription>
+                        Create a new project and start logging your events.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={create} id="create-project-form" className="space-y-4">
+                        <div>
+                            <Label htmlFor="project-name" className="mb-2">
+                                Project Name
+                            </Label>
+                            <Input
+                                id="project-name"
+                                placeholder="My App"
+                                className="bg-input border-0 text-white"
+                                value={projectName}
+                                onChange={(e) => setProjectName(e.target.value)}
+                                maxLength={80}
+                                autoFocus
+                            />
+                        </div>
+                    </form>
+                </CardContent>
+                <CardFooter className="justify-end gap-2">
+                    <Button type="button" variant="secondary" asChild disabled={isSubmitting}>
+                        <Link href="/settings/projects">Cancel</Link>
+                    </Button>
+                    <Button
+                        className="cursor-pointer"
+                        type="submit"
+                        form="create-project-form"
+                    >
+                        {isSubmitting ? "Creating..." : "Create Project"}
+                    </Button>
+                </CardFooter>
+            </Card>
         </div>
     );
 }
