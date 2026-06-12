@@ -4,6 +4,7 @@ import { Folder, ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { authClient } from "@/client/auth"
+import Link from "next/link"
 
 export default function Page() {
     const { data: session, isPending } = authClient.useSession()
@@ -55,7 +56,9 @@ export default function Page() {
                         Your Projects
                     </h2>
                     <Button className="cursor-pointer bg-primary text-xs font-bold text-primary-foreground hover:bg-primary/80">
-                        Create Project
+                        <Link href="/new-project">
+                            Create Project
+                        </Link>
                     </Button>
                 </div>
 
