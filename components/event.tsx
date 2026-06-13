@@ -51,8 +51,9 @@ export type EventProps = {
     }[]
 }
 
-function formatDate(date: Date) {
-    return date.toLocaleDateString("en-GB", {
+function formatDate(dateStr: string) {
+    const [year, month, day] = dateStr.split("-").map(Number)
+    return new Date(year, month - 1, day).toLocaleDateString("en-GB", {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -60,7 +61,10 @@ function formatDate(date: Date) {
 }
 
 function getDayKey(date: Date) {
-    return date.toISOString().split("T")[0]
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
 }
 
 export function EventsList({ events }: Events) {
@@ -84,7 +88,7 @@ export function EventsList({ events }: Events) {
                 <div key={groupIndex} className="flex flex-col gap-2">
                     {hasMultipleDays && (
                         <p className="py-1 text-sm text-semibold text-muted-foreground">
-                            Events on {formatDate(new Date(group.date))}
+                            Events on {formatDate(group.date)}
                         </p>
                     )}
                     {group.events.map((event, index) => (
