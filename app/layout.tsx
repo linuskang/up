@@ -20,7 +20,7 @@ export default function RootLayout({
                     <ThemeProvider attribute="class" defaultTheme="dark">
                         <TooltipProvider>
                             {children}
-                            <Toaster richColors position="top-center" />
+                            <Toaster position="top-center" />
                         </TooltipProvider>
                     </ThemeProvider>
                 </main>

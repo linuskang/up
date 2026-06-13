@@ -35,6 +35,7 @@ model Project {
   ownerId   String
   owner     User   @relation(fields: [ownerId], references: [id])
   apiKeys ApiKey[]
+  events    Event[]
 }
 
 model ApiKey {
@@ -47,6 +48,22 @@ model ApiKey {
   addedById String
   addedBy   User     @relation(fields: [addedById], references: [id])
   active  Boolean  @default(true)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  title     String
+  icon      String
+  time      String
+  content   String?
+  category  String?
+  fields    Json?
+  events    Json?
+  data      Json?
+  actions   Json?
+  createdAt DateTime @default(now())
   projectId String
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }

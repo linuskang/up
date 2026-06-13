@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function Error({
     error,
@@ -41,7 +42,7 @@ export default function Error({
                 <div className="flex items-center justify-center gap-3 pt-2">
                     <Button onClick={reset}>Try Again</Button>
                     <Button variant="secondary" asChild>
-                        <a href="/">Go to Dashboard</a>
+                        <Link href="/">Go to Dashboard</Link>
                     </Button>
                 </div>
             </div>

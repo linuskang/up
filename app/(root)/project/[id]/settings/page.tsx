@@ -37,7 +37,7 @@ export default function Page() {
             <main className="flex-1">
                 <div className="w-full py-6">
                     <Breadcrumb className="mb-4">
-                        <BreadcrumbList>
+                        <BreadcrumbList className="text-sm">
                             <BreadcrumbItem>
                                 <BreadcrumbLink asChild>
                                     <Link href="/">Dashboard</Link>
