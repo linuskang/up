@@ -144,9 +144,9 @@ export function Event({
       >
         <div className="min-h-0 overflow-hidden">
           {content && (
-            <p className="text-sm leading-relaxed text-muted-foreground">
+            <div className="text-sm leading-relaxed text-muted-foreground">
               {content}
-            </p>
+            </div>
           )}
           {fields && (
             <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
