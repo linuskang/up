@@ -1,5 +1,5 @@
 # Dependencies
-FROM node:22-alpine AS deps
+FROM node:22 AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 # Build
-FROM node:22-alpine AS builder
+FROM node:22 AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -27,7 +27,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Runner
-FROM node:22-alpine AS runner
+FROM node:22 AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
