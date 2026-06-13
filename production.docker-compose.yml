@@ -1,39 +1,23 @@
-version: "3.8"
-
 services:
-  app:
-    image: ghcr.io/linusdotmy/upstream:latest
+  upstream:
+    image: ghcr.io/linusdotmy/up.linus.my:latest
     ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/upstream
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-      RESEND_EMAIL_FROM: ${RESEND_EMAIL_FROM}
-    depends_on:
-      db:
-        condition: service_healthy
+      - "4002:3000"
+    env_file: .env
     restart: unless-stopped
-
+    depends_on:
+      - db
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: upstream
+      POSTGRES_PASSWORD: upstream
       POSTGRES_DB: upstream
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - upstream_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d upstream"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "4001:5432"
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  upstream_data:
