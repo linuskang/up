@@ -56,7 +56,6 @@ model Event {
   id        String   @id @default(uuid())
   title     String
   icon      String
-  time      String
   content   String?
   category  String?
   fields    Json?

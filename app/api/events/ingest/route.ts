@@ -7,7 +7,6 @@ const eventSchema = z.object(
     {
         title: z.string().min(1),
         icon: z.string().min(1),
-        time: z.string().min(1),
         content: z.string().optional().nullable(),
         category: z.string().optional().nullable(),
         fields: z
@@ -94,7 +93,6 @@ export async function POST(req: NextRequest) {
                 projectId: keyValidation.projectId!,
                 title: events.title,
                 icon: events.icon,
-                time: events.time,
                 content: events.content,
                 category: events.category,
                 fields: events.fields ?? undefined,

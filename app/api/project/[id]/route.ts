@@ -89,6 +89,75 @@ export async function GET(
     )
 }
 
+export async function PATCH(
+    request: NextRequest,
+    {
+        params,
+    }: {
+        params: Promise<postParams>
+    }
+) {
+    const session = await auth.api.getSession({
+        headers: request.headers,
+    })
+
+    if (!session) {
+        return NextResponse.json(
+            {
+                error: "Unauthorized",
+            },
+            {
+                status: 401,
+            }
+        )
+    }
+
+    const { id } = await params
+    const body = await request.json()
+
+    if (!body.name) {
+        return NextResponse.json(
+            {
+                error: "Missing required fields",
+            },
+            {
+                status: 400,
+            }
+        )
+    }
+
+    const project = await prisma.project.findUnique(
+        {
+            where: {
+                id,
+                ownerId: session.user.id,
+            },
+            select: {
+                id: true,
+            }
+        }
+    )
+
+    if (!project) {
+        return NextResponse.json(
+            {
+                error: "Project not found",
+            },
+            {
+                status: 404,
+            }
+        )
+    }
+
+    await Project.rename(id, body.name)
+
+    return NextResponse.json(
+        {
+            success: true,
+        }
+    )
+}
+
 export async function DELETE(
     request: NextRequest,
     {

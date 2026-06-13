@@ -71,6 +71,7 @@ export async function GET(
             id: key.id,
             name: key.name,
             createdAt: key.createdAt,
+            lastUsed: key.lastUsed,
             addedBy: key.addedBy,
             active: key.active,
         }

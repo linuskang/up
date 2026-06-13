@@ -1,6 +1,5 @@
 import { prisma } from "@/server/prisma"
 import crypto from "crypto"
-import type { Prisma } from "../generated/prisma/client"
 
 export class Api {
     static async validateKey(apiKey: string): Promise<{ valid: boolean; projectId?: string }> {
@@ -52,6 +51,18 @@ export class Project {
         })
 
         return newProject
+    }
+
+    static async rename(projectId: string, name: string) {
+        await prisma.project.update({
+            where: {
+                id: projectId,
+            },
+            data: {
+                name,
+            },
+        })
+        return true
     }
 
     static async addApiKey(projectId: string, addedById: string, name: string) {
