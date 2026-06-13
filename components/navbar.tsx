@@ -22,7 +22,15 @@ import { GeistMono } from "geist/font/mono";
 
 // Components
 import { Button } from "@/components/ui/button"
-import { Folder, Layers, Settings } from "lucide-react"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { authClient } from "@/client/auth"
+import { Folder, Layers, LogOut, Settings } from "lucide-react"
 
 // Types
 interface NavItem {
@@ -83,28 +91,47 @@ export default function Navbar({ user }: NavbarProps) {
                 </div>
 
                 <div className="justify-self-end">
-                    <Link href="/settings">
-                        <Button
-                            variant="ghost"
-                            className="group h-11 cursor-pointer gap-3 bg-white/5 px-2.5 text-left hover:bg-white/10 focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none aria-expanded:border-transparent aria-expanded:ring-0"
-                        >
-                            <span className="hidden min-w-0 flex-col items-start leading-tight sm:flex">
-                                <span className="max-w-28 truncate text-sm font-semibold text-foreground">
-                                    {user.name?.split(" ")[0]}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="group h-11 cursor-pointer gap-3 bg-white/5 px-2.5 text-left hover:bg-white/10 focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none aria-expanded:border-transparent aria-expanded:ring-0"
+                            >
+                                <span className="hidden min-w-0 flex-col items-start leading-tight sm:flex">
+                                    <span className="max-w-28 truncate text-sm font-semibold text-foreground">
+                                        {user.name?.split(" ")[0]}
+                                    </span>
                                 </span>
-                            </span>
-                            <div className="relative -ml-1 size-8 overflow-hidden rounded-md border border-border/60 bg-secondary">
-                                <Image
-                                    src={user.image || ""}
-                                    alt={user.name || "Avatar"}
-                                    width={32}
-                                    height={32}
-                                    unoptimized
-                                    className="object-cover"
-                                />
-                            </div>
-                        </Button>
-                    </Link>
+                                <div className="relative -ml-1 size-8 overflow-hidden rounded-md border border-border/60 bg-secondary">
+                                    <Image
+                                        src={user.image || ""}
+                                        alt={user.name || "Avatar"}
+                                        width={32}
+                                        height={32}
+                                        unoptimized
+                                        className="object-cover"
+                                    />
+                                </div>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem asChild>
+                                <Link href="/settings" className="flex items-center font-medium gap-2 cursor-pointer">
+                                    <Settings className="size-3.5" />
+                                    Settings
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => authClient.signOut()}
+                                className="flex items-center gap-2 cursor-pointer"
+                            >
+                                <LogOut className="size-3.5" />
+                                Sign out
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
         </nav>
