@@ -2,7 +2,6 @@
 
 import { notFound } from "next/navigation";
 // Libraries
-import { authClient } from "@/client/auth"
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link"
@@ -23,7 +22,6 @@ import { Folder } from "lucide-react"
 
 export default function Page() {
     const params = useParams();
-    const { data: session, isPending } = authClient.useSession();
 
     const [project, setProject] = useState<{ project: { name: string } } | null>(null);
     const [events, setEvents] = useState<EventProps[]>([]);
@@ -57,7 +55,7 @@ export default function Page() {
         fetchProject();
     }, [params.id]);
 
-    if (isPending || loading) {
+    if (loading) {
         return (
             <div className="flex min-h-svh items-center justify-center py-6">
                 <div className="text-sm text-muted-foreground">Loading...</div>

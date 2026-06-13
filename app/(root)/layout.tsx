@@ -3,7 +3,7 @@
 // Libraries
 import { useState } from "react"
 import { authClient } from "@/client/auth"
-import { redirect, usePathname } from "next/navigation"
+import { redirect } from "next/navigation"
 
 // Components
 import { Button } from "@/components/ui/button"
@@ -20,8 +20,6 @@ export default function RootLayout({
     const [resendLoading, setResendLoading] = useState(false)
     const [resendSent, setResendSent] = useState(false)
     const [resendError, setResendError] = useState<string | null>(null)
-    const pathname = usePathname()
-    const isSettings = pathname?.startsWith("/settings")
 
     if (isPending) {
         return (

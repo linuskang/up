@@ -1,12 +1,10 @@
 "use client";
 
 import { authClient } from "@/client/auth"
-import { redirect } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight, UserRound, BriefcaseBusiness, CreditCard } from "lucide-react";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
 import {
     AlertDialog,
     AlertDialogAction,

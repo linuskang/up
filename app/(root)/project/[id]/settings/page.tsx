@@ -29,7 +29,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2, KeyRound, Copy, Check } from "lucide-react";
+import { Trash2, Copy, Check } from "lucide-react";
 import Link from "next/link";
 import {
     Table,
