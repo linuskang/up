@@ -75,6 +75,7 @@ export default function Page() {
     const [project, setProject] = useState<{ name: string; id: string } | null>(null);
     const [keys, setKeys] = useState<ApiKey[]>([]);
     const [loading, setLoading] = useState(true);
+    const [notFoundState, setNotFoundState] = useState(false);
     const [newProjectName, setNewProjectName] = useState("");
     const [newKeyName, setNewKeyName] = useState("");
     const [createdKey, setCreatedKey] = useState<string | null>(null);
@@ -95,7 +96,9 @@ export default function Page() {
             ]);
 
             if (!projectRes.ok) {
-                return notFound();
+                setNotFoundState(true);
+                setLoading(false);
+                return;
             }
 
             const projectData = await projectRes.json();
@@ -223,6 +226,10 @@ export default function Page() {
                 <div className="h-8 w-48 animate-pulse rounded bg-muted" />
             </div>
         );
+    }
+
+    if (notFoundState) {
+        return notFound();
     }
 
     if (!session) {
