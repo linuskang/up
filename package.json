@@ -39,7 +39,7 @@
         "react": "19.2.4",
         "react-day-picker": "^10.0.1",
         "react-dom": "19.2.4",
-        "react-email": "^6.5.0",
+        "react-email": "^6.6.0",
         "react-resizable-panels": "^4.11.2",
         "react-syntax-highlighter": "^16.1.1",
         "recharts": "^3.8.0",
