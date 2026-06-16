@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/server/auth"
 import { Project } from "@/server/utils"
+import { plans } from "@/lib/plans"
 import { prisma } from "@/server/prisma"
 
 export async function GET(request: NextRequest) {
@@ -64,6 +65,31 @@ export async function POST(request: NextRequest) {
             },
             {
                 status: 400,
+            }
+        )
+    }
+
+    // Check project quota
+    const projectCount = await Project.count(session.user.id)
+    const user = await prisma.user.findUnique({
+        where: {
+            id: session.user.id,
+        },
+        select: {
+            plan: true,
+        },
+    })
+
+    const userPlan = user?.plan.toLowerCase() as keyof typeof plans ?? "free"
+    const limit = plans[userPlan].maxProjects
+
+    if (projectCount >= limit) {
+        return NextResponse.json(
+            {
+                error: "Project limit reached. Upgrade your plan to create more projects.",
+            },
+            {
+                status: 403,
             }
         )
     }

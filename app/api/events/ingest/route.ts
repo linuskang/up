@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { Api } from "@/server/utils"
+import { Api, Usage } from "@/server/utils"
+import { plans } from "@/lib/plans"
 import { z } from "zod"
 import { prisma } from "@/server/prisma"
 
@@ -65,6 +66,66 @@ export async function POST(req: NextRequest) {
             },
             {
                 status: 401,
+            }
+        )
+    }
+
+    // Get the project owner and check quota
+    const project = await prisma.project.findUnique({
+        where: {
+            id: keyValidation.projectId,
+        },
+        select: {
+            ownerId: true,
+        },
+    })
+
+    if (!project) {
+        return NextResponse.json(
+            {
+                error: "Project not found",
+            },
+            {
+                status: 404,
+            }
+        )
+    }
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: project.ownerId,
+        },
+        select: {
+            id: true,
+            plan: true,
+        },
+    })
+
+    if (!user) {
+        return NextResponse.json(
+            {
+                error: "User not found",
+            },
+            {
+                status: 500,
+            }
+        )
+    }
+
+    // Increment monthly usage and check quota
+    const usage = await Usage.increment(user.id)
+    const userPlan = user.plan.toLowerCase() as keyof typeof plans
+    const limit = plans[userPlan].maxEventsPerMonth
+
+    if (usage.eventCount > limit) {
+        await Usage.decrement(user.id)
+
+        return NextResponse.json(
+            {
+                error: "Monthly event quota exceeded. Upgrade your plan to ingest more events.",
+            },
+            {
+                status: 429,
             }
         )
     }

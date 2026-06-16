@@ -29,6 +29,8 @@ interface Project {
     name: string
 }
 
+import { UsageStats } from "@/types"
+
 const ITEMS_PER_PAGE = 5
 
 export default function Page() {
@@ -36,6 +38,8 @@ export default function Page() {
     const { data: session, isPending: sessionPending } = authClient.useSession()
     const [projects, setProjects] = useState<Project[]>([])
     const [projectsLoading, setProjectsLoading] = useState(true)
+    const [usage, setUsage] = useState<UsageStats | null>(null)
+    const [usageLoading, setUsageLoading] = useState(true)
     const [currentPage, setCurrentPage] = useState(1)
 
     useEffect(() => {
@@ -48,7 +52,16 @@ export default function Page() {
             }
             setProjectsLoading(false)
         }
+        async function fetchUsage() {
+            const res = await fetch("/api/usage")
+            if (res.ok) {
+                const data = await res.json()
+                setUsage(data)
+            }
+            setUsageLoading(false)
+        }
         fetchProjects()
+        fetchUsage()
     }, [session])
 
     const totalPages = Math.ceil(projects.length / ITEMS_PER_PAGE)
@@ -57,7 +70,7 @@ export default function Page() {
         currentPage * ITEMS_PER_PAGE
     )
 
-    if (sessionPending || projectsLoading) {
+    if (sessionPending || projectsLoading || usageLoading) {
         return (
             <div className="flex min-h-svh items-center justify-center py-6">
                 <div className="text-sm text-muted-foreground">Loading...</div>
@@ -76,24 +89,24 @@ export default function Page() {
                     <div className="rounded-lg bg-muted/40 p-4">
                         <p className="text-xs text-muted-foreground">Total Projects</p>
                         <p className="text-2xl font-bold text-foreground">
-                            {projects.length}{" "}
+                            {usage?.projects.current ?? 0}{" "}
                             <span className="text-sm font-normal text-muted-foreground">
-                                / 1
+                                / {usage?.projects.limit ?? 1}
                             </span>
                         </p>
                     </div>
                     <div className="rounded-lg bg-muted/40 p-4">
-                        <p className="text-xs text-muted-foreground">Events Today</p>
+                        <p className="text-xs text-muted-foreground">Events This Month</p>
                         <p className="text-2xl font-bold text-foreground">
-                            0{" "}
+                            {usage?.eventsMonth.current ?? 0}{" "}
                             <span className="text-sm font-normal text-muted-foreground">
-                                / 100
+                                / {usage?.eventsMonth.limit ?? 100}
                             </span>
                         </p>
                     </div>
                     <div className="rounded-lg bg-muted/40 p-4">
                         <p className="text-xs text-muted-foreground">Account Plan</p>
-                        <p className="text-2xl font-bold text-foreground">Free</p>
+                        <p className="text-2xl font-bold text-foreground">{usage?.plan ?? "Free"}</p>
                     </div>
                 </div>
             </div>
