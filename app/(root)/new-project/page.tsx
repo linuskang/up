@@ -97,7 +97,9 @@ export default function Page() {
             window.location.href = `/project/${d.projectId}`;
 
         } else {
-            toast.error("Failed to create project. Please try again.");
+            const msg = await response.json();
+            toast.error(msg.error);
+            setIsSubmitting(false);
         }
     }
 

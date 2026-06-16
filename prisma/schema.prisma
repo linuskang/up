@@ -12,44 +12,62 @@ datasource db {
   provider = "postgresql"
 }
 
+model UserUsage {
+  id         String @id @default(uuid())
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month      String
+  eventCount Int    @default(0)
+
+  @@unique([userId, month])
+  @@index([userId])
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
 model User {
-  id            String    @id
+  id            String      @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean     @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  plan          Plan        @default(FREE)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   sessions      Session[]
   accounts      Account[]
   projects      Project[]
-  apiKeys ApiKey[]
+  apiKeys       ApiKey[]
+  userUsages    UserUsage[]
 
   @@unique([email])
   @@map("user")
 }
 
 model Project {
-  id        String @id @default(uuid())
-  name      String
-  ownerId   String
-  owner     User   @relation(fields: [ownerId], references: [id])
+  id      String   @id @default(uuid())
+  name    String
+  ownerId String
+  owner   User     @relation(fields: [ownerId], references: [id])
   apiKeys ApiKey[]
-  events    Event[]
+  events  Event[]
 }
 
 model ApiKey {
-  id        String   @id @default(uuid())
-  key       String   @unique
+  id        String    @id @default(uuid())
+  key       String    @unique
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
   lastUsed  DateTime?
   addedById String
-  addedBy   User     @relation(fields: [addedById], references: [id])
-  active  Boolean  @default(true)
+  addedBy   User      @relation(fields: [addedById], references: [id])
+  active    Boolean   @default(true)
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Event {
