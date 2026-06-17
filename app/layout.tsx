@@ -5,13 +5,10 @@ import { GeistSans } from "geist/font/sans"
 import { RegisterServiceWorker } from "@/components/register-sw"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
+
 export const metadata: Metadata = {
     title: "Upstream",
     description: "A simple logging platform built for developers.",
-    icons: {
-        icon: "/favicon.ico",
-        apple: "/apple-icon",
-    },
 }
 
 export const viewport = {

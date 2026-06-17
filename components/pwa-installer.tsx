@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Smartphone, Monitor, Download, Check, Share, Info } from "lucide-react"
+import { Smartphone, Monitor, Download, Check, Share, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 type BeforeInstallPromptEvent = Event & {
@@ -12,28 +12,23 @@ type BeforeInstallPromptEvent = Event & {
 }
 
 export function PwaInstaller() {
+    const [mounted, setMounted] = useState(false)
+    const [platform, setPlatform] = useState<"ios" | "android" | "desktop">("desktop")
+    const [isStandalone, setIsStandalone] = useState(false)
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-    const [isInstalled, setIsInstalled] = useState(false)
-    const [platform, setPlatform] = useState<"ios" | "android" | "desktop" | "unknown">("unknown")
-    const [isBrave, setIsBrave] = useState(false)
 
     useEffect(() => {
-        const inStandalone =
-            window.matchMedia("(display-mode: standalone)").matches ||
-            (window.navigator as any).standalone === true
-        setIsInstalled(inStandalone)
+        setMounted(true)
 
         const ua = navigator.userAgent
         const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream
         const isAndroid = /Android/.test(ua)
-        const isDesktop = !/Mobi|Android/i.test(ua)
 
         if (isIOS) setPlatform("ios")
         else if (isAndroid) setPlatform("android")
-        else if (isDesktop) setPlatform("desktop")
-        else setPlatform("unknown")
+        else setPlatform("desktop")
 
-        setIsBrave((navigator as any).brave?.isBrave?.name === "isBrave" || false)
+        setIsStandalone(window.matchMedia("(display-mode: standalone)").matches)
 
         const handler = (e: Event) => {
             e.preventDefault()
@@ -41,15 +36,8 @@ export function PwaInstaller() {
         }
         window.addEventListener("beforeinstallprompt", handler)
 
-        const installedHandler = () => {
-            setDeferredPrompt(null)
-            setIsInstalled(true)
-        }
-        window.addEventListener("appinstalled", installedHandler)
-
         return () => {
             window.removeEventListener("beforeinstallprompt", handler)
-            window.removeEventListener("appinstalled", installedHandler)
         }
     }, [])
 
@@ -63,13 +51,34 @@ export function PwaInstaller() {
             return
         }
 
-        toast.info("Use your browser menu to install", {
-            description:
-                "Look for 'Add to Home screen' or 'Install' in the browser menu.",
-        })
+        // No native prompt — show manual instructions via toast
+        if (platform === "ios") {
+            toast.info("Install on iOS", {
+                description: "Open Safari, tap Share, then Add to Home Screen.",
+            })
+        } else if (platform === "android") {
+            toast.info("Install on Android", {
+                description: "Tap the menu (three dots) and select Add to Home screen.",
+            })
+        } else {
+            toast.info("Install on Desktop", {
+                description: "Use the menu → More tools → Create shortcut → Open as window.",
+            })
+        }
     }
 
-    if (isInstalled) {
+    if (!mounted) {
+        return (
+            <Card className="w-full max-w-md bg-background ring-1 ring-foreground/10">
+                <CardContent className="flex flex-col items-center gap-4 py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Loading...</p>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (isStandalone) {
         return (
             <Card className="w-full max-w-md bg-background ring-1 ring-foreground/10">
                 <CardContent className="flex flex-col items-center gap-4 py-8">
@@ -97,19 +106,12 @@ export function PwaInstaller() {
                         <Download className="h-4 w-4" />
                         Install Upstream
                     </Button>
-                    {deferredPrompt === null && (
-                        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Info className="h-3.5 w-3.5" />
-                            If the button doesn&apos;t trigger a prompt, use your browser menu.
-                        </p>
-                    )}
                 </CardContent>
             </Card>
 
             {platform === "ios" && <IOSInstructions />}
-            {platform === "android" && <AndroidInstructions isBrave={isBrave} />}
-            {platform === "desktop" && <DesktopInstructions isBrave={isBrave} />}
-            {platform === "unknown" && <GenericInstructions />}
+            {platform === "android" && <AndroidInstructions />}
+            {platform === "desktop" && <DesktopInstructions />}
         </div>
     )
 }
@@ -124,23 +126,23 @@ function IOSInstructions() {
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
                 <p>
-                    1. Open this page in <strong>Safari</strong> (Chrome on iOS cannot install PWAs).
+                    1. Open this page in <strong>Safari</strong>.
                 </p>
                 <p className="flex items-center gap-2">
-                    2. Tap the <Share className="h-4 w-4 inline" /> Share button in the toolbar.
+                    2. Tap the <Share className="h-4 w-4 inline" /> Share button.
                 </p>
                 <p>
-                    3. Scroll down and tap <strong>Add to Home Screen</strong>.
+                    3. Tap <strong>Add to Home Screen</strong>.
                 </p>
                 <p>
-                    4. Tap <strong>Add</strong> in the top right corner.
+                    4. Tap <strong>Add</strong>.
                 </p>
             </CardContent>
         </Card>
     )
 }
 
-function AndroidInstructions({ isBrave }: { isBrave: boolean }) {
+function AndroidInstructions() {
     return (
         <Card className="bg-background ring-1 ring-foreground/10">
             <CardHeader className="text-center pb-2">
@@ -149,29 +151,21 @@ function AndroidInstructions({ isBrave }: { isBrave: boolean }) {
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
-                {isBrave ? (
-                    <>
-                        <p>1. Tap the menu (three dots) in the bottom right of Brave.</p>
-                        <p>
-                            2. Tap <strong>Add to Home screen</strong>.
-                        </p>
-                        <p>3. Tap <strong>Add</strong> on the confirmation dialog.</p>
-                    </>
-                ) : (
-                    <>
-                        <p>1. Tap the menu (three dots) in the top right of your browser.</p>
-                        <p>
-                            2. Tap <strong>Add to Home screen</strong> or <strong>Install app</strong>.
-                        </p>
-                        <p>3. Follow the prompts to complete installation.</p>
-                    </>
-                )}
+                <p>
+                    1. Tap the menu (three dots) in the top right of your browser.
+                </p>
+                <p>
+                    2. Tap <strong>Add to Home screen</strong>.
+                </p>
+                <p>
+                    3. Tap <strong>Add</strong> on the confirmation dialog.
+                </p>
             </CardContent>
         </Card>
     )
 }
 
-function DesktopInstructions({ isBrave }: { isBrave: boolean }) {
+function DesktopInstructions() {
     return (
         <Card className="bg-background ring-1 ring-foreground/10">
             <CardHeader className="text-center pb-2">
@@ -180,51 +174,17 @@ function DesktopInstructions({ isBrave }: { isBrave: boolean }) {
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
-                {isBrave ? (
-                    <>
-                        <p>1. Click the menu (three lines) in the top right of Brave.</p>
-                        <p>
-                            2. Go to <strong>More tools</strong> →{" "}
-                            <strong>Create shortcut...</strong>
-                        </p>
-                        <p>
-                            3. Check <strong>Open as window</strong> and click{" "}
-                            <strong>Create</strong>.
-                        </p>
-                    </>
-                ) : (
-                    <>
-                        <p>
-                            1. Look for the install icon in your browser&apos;s address bar (usually on the right side).
-                        </p>
-                        <p>
-                            2. Click it and select <strong>Install Upstream</strong>.
-                        </p>
-                        <p>Alternatively:</p>
-                        <p>
-                            Open the browser menu and look for <strong>Install Upstream</strong> or{" "}
-                            <strong>Create shortcut</strong>.
-                        </p>
-                    </>
-                )}
-            </CardContent>
-        </Card>
-    )
-}
-
-function GenericInstructions() {
-    return (
-        <Card className="bg-background ring-1 ring-foreground/10">
-            <CardHeader className="text-center pb-2">
-                <CardTitle className="text-xl">Install Upstream</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
                 <p>
-                    To install Upstream, use your browser&apos;s menu and look for an option like{" "}
-                    <strong>Install</strong>, <strong>Add to Home Screen</strong>, or{" "}
-                    <strong>Create shortcut</strong>.
+                    1. Click the menu (three lines) in the top right of Brave.
                 </p>
-                <p>If you&apos;re on mobile, try Chrome or Brave for the best experience.</p>
+                <p>
+                    2. Go to <strong>More tools</strong> →{" "}
+                    <strong>Create shortcut...</strong>
+                </p>
+                <p>
+                    3. Check <strong>Open as window</strong> and click{" "}
+                    <strong>Create</strong>.
+                </p>
             </CardContent>
         </Card>
     )
