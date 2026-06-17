@@ -57,7 +57,7 @@ export default function Page() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-semibold text-foreground">Free</p>
-                                <p className="text-xs text-muted-foreground">Perfect for small projects</p>
+                                <p className="text-xs text-muted-foreground">Perfect for small projects to log critical events</p>
                             </div>
                             <Label className="px-2 py-1 bg-muted rounded-md text-muted-foreground">
                                 Current Plan
@@ -65,16 +65,16 @@ export default function Page() {
                         </div>
                         <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> 1 project
+                                <Check className="h-4 w-4" /> Up to 1 project
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> 50 events / day
+                                <Check className="h-4 w-4" /> Up to 50 events / month
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> 3 days data retention
+                                <Check className="h-4 w-4" /> Up to 7 days event retention
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> 1 member
+                                <Check className="h-4 w-4" /> Up to 1 member
                             </li>
                             <li className="flex items-center gap-2">
                                 <Check className="h-4 w-4" /> Community support
@@ -85,8 +85,8 @@ export default function Page() {
                     <div className="flex flex-col gap-4 rounded-lg bg-muted/40 p-4 mt-3">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-semibold text-foreground">Pro ($29 / month)*</p>
-                                <p className="text-xs text-muted-foreground">Advanced features for production apps</p>
+                                <p className="text-sm font-semibold text-foreground">Pro ($29 / month)¹</p>
+                                <p className="text-xs text-muted-foreground">Higher quotas & advanced features for pro users</p>
                             </div>
                             <Button variant="default" size="sm">
                                 Upgrade
@@ -94,37 +94,55 @@ export default function Page() {
                         </div>
                         <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Unlimited projects
+                                <Check className="h-4 w-4" /> Up to 10 projects
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> 10,000 events / day
+                                <Check className="h-4 w-4" /> Up to 10,000 events / month²
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> 90 days data retention
+                                <Check className="h-4 w-4" /> Up to 90 days event retention
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4" /> Up to 10 project members
                             </li>
                             <li className="flex items-center gap-2">
                                 <Check className="h-4 w-4" /> Analytics
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Bulk event export
+                                <Check className="h-4 w-4" /> Event exporting
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Event webhooks
+                                <Check className="h-4 w-4" /> Webhooks
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Unlimited members
+                                <Check className="h-4 w-4" /> Audit logs
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Project audit logs
+                                <Check className="h-4 w-4" /> BYO domain
                             </li>
                             <li className="flex items-center gap-2">
                                 <Check className="h-4 w-4" /> Email support
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4" /> Extra Usage³
                             </li>
                         </ul>
                     </div>
 
                     <p className="mt-4 text-xs text-muted-foreground">
-                        * Pro plan perks are currently applied to beta accounts for free whilst we gather feedback for development. This perks will remain free until we enter production!
+                        ¹ Pro plan perks are available to all beta users for free during the beta period, which will end on July 31, 2026. After the beta period, users will need to upgrade to the Pro plan to continue enjoying these perks.
+                    </p>
+
+                    <p className="text-xs text-muted-foreground mt-2">
+                        ² Maximum event payload is 512KB. This may change in the future. To increase this limit, please contact support.
+                    </p>
+
+                    <p className="text-xs text-muted-foreground mt-2">
+                        ³ Extra Usage is available to pro plan subscribers who exceed the included quotas:
+                        <ul className="list-disc list-inside mt-1 mb-1">
+                            <li>$2.50 per 1,000 events / month</li>
+                        </ul>
+                        To enable extra usage, please go to <Link href="/settings/billing" className="text-primary underline">Account Billing</Link> and enable Extra usage.
                     </p>
                 </CardContent>
             </Card>
