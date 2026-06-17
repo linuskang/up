@@ -78,7 +78,7 @@ export default function Navbar({ user }: NavbarProps) {
                                         }`}
                                 >
                                     {Icon && <Icon className="size-5" />}
-                                    {item.label}
+                                    <span className={`${isActive ? "inline" : "hidden"} sm:inline`}>{item.label}</span>
                                 </Button>
                             </Link>
                         )

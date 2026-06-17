@@ -73,12 +73,12 @@ export default function Page() {
 
   return (
     <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-10 sm:px-6">
-      <Card className="bg-background ring-0">
+      <Card className="w-full sm:w-auto bg-background ring-0">
         <CardHeader className="gap-2 pb-2 text-center">
           <CardTitle className="text-5xl font-bold">Upstream</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="flex min-w-90 flex-col gap-5" onSubmit={signUp}>
+          <form className="flex flex-col gap-5 sm:min-w-90" onSubmit={signUp}>
             <Field>
               <Button
                 variant="outline"

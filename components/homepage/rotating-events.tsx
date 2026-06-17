@@ -311,7 +311,7 @@ export function RotatingEvents() {
     }, [start, stop])
 
     return (
-        <div className="mx-auto w-[400px]">
+        <div className="mx-auto w-full max-w-[400px] px-2 sm:px-0">
             {items.map((item) => {
                 const collapsed = item.id === enteringId || item.id === leavingId
                 return (
