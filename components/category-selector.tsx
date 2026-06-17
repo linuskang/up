@@ -18,14 +18,14 @@ export function CategorySelector({
     onSelectCategory?: (category: string) => void
 }) {
     return (
-        <Card className="w-[160px] rounded-xl bg-muted/40 ring-0">
+        <Card className="w-full rounded-xl bg-muted/40 ring-0 sm:w-[160px]">
             <CardHeader className="px-4 pt-0 pb-0">
-                <CardTitle className="text-lg font-semibold text-foreground">
+                <CardTitle className="text-base font-semibold text-foreground sm:text-lg">
                     Categories
                 </CardTitle>
             </CardHeader>
             <CardContent className="px-2 pt-0 pb-0">
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-row gap-0.5 overflow-x-auto sm:flex-col">
                     {categories.map((category) => {
                         const active = selectedCategory === category.name
                         return (
@@ -34,7 +34,7 @@ export function CategorySelector({
                                 type="button"
                                 onClick={() => onSelectCategory?.(category.name)}
                                 className={cn(
-                                    "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                    "flex shrink-0 items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
                                     active
                                         ? "bg-secondary text-secondary-foreground"
                                         : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"

@@ -8,6 +8,11 @@ export const metadata = {
     description: "A simple logging platform built for developers.",
 }
 
+export const viewport = {
+    width: "device-width",
+    initialScale: 1,
+}
+
 export default function RootLayout({
     children,
 }: Readonly<{

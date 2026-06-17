@@ -8,7 +8,6 @@ import Link from "next/link"
 
 import type { EventProps } from "@/components/event";
 import { EventsList } from "@/components/event"
-import { CategorySelector } from "@/components/category-selector"
 import {
     Breadcrumb,
     BreadcrumbList,
@@ -19,6 +18,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { Folder, Search } from "lucide-react"
 
 export default function Page() {
@@ -96,8 +102,8 @@ export default function Page() {
 
     return (
         <main>
-            <div className="flex min-h-svh flex-col items-center gap-6 py-6">
-                <div className="flex w-fit flex-col gap-3">
+            <div className="flex min-h-svh flex-col gap-3 py-6">
+                <div className="flex flex-col gap-3">
                     <Breadcrumb>
                         <BreadcrumbList className="text-sm">
                             <BreadcrumbItem>
@@ -110,53 +116,62 @@ export default function Page() {
                         </BreadcrumbList>
                     </Breadcrumb>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-3">
                         <h1 className="text-3xl font-semibold">Events</h1>
 
-                        <Button className="w-fit" variant="default" size="sm">
+                        <Button className="w-fit shrink-0" variant="default" size="sm">
                             <Link href={`/project/${params.id}/settings`}>Project Settings</Link>
                         </Button>
                     </div>
 
-                    <div className="flex gap-3">
-                        <div className="sticky top-6 h-fit">
-                            <CategorySelector
-                                categories={categories}
-                                selectedCategory={selectedCategory}
-                                onSelectCategory={setSelectedCategory}
+                    <div className="flex flex-col gap-3">
+                        <div className="relative">
+                            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground z-10" />
+                            <Input
+                                placeholder="Search events..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="bg-card !text-md font-base pl-9 pr-[8.5rem] h-10 border-0"
                             />
-                        </div>
-                        <div className="flex min-w-0 flex-col gap-3">
-                            <div className="relative w-full">
-                                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search events..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="bg-card text-sm font-semibold pl-9 h-10 border-0"
-                                />
+                            <div className="absolute top-1/2 right-0 -translate-y-1/2">
+                                <Select
+                                    value={selectedCategory}
+                                    onValueChange={setSelectedCategory}
+                                >
+                                    <SelectTrigger className="h-10 w-32 shrink-0 border-0 bg-transparent shadow-none focus:ring-0 focus:ring-offset-0">
+                                        <SelectValue placeholder="Category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categories.map((cat) => (
+                                            <SelectItem key={cat.name} value={cat.name}>
+                                                <span className="capitalize">{cat.name}</span>
+                                                <span className="ml-1 text-muted-foreground">({cat.count})</span>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            {filteredEvents.length === 0 ? (
-                                <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 rounded-lg bg-muted/40 p-8 text-center">
-                                    <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
-                                        <Folder
-                                            className="size-5 text-muted-foreground"
-                                            fill="currentColor"
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <p className="text-sm font-semibold text-foreground">
-                                            No Events Yet
-                                        </p>
-                                        <p className="max-w-sm text-xs text-muted-foreground">
-                                            No events have been logged for this project yet.
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <EventsList events={filteredEvents} />
-                            )}
                         </div>
+                        {filteredEvents.length === 0 ? (
+                            <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 rounded-lg bg-muted/40 p-8 text-center">
+                                <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+                                    <Folder
+                                        className="size-5 text-muted-foreground"
+                                        fill="currentColor"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <p className="text-sm font-semibold text-foreground">
+                                        No Events Yet
+                                    </p>
+                                    <p className="max-w-sm text-xs text-muted-foreground">
+                                        No events have been logged for this project yet.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <EventsList events={filteredEvents} />
+                        )}
                     </div>
                 </div>
             </div>

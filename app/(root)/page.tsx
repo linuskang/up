@@ -85,28 +85,28 @@ export default function Page() {
             </div>
 
             <div className="flex flex-col gap-3">
-                <div className="grid grid-cols-3 gap-3">
-                    <div className="rounded-lg bg-muted/40 p-4">
-                        <p className="text-xs text-muted-foreground">Total Projects</p>
-                        <p className="text-2xl font-bold text-foreground">
-                            {usage?.projects.current ?? 0}{" "}
+                <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-lg bg-muted/40 p-3">
+                        <p className="text-sm font-semibold text-muted-foreground">Total Projects</p>
+                        <p className="text-xl font-bold text-foreground">
+                            {(usage?.projects.current ?? 0).toLocaleString()}{" "}
                             <span className="text-sm font-normal text-muted-foreground">
-                                / {usage?.projects.limit ?? 1}
+                                / {(usage?.projects.limit ?? 1).toLocaleString()}
                             </span>
                         </p>
                     </div>
-                    <div className="rounded-lg bg-muted/40 p-4">
-                        <p className="text-xs text-muted-foreground">Events This Month</p>
-                        <p className="text-2xl font-bold text-foreground">
-                            {usage?.eventsMonth.current ?? 0}{" "}
+                    <div className="rounded-lg bg-muted/40 p-3">
+                        <p className="text-sm font-semibold text-muted-foreground">Event Quota</p>
+                        <p className="text-xl font-bold text-foreground">
+                            {(usage?.eventsMonth.current ?? 0).toLocaleString()}{" "}
                             <span className="text-sm font-normal text-muted-foreground">
-                                / {usage?.eventsMonth.limit ?? 100}
+                                / {(usage?.eventsMonth.limit ?? 100).toLocaleString()}
                             </span>
                         </p>
                     </div>
-                    <div className="rounded-lg bg-muted/40 p-4">
-                        <p className="text-xs text-muted-foreground">Account Plan</p>
-                        <p className="text-2xl font-bold text-foreground">{usage?.plan ?? "Free"}</p>
+                    <div className="rounded-lg bg-muted/40 p-3">
+                        <p className="text-sm font-semibold text-muted-foreground">Account Plan</p>
+                        <p className="text-xl font-bold text-foreground">{usage?.plan ?? "Free"}</p>
                     </div>
                 </div>
             </div>

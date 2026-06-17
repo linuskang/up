@@ -260,7 +260,7 @@ export default function Page() {
                 </Breadcrumb>
             </div>
 
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                 <div className="min-w-0">
                     <h1 className="truncate text-2xl font-bold">{project?.name}</h1>
                 </div>
@@ -432,8 +432,8 @@ export default function Page() {
                 )}
             </div>
 
-            <div className="mt-4 rounded-lg bg-card p-4 ring-0">
-                <div className="flex items-center justify-between gap-3">
+                <div className="mt-4 rounded-lg bg-card p-4 ring-0">
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <div>
                         <h2 className="text-sm font-semibold text-destructive">Danger Zone</h2>
                         <p className="mt-1 text-xs text-muted-foreground">

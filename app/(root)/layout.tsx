@@ -9,7 +9,6 @@ import { redirect } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Navbar from "@/components/navbar"
-import { cn } from "@/lib/utils"
 
 export default function RootLayout({
     children,
@@ -123,12 +122,7 @@ export default function RootLayout({
     return (
         <>
             <Navbar user={session.user} />
-            <div
-                className={cn(
-                    "mx-auto w-full px-4",
-                    "max-w-lg"
-                )}
-            >
+            <div className="mx-auto w-full max-w-lg px-4">
                 {children}
             </div>
         </>
