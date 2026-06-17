@@ -18,7 +18,6 @@ import { usePathname } from "next/navigation"
 import type { ElementType } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { GeistMono } from "geist/font/mono";
 
 // Components
 import { Button } from "@/components/ui/button"
@@ -57,16 +56,12 @@ export default function Navbar({ user }: NavbarProps) {
     const pathname = usePathname()
 
     return (
-        <nav className="sticky top-0 z-50 w-full bg-background px-5 py-3">
-            <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <nav className="sticky top-0 z-50 w-full bg-background px-3 py-1">
+            <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-2 ">
                 <div className="flex items-center gap-1">
                     <Link href="/">
-                        <Image src="/logo.png" width={48} height={48} alt="Logo" />
+                        <Image src="/logo.png" width={45} height={45} alt="Logo" />
                     </Link>
-
-                    <span className={`${GeistMono.className} rounded-sm bg-card px-2 py-1 text-xs font-sm text-white`}>
-                        beta
-                    </span>
                 </div>
 
                 <div className="flex items-center justify-center gap-1">
@@ -77,7 +72,7 @@ export default function Navbar({ user }: NavbarProps) {
                             <Link href={item.path} key={item.path}>
                                 <Button
                                     variant="ghost"
-                                    className={`rounded-base flex items-center gap-2 px-4 py-4 text-sm font-medium transition-colors ${isActive
+                                    className={`rounded-base flex items-center gap-1.5 px-2.5 py-2.5 text-xs font-medium transition-colors ${isActive
                                         ? "bg-muted text-foreground"
                                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                         }`}
@@ -95,14 +90,9 @@ export default function Navbar({ user }: NavbarProps) {
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="group h-11 cursor-pointer gap-3 bg-white/5 px-2.5 text-left hover:bg-white/10 focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none aria-expanded:border-transparent aria-expanded:ring-0"
+                                className="group h-11 cursor-pointer gap-2 px-1.5 text-left focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none aria-expanded:border-transparent aria-expanded:ring-0"
                             >
-                                <span className="hidden min-w-0 flex-col items-start leading-tight sm:flex">
-                                    <span className="max-w-28 truncate text-sm font-semibold text-foreground">
-                                        {user.name?.split(" ")[0]}
-                                    </span>
-                                </span>
-                                <div className="relative -ml-1 size-8 overflow-hidden rounded-md border border-border/60 bg-secondary">
+                                <div className="relative size-8 overflow-hidden rounded-md border border-border/60 bg-secondary">
                                     <Image
                                         src={user.image || ""}
                                         alt={user.name || "Avatar"}
