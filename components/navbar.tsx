@@ -30,7 +30,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { authClient } from "@/client/auth"
-import { Folder, Layers, LogOut, Settings } from "lucide-react"
+import { ExternalLink, Folder, Home, Layers, LogOut, Settings } from "lucide-react"
 
 // Types
 interface NavItem {
@@ -115,6 +115,24 @@ export default function Navbar({ user }: NavbarProps) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem asChild>
+                                <Link href="/home" className="flex items-center font-medium gap-2 cursor-pointer">
+                                    <Home className="size-3.5" />
+                                    Homepage
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="/docs" className="flex items-center font-medium gap-2 cursor-pointer">
+                                    <Folder className="size-3.5" />
+                                    Docs
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="https://github.com/linusdotmy/upstream" target="_blank" className="flex items-center font-medium gap-2 cursor-pointer">
+                                    <ExternalLink className="size-3.5" />
+                                    Github
+                                </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link href="/settings" className="flex items-center font-medium gap-2 cursor-pointer">
                                     <Settings className="size-3.5" />
