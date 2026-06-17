@@ -85,8 +85,8 @@ export default function Page() {
                     <div className="flex flex-col gap-4 rounded-lg bg-muted/40 p-4 mt-3">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-semibold text-foreground">Pro ($29 / month)¹</p>
-                                <p className="text-xs text-muted-foreground">Higher quotas & advanced features for pro users</p>
+                                <p className="text-sm font-semibold text-foreground">Pro</p>
+                                <p className="text-xs text-muted-foreground">Higher quotas & advanced features for pro users¹</p>
                             </div>
                             <Button variant="default" size="sm">
                                 Upgrade
@@ -118,14 +118,41 @@ export default function Page() {
                                 <Check className="h-4 w-4" /> Audit logs
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> BYO domain
-                            </li>
-                            <li className="flex items-center gap-2">
                                 <Check className="h-4 w-4" /> Email support
                             </li>
                             <li className="flex items-center gap-2">
                                 <Check className="h-4 w-4" /> Extra Usage³
                             </li>
+                        </ul>
+                    </div>
+
+                    <div className="flex flex-col gap-4 rounded-lg bg-muted/40 p-4 mt-3">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-semibold text-foreground">Max</p>
+                                <p className="text-xs text-muted-foreground">Unlimited quotas for power users</p>
+                            </div>
+                            <Button variant="default" size="sm">
+                                Contact Sales
+                            </Button>
+                        </div>
+                        <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
+                            <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4" /> Everything in Pro, plus:
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4" /> Unlimited projects
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4" /> Unlimited events / month
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4" /> Unlimited event retention
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4" /> Unlimited project members
+                            </li>
+
                         </ul>
                     </div>
 
@@ -137,13 +164,13 @@ export default function Page() {
                         ² Maximum event payload is 512KB. This may change in the future. To increase this limit, please contact support.
                     </p>
 
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <div className="text-xs text-muted-foreground mt-2">
                         ³ Extra Usage is available to pro plan subscribers who exceed the included quotas:
                         <ul className="list-disc list-inside mt-1 mb-1">
                             <li>$2.50 per 1,000 events / month</li>
                         </ul>
                         To enable extra usage, please go to <Link href="/settings/billing" className="text-primary underline">Account Billing</Link> and enable Extra usage.
-                    </p>
+                    </div>
                 </CardContent>
             </Card>
         </div>
