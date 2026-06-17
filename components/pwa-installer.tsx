@@ -15,24 +15,38 @@ export function PwaInstaller() {
     const [mounted, setMounted] = useState(false)
     const [platform, setPlatform] = useState<"ios" | "android" | "desktop">("desktop")
     const [isStandalone, setIsStandalone] = useState(false)
+    const [isInstalled, setIsInstalled] = useState(false)
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+    const [promptFired, setPromptFired] = useState(false)
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true)
 
         const ua = navigator.userAgent
-        const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream
+        const isIOS = /iPad|iPhone|iPod/.test(ua) && !((window as unknown as Record<string, unknown>).MSStream)
         const isAndroid = /Android/.test(ua)
 
         if (isIOS) setPlatform("ios")
         else if (isAndroid) setPlatform("android")
         else setPlatform("desktop")
 
-        setIsStandalone(window.matchMedia("(display-mode: standalone)").matches)
+        const standalone = window.matchMedia("(display-mode: standalone)").matches
+        setIsStandalone(standalone)
+
+        if (standalone) {
+            setIsInstalled(true)
+        } else if ("getInstalledRelatedApps" in navigator) {
+            const nav = navigator as Navigator & { getInstalledRelatedApps: () => Promise<{ platform: string; url?: string }[]> }
+            nav.getInstalledRelatedApps().then((apps) => {
+                if (apps.length > 0) setIsInstalled(true)
+            }).catch(() => {})
+        }
 
         const handler = (e: Event) => {
             e.preventDefault()
             setDeferredPrompt(e as BeforeInstallPromptEvent)
+            setPromptFired(true)
         }
         window.addEventListener("beforeinstallprompt", handler)
 
@@ -51,7 +65,6 @@ export function PwaInstaller() {
             return
         }
 
-        // No native prompt — show manual instructions via toast
         if (platform === "ios") {
             toast.info("Install on iOS", {
                 description: "Open Safari, tap Share, then Add to Home Screen.",
@@ -59,6 +72,11 @@ export function PwaInstaller() {
         } else if (platform === "android") {
             toast.info("Install on Android", {
                 description: "Tap the menu (three dots) and select Add to Home screen.",
+            })
+        } else if (!promptFired) {
+            toast.error("Install not available", {
+                description:
+                    "Your browser may not support app installation, or the page is not yet installable. Try opening in Chrome or check that you're on HTTPS.",
             })
         } else {
             toast.info("Install on Desktop", {
@@ -87,6 +105,22 @@ export function PwaInstaller() {
                     </div>
                     <p className="text-center text-lg font-medium">You are using the Upstream app!</p>
                     <p className="text-center text-sm text-muted-foreground">Thanks for installing.</p>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (isInstalled) {
+        return (
+            <Card className="w-full max-w-md bg-background ring-1 ring-foreground/10">
+                <CardContent className="flex flex-col items-center gap-4 py-8">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                        <Check className="h-6 w-6 text-primary" />
+                    </div>
+                    <p className="text-center text-lg font-medium">Upstream is already installed</p>
+                    <p className="text-center text-sm text-muted-foreground">
+                        Open it from your {platform === "android" ? "Home screen" : platform === "ios" ? "Home screen" : "Start menu or dock"}.
+                    </p>
                 </CardContent>
             </Card>
         )
