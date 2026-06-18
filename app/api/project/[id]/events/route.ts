@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/server/auth"
 import { prisma } from "@/server/prisma"
-import { plans } from "@/lib/plans"
 
 interface RouteParams {
     id: string
@@ -57,21 +56,9 @@ export async function GET(
         )
     }
 
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { plan: true },
-    })
-
-    const userPlan = (user?.plan ?? "FREE").toLowerCase() as keyof typeof plans
-    const retentionDays = plans[userPlan].retentionDays
-    const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000)
-
     const events = await prisma.event.findMany({
         where: {
             projectId: id,
-            createdAt: {
-                gte: cutoff,
-            },
         },
         orderBy: {
             createdAt: "desc",
