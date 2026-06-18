@@ -3,29 +3,18 @@ name: Retention Cleanup
 on:
   schedule:
     - cron: "0 0 * * *"
-  push:
-    branches: [master]
   workflow_dispatch:
 
 jobs:
   cleanup:
     name: Trigger retention cleanup
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run retention cleanup
-        run: npx tsx scripts/trigger-retention.ts
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          UPSTREAM_URL: ${{ secrets.UPSTREAM_URL }}
+      - name: Trigger retention cleanup
+        run: |
+          curl --fail-with-body \
+            -X POST \
+            -H "x-api-key: ${{ secrets.CRON_CLEANUP_SECRET }}" \
+            -H "cf-bypass-key: ${{ secrets.CF_BYPASS_KEY }}" \
+            "${{ secrets.UPSTREAM_CLEANUP_URL }}"

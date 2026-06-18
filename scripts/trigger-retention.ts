@@ -1,5 +1,8 @@
 export { }
 
+import dotenv from "dotenv"
+dotenv.config()
+
 const endpoint = process.env.UPSTREAM_URL
 const secret = process.env.CRON_SECRET
 
