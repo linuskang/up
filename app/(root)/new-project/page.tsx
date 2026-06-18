@@ -148,7 +148,7 @@ export default function Page() {
                 </CardContent>
                 <CardFooter className="justify-end gap-2">
                     <Button type="button" variant="secondary" asChild disabled={isSubmitting}>
-                        <Link href="/settings/projects">Cancel</Link>
+                        <Link href="/">Cancel</Link>
                     </Button>
                     <Button
                         className="cursor-pointer"
