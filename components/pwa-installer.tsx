@@ -24,7 +24,8 @@ export function PwaInstaller() {
         setMounted(true)
 
         const ua = navigator.userAgent
-        const isIOS = /iPad|iPhone|iPod/.test(ua) && !((window as unknown as Record<string, unknown>).MSStream)
+        const isIPadOS = navigator.maxTouchPoints > 1 && /Macintosh/.test(ua)
+        const isIOS = /iPad|iPhone|iPod/.test(ua) || isIPadOS
         const isAndroid = /Android/.test(ua)
 
         if (isIOS) setPlatform("ios")
@@ -40,7 +41,7 @@ export function PwaInstaller() {
             const nav = navigator as Navigator & { getInstalledRelatedApps: () => Promise<{ platform: string; url?: string }[]> }
             nav.getInstalledRelatedApps().then((apps) => {
                 if (apps.length > 0) setIsInstalled(true)
-            }).catch(() => {})
+            }).catch(() => { })
         }
 
         const handler = (e: Event) => {
@@ -100,9 +101,6 @@ export function PwaInstaller() {
         return (
             <Card className="w-full max-w-md bg-background ring-1 ring-foreground/10">
                 <CardContent className="flex flex-col items-center gap-4 py-8">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
-                        <Check className="h-6 w-6 text-green-500" />
-                    </div>
                     <p className="text-center text-lg font-medium">You are using the Upstream app!</p>
                     <p className="text-center text-sm text-muted-foreground">Thanks for installing.</p>
                 </CardContent>
@@ -128,20 +126,11 @@ export function PwaInstaller() {
 
     return (
         <div className="flex w-full max-w-md flex-col gap-4">
-            <Card className="bg-background ring-1 ring-foreground/10">
-                <CardHeader className="text-center pb-2">
-                    <CardTitle className="text-xl">Install Upstream</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center gap-4">
-                    <p className="text-center text-sm text-muted-foreground">
-                        Install Upstream as an app for quick access and a better experience.
-                    </p>
-                    <Button onClick={handleInstall} className="w-full gap-2">
-                        <Download className="h-4 w-4" />
-                        Install Upstream
-                    </Button>
-                </CardContent>
-            </Card>
+
+            <Button onClick={handleInstall} className="w-full h-12 text-base gap-2">
+                <Download className="h-7 w-7" />
+                Install Upstream
+            </Button>
 
             {platform === "ios" && <IOSInstructions />}
             {platform === "android" && <AndroidInstructions />}

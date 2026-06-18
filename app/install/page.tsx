@@ -11,18 +11,20 @@ export const metadata = {
 export default function InstallPage() {
     return (
         <div className="flex min-h-svh flex-col items-center justify-center p-6">
-            <div className="mb-8 flex flex-col items-center gap-2">
+            <div className="mb-4 flex flex-col items-center gap-2">
                 <Button variant="ghost" className="rounded-full p-0">
                     <Link href="/" className="flex items-center justify-center">
                         <Image
                             src="/logo.png"
                             alt="Upstream Logo"
-                            className="h-10 w-10 rounded-full"
+                            width={60}
+                            height={60}
+                            className="h-15 w-15 rounded-full"
                         />
                     </Link>
                 </Button>
-                <h1 className="text-3xl font-bold">Get Upstream</h1>
-                <p className="text-muted-foreground">Install it once, use it everywhere.</p>
+                <h1 className="text-3xl font-bold">Install Upstream</h1>
+                <p className="text-muted-foreground">Download our PWA app to use Upstream on your device.</p>
             </div>
             <PwaInstaller />
         </div>
