@@ -1,6 +1,7 @@
 import { PwaInstaller } from "@/components/pwa-installer"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import Image from "next/image"
 
 export const metadata = {
     title: "Install Upstream",
@@ -13,7 +14,7 @@ export default function InstallPage() {
             <div className="mb-8 flex flex-col items-center gap-2">
                 <Button variant="ghost" className="rounded-full p-0">
                     <Link href="/" className="flex items-center justify-center">
-                        <img
+                        <Image
                             src="/logo.png"
                             alt="Upstream Logo"
                             className="h-10 w-10 rounded-full"

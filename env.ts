@@ -12,6 +12,8 @@ export const env = createEnv({
 
     RESEND_API_KEY: z.string(),
     RESEND_EMAIL_FROM: z.string(),
+
+    CRON_SECRET: z.string().optional(),
   },
 
   clientPrefix: "PUBLIC_",
