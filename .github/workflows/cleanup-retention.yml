@@ -16,5 +16,5 @@ jobs:
           curl --fail-with-body \
             -X POST \
             -H "x-api-key: ${{ secrets.CRON_CLEANUP_SECRET }}" \
-            -H "cf-bypass-key: ${{ secrets.CF_BYPASS_KEY }}" \
+            -H "x-cf-bypass-key: ${{ secrets.CF_BYPASS_KEY }}" \
             "${{ secrets.UPSTREAM_CLEANUP_URL }}"
