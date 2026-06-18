@@ -1,11 +1,11 @@
 {
     "name": "upstream",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "author": "linuskang",
     "type": "module",
     "private": true,
     "scripts": {
-        "dev": "next dev",
+        "dev": "next dev -p 3001 -H 0.0.0.0",
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
