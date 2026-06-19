@@ -49,13 +49,14 @@ model User {
 }
 
 model Project {
-  id        String     @id @default(uuid())
-  name      String
-  ownerId   String
-  owner     User       @relation(fields: [ownerId], references: [id])
-  apiKeys   ApiKey[]
-  events    Event[]
-  auditLogs AuditLog[]
+  id          String       @id @default(uuid())
+  name        String
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id])
+  apiKeys     ApiKey[]
+  events      Event[]
+  auditLogs   AuditLog[]
+  requestLogs RequestLog[]
 }
 
 model AuditLog {
@@ -69,6 +70,25 @@ model AuditLog {
   message String
 
   createdAt DateTime @default(now())
+}
+
+model RequestLog {
+  id        String  @id @default(uuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  endpoint String
+  method   String
+  status   Int
+
+  userAgent    String?
+  requestBody  Json?
+  responseBody Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId, createdAt])
+  @@index([projectId, status])
 }
 
 model ApiKey {
