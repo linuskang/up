@@ -561,7 +561,8 @@ export default function Page() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {requestLogs
+                                    {[...requestLogs]
+                                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                                         .slice((requestLogPage - 1) * REQUEST_LOGS_PER_PAGE, requestLogPage * REQUEST_LOGS_PER_PAGE)
                                         .map((log) => (
                                             <TableRow
