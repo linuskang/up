@@ -1,7 +1,7 @@
 export const plans = {
     free: {
         maxProjects: 1,
-        maxEventsPerMonth: 50,
+        maxEventsPerMonth: 100,
         retentionDays: 7,
     },
     pro: {
