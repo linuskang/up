@@ -54,7 +54,7 @@ import { notFound, useRouter } from "next/navigation";
 import { authClient } from "@/client/auth"
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ApiKey } from "@/types";
 import { RequestLog } from "@/types";
 
@@ -87,6 +87,19 @@ export default function Page() {
     const [selectedRequestLog, setSelectedRequestLog] = useState<RequestLog | null>(null);
     const [requestLogDetailOpen, setRequestLogDetailOpen] = useState(false);
     const REQUEST_LOGS_PER_PAGE = 5;
+
+    function getPageNumbers(current: number, total: number): (number | "...")[] {
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+        const pages: (number | "...")[] = [1];
+        if (current > 3) pages.push("...");
+        const start = Math.max(2, current - 1);
+        const end = Math.min(total - 1, current + 1);
+        for (let i = start; i <= end; i++) pages.push(i);
+        if (current < total - 2) pages.push("...");
+        pages.push(total);
+        return pages;
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             const [projectRes, keysRes, auditLogsRes, requestLogsRes] = await Promise.all([
@@ -496,21 +509,27 @@ export default function Page() {
                                             className={auditLogPage === 1 ? "pointer-events-none opacity-50" : ""}
                                         />
                                     </PaginationItem>
-                                    {Array.from({ length: Math.ceil(auditLogs.length / AUDIT_LOGS_PER_PAGE) }, (_, i) => i + 1).map((page) => (
-                                        <PaginationItem key={page}>
-                                            <PaginationLink
-                                                href="#"
-                                                isActive={page === auditLogPage}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setAuditLogPage(page);
-                                                }}
-                                                className="border-0"
-                                            >
-                                                {page}
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                    ))}
+                                    {getPageNumbers(auditLogPage, Math.ceil(auditLogs.length / AUDIT_LOGS_PER_PAGE)).map((page, idx) =>
+                                        page === "..." ? (
+                                            <PaginationItem key={`audit-ellipsis-${idx}`}>
+                                                <PaginationEllipsis />
+                                            </PaginationItem>
+                                        ) : (
+                                            <PaginationItem key={page}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    isActive={page === auditLogPage}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setAuditLogPage(page);
+                                                    }}
+                                                    className="border-0"
+                                                >
+                                                    {page}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        )
+                                    )}
                                     <PaginationItem>
                                         <PaginationNext
                                             href="#"
@@ -617,21 +636,27 @@ export default function Page() {
                                             className={requestLogPage === 1 ? "pointer-events-none opacity-50" : ""}
                                         />
                                     </PaginationItem>
-                                    {Array.from({ length: Math.ceil(requestLogs.length / REQUEST_LOGS_PER_PAGE) }, (_, i) => i + 1).map((page) => (
-                                        <PaginationItem key={page}>
-                                            <PaginationLink
-                                                href="#"
-                                                isActive={page === requestLogPage}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setRequestLogPage(page);
-                                                }}
-                                                className="border-0"
-                                            >
-                                                {page}
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                    ))}
+                                    {getPageNumbers(requestLogPage, Math.ceil(requestLogs.length / REQUEST_LOGS_PER_PAGE)).map((page, idx) =>
+                                        page === "..." ? (
+                                            <PaginationItem key={`request-ellipsis-${idx}`}>
+                                                <PaginationEllipsis />
+                                            </PaginationItem>
+                                        ) : (
+                                            <PaginationItem key={page}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    isActive={page === requestLogPage}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setRequestLogPage(page);
+                                                    }}
+                                                    className="border-0"
+                                                >
+                                                    {page}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        )
+                                    )}
                                     <PaginationItem>
                                         <PaginationNext
                                             href="#"
