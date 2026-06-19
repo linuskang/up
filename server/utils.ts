@@ -224,4 +224,22 @@ export class Project {
 
         return project?.owner ?? null
     }
+
+    static async log(
+        projectId: string,
+        userId: string,
+        message: string
+    ) {
+        const res = await prisma.auditLog.create(
+            {
+                data: {
+                    projectId,
+                    userId,
+                    message,
+                }
+            }
+        )
+
+        return res;
+    }
 }

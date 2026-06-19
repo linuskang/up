@@ -42,18 +42,33 @@ model User {
   projects      Project[]
   apiKeys       ApiKey[]
   userUsages    UserUsage[]
+  auditLogs     AuditLog[]
 
   @@unique([email])
   @@map("user")
 }
 
 model Project {
-  id      String   @id @default(uuid())
-  name    String
-  ownerId String
-  owner   User     @relation(fields: [ownerId], references: [id])
-  apiKeys ApiKey[]
-  events  Event[]
+  id        String     @id @default(uuid())
+  name      String
+  ownerId   String
+  owner     User       @relation(fields: [ownerId], references: [id])
+  apiKeys   ApiKey[]
+  events    Event[]
+  auditLogs AuditLog[]
+}
+
+model AuditLog {
+  id        String  @id @default(uuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  message String
+
+  createdAt DateTime @default(now())
 }
 
 model ApiKey {

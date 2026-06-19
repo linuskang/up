@@ -141,6 +141,11 @@ export async function POST(
     }
 
     const key = await Project.addApiKey(id, session.user.id, body.name)
+    await Project.log(
+        id,
+        session.user.id,
+        `Created API key ${body.name}`
+    )
 
     return NextResponse.json(
         {
@@ -214,6 +219,12 @@ export async function DELETE(
                 projectId: id,
             },
         }
+    )
+
+    await Project.log(
+        id,
+        session.user.id,
+        `Deleted API key ${key.name}`
     )
 
     return NextResponse.json(

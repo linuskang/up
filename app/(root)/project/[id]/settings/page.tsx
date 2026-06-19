@@ -30,6 +30,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2, Copy, Check } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import {
     Table,
@@ -52,6 +53,7 @@ import { notFound, useRouter } from "next/navigation";
 import { authClient } from "@/client/auth"
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 interface ApiKey {
     id: string
@@ -87,12 +89,16 @@ export default function Page() {
     const [isSaving, setIsSaving] = useState(false);
     const [isCreatingKey, setIsCreatingKey] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [auditLogs, setAuditLogs] = useState<{ message: string; createdAt: string; user: { name: string; image: string | null } | null }[]>([]);
+    const [auditLogPage, setAuditLogPage] = useState(1);
+    const AUDIT_LOGS_PER_PAGE = 5;
 
     useEffect(() => {
         const fetchData = async () => {
-            const [projectRes, keysRes] = await Promise.all([
+            const [projectRes, keysRes, auditLogsRes] = await Promise.all([
                 fetch(`/api/project/${params.id}`),
                 fetch(`/api/project/${params.id}/keys`),
+                fetch(`/api/project/${params.id}/auditlogs`),
             ]);
 
             if (!projectRes.ok) {
@@ -108,6 +114,11 @@ export default function Page() {
             if (keysRes.ok) {
                 const keysData = await keysRes.json();
                 setKeys(keysData.keys || []);
+            }
+
+            if (auditLogsRes.ok) {
+                const auditLogsData = await auditLogsRes.json();
+                setAuditLogs(auditLogsData.auditLogs || []);
             }
 
             setLoading(false);
@@ -432,40 +443,155 @@ export default function Page() {
                 )}
             </div>
 
-                <div className="mt-4 rounded-lg bg-card p-4 ring-0">
-                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-                    <div>
-                        <h2 className="text-sm font-semibold text-destructive">Danger Zone</h2>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                            Deleting this project removes API keys and events permanently.
-                        </p>
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-semibold">Recent Activity</h2>
+                </div>
+
+                {auditLogs.length === 0 ? (
+                    <div className="rounded-xl bg-card ring-0">
+                        <div className="p-4 text-center">
+                            <Empty>
+                                <EmptyHeader>
+                                    <EmptyTitle>No Audit Logs Yet</EmptyTitle>
+                                    <EmptyDescription>
+                                        Activity on this project will appear here.
+                                    </EmptyDescription>
+                                </EmptyHeader>
+                            </Empty>
+                        </div>
                     </div>
-                    <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="cursor-pointer">
-                                <Trash2 className="mr-1 size-4" />
-                                Delete Project
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-card ring-0">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Project?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This will permanently delete &quot;{project?.name}&quot; and all its API keys and events. This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel className="border-0">Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    onClick={deleteProject}
-                                    disabled={isDeleting}
-                                >
-                                    {isDeleting ? "Deleting..." : "Delete Project"}
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                ) : (
+                    <div className="flex flex-col gap-3">
+                        <div className="overflow-hidden rounded-xl bg-card">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="border-border/40 hover:bg-transparent">
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">User</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Message</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 pr-4 text-right text-muted-foreground">Timestamp</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {auditLogs
+                                        .slice((auditLogPage - 1) * AUDIT_LOGS_PER_PAGE, auditLogPage * AUDIT_LOGS_PER_PAGE)
+                                        .map((log, index) => (
+                                            <TableRow
+                                                key={index}
+                                                className="border-border/40 transition-colors hover:bg-accent/50"
+                                            >
+                                                <TableCell className="w-fit whitespace-nowrap pl-4">
+                                                    {log.user ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <Avatar size="sm">
+                                                                <AvatarImage src={log.user.image ?? undefined} alt={log.user.name} />
+                                                            </Avatar>
+                                                            <span className="text-sm text-foreground">{log.user.name}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-sm text-muted-foreground">System</span>
+                                                    )}
+                                                </TableCell>
+
+                                                <TableCell className="w-fit whitespace-nowrap pl-4 font-medium text-foreground">
+                                                    {log.message}
+                                                </TableCell>
+
+                                                <TableCell className="w-fit whitespace-nowrap pl-4 pr-4 text-right text-muted-foreground">
+                                                    {new Date(log.createdAt).toLocaleString()}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+
+                        {auditLogs.length > AUDIT_LOGS_PER_PAGE && (
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setAuditLogPage((p) => Math.max(1, p - 1));
+                                            }}
+                                            aria-disabled={auditLogPage === 1}
+                                            className={auditLogPage === 1 ? "pointer-events-none opacity-50" : ""}
+                                        />
+                                    </PaginationItem>
+                                    {Array.from({ length: Math.ceil(auditLogs.length / AUDIT_LOGS_PER_PAGE) }, (_, i) => i + 1).map((page) => (
+                                        <PaginationItem key={page}>
+                                            <PaginationLink
+                                                href="#"
+                                                isActive={page === auditLogPage}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setAuditLogPage(page);
+                                                }}
+                                                className="border-0"
+                                            >
+                                                {page}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    ))}
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setAuditLogPage((p) => Math.min(Math.ceil(auditLogs.length / AUDIT_LOGS_PER_PAGE), p + 1));
+                                            }}
+                                            aria-disabled={auditLogPage === Math.ceil(auditLogs.length / AUDIT_LOGS_PER_PAGE)}
+                                            className={auditLogPage === Math.ceil(auditLogs.length / AUDIT_LOGS_PER_PAGE) ? "pointer-events-none opacity-50" : ""}
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        )}
+                    </div>
+                )}
+            </div>
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-semibold">Project Settings</h2>
+                </div>
+                <div className="rounded-xl bg-card p-4 ring-0">
+
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <div>
+                            <h2 className="text-sm font-semibold text-destructive">Danger Zone</h2>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Deleting this project removes API keys and events permanently.
+                            </p>
+                        </div>
+                        <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" className="cursor-pointer">
+                                    <Trash2 className="mr-1 size-4" />
+                                    Delete Project
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="bg-card ring-0">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Project?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This will permanently delete &quot;{project?.name}&quot; and all its API keys and events. This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className="border-0">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={deleteProject}
+                                        disabled={isDeleting}
+                                    >
+                                        {isDeleting ? "Deleting..." : "Delete Project"}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 </div>
             </div>
         </div>

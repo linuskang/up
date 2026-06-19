@@ -150,6 +150,11 @@ export async function PATCH(
     }
 
     await Project.rename(id, body.name)
+    await Project.log(
+        id,
+        session.user.id,
+        `Renamed project to ${body.name}`
+    )
 
     return NextResponse.json(
         {

@@ -95,6 +95,11 @@ export async function POST(request: NextRequest) {
     }
 
     const newProject = await Project.create(session.user.id, body.name)
+    await Project.log(
+        newProject.id,
+        session.user.id,
+        `Created project ${body.name}`
+    )
 
     return NextResponse.json(
         {
