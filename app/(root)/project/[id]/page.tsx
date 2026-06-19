@@ -3,7 +3,7 @@
 import { notFound } from "next/navigation";
 // Libraries
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link"
 
 import type { EventProps } from "@/components/event";
@@ -25,7 +25,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Folder, Search } from "lucide-react"
+import { Folder, Search, Loader2 } from "lucide-react"
+
+const EVENTS_PER_PAGE = 20
 
 export default function Page() {
     const params = useParams();
@@ -36,6 +38,10 @@ export default function Page() {
     const [notFoundState, setNotFoundState] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -49,22 +55,52 @@ export default function Page() {
             const projectData = await res.json();
             setProject(projectData);
 
-            const eventsRes = await fetch(`/api/project/${params.id}/events`);
+            const eventsRes = await fetch(`/api/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}`);
             if (!eventsRes.ok) {
                 setEvents([]);
             } else {
                 const eventsData = await eventsRes.json();
-                const sortedEvents = eventsData.sort((a: EventProps, b: EventProps) => {
-                    const dateA = new Date(a.createdAt).getTime();
-                    const dateB = new Date(b.createdAt).getTime();
-                    return dateB - dateA;
-                });
-                setEvents(sortedEvents);
+                setEvents(eventsData);
+                if (eventsData.length < EVENTS_PER_PAGE) {
+                    setHasMore(false);
+                }
             }
             setLoading(false);
         };
         fetchProject();
     }, [params.id]);
+
+    const loadMore = async () => {
+        if (loadingMore || !hasMore) return;
+        setLoadingMore(true);
+        const nextPage = page + 1;
+        const res = await fetch(`/api/project/${params.id}/events?page=${nextPage}&limit=${EVENTS_PER_PAGE}`);
+        if (res.ok) {
+            const data = await res.json();
+            setEvents((prev) => [...prev, ...data]);
+            setPage(nextPage);
+            if (data.length < EVENTS_PER_PAGE) {
+                setHasMore(false);
+            }
+        }
+        setLoadingMore(false);
+    };
+
+    useEffect(() => {
+        if (!sentinelRef.current || !hasMore || loading) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    loadMore();
+                }
+            },
+            { rootMargin: "200px" }
+        );
+
+        observer.observe(sentinelRef.current);
+        return () => observer.disconnect();
+    }, [hasMore, loading, loadingMore, page, params.id]);
 
     if (loading) {
         return (
@@ -171,6 +207,14 @@ export default function Page() {
                             </div>
                         ) : (
                             <EventsList events={filteredEvents} />
+                        )}
+
+                        {filteredEvents.length > 0 && hasMore && (
+                            <div ref={sentinelRef} className="flex items-center justify-center py-4">
+                                {loadingMore && (
+                                    <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
