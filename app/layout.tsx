@@ -35,7 +35,7 @@ export default function RootLayout({
                     </ThemeProvider>
                 </main>
                 <footer className="w-full py-4 text-center text-xs text-muted-foreground">
-                    Upstream is v0.2.0. Project by Linus Kang.
+                    (c) 2026 Linus Kang. All Rights Reserved.
                 </footer>
             </body>
         </html>

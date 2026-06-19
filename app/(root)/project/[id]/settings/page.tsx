@@ -271,41 +271,8 @@ export default function Page() {
                 </Breadcrumb>
             </div>
 
-            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-                <div className="min-w-0">
-                    <h1 className="truncate text-2xl font-bold">{project?.name}</h1>
-                </div>
-                <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
-                    <DialogTrigger asChild>
-                        <Button variant="secondary" className="cursor-pointer">
-                            Rename Project
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-card ring-0">
-                        <DialogHeader>
-                            <DialogTitle>Rename Project</DialogTitle>
-                            <DialogDescription>
-                                Update the project name shown across the dashboard and settings pages.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={rename} className="space-y-3">
-                            <div>
-                                <Label htmlFor="project-name">Project Name</Label>
-                                <Input
-                                    id="project-name"
-                                    value={newProjectName}
-                                    onChange={(e) => setNewProjectName(e.target.value)}
-                                    className="bg-input border-0"
-                                />
-                            </div>
-                            <DialogFooter>
-                                <Button type="submit" className="cursor-pointer" disabled={isSaving}>
-                                    {isSaving ? "Saving..." : "Save Changes"}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+            <div className="min-w-0">
+                <h1 className="truncate text-2xl font-bold">{project?.name}</h1>
             </div>
 
             <div className="flex flex-col gap-3">
@@ -557,10 +524,50 @@ export default function Page() {
                     <h2 className="text-sm font-semibold">Project Settings</h2>
                 </div>
                 <div className="rounded-xl bg-card p-4 ring-0">
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <div className="mb-4">
+                            <h3 className="text-sm font-semibold">Project Name</h3>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Change the name of your project as it appears across the dashboard.
+                            </p>
+                        </div>
+                        <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="secondary" className="cursor-pointer">
+                                    Rename Project
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-card ring-0">
+                                <DialogHeader>
+                                    <DialogTitle>Rename Project</DialogTitle>
+                                    <DialogDescription>
+                                        Update the project name shown across the dashboard and settings pages.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <form onSubmit={rename} className="space-y-3">
+                                    <div>
+                                        <Label htmlFor="project-name">Project Name</Label>
+                                        <Input
+                                            id="project-name"
+                                            value={newProjectName}
+                                            onChange={(e) => setNewProjectName(e.target.value)}
+                                            className="bg-input border-0"
+                                        />
+                                    </div>
+                                    <DialogFooter>
+                                        <Button type="submit" className="cursor-pointer" disabled={isSaving}>
+                                            {isSaving ? "Saving..." : "Save Changes"}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
 
                     <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                         <div>
-                            <h2 className="text-sm font-semibold text-destructive">Danger Zone</h2>
+                            <h3 className="text-sm font-semibold ">Delete Project</h3>
                             <p className="mt-1 text-xs text-muted-foreground">
                                 Deleting this project removes API keys and events permanently.
                             </p>
@@ -568,7 +575,6 @@ export default function Page() {
                         <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" className="cursor-pointer">
-                                    <Trash2 className="mr-1 size-4" />
                                     Delete Project
                                 </Button>
                             </AlertDialogTrigger>
