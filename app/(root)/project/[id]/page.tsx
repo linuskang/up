@@ -29,65 +29,143 @@ import { Folder, Search, Loader2 } from "lucide-react"
 
 const EVENTS_PER_PAGE = 20
 
+interface EventItem extends EventProps {
+    id: string
+}
+
 export default function Page() {
     const params = useParams();
 
     const [project, setProject] = useState<{ project: { name: string } } | null>(null);
-    const [events, setEvents] = useState<EventProps[]>([]);
     const [loading, setLoading] = useState(true);
     const [notFoundState, setNotFoundState] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
+
+    // "all" events cache
+    const [allEvents, setAllEvents] = useState<EventItem[]>([]);
+    const [allPage, setAllPage] = useState(1);
+    const [allHasMore, setAllHasMore] = useState(true);
+
+    // category-specific events
+    const [catEvents, setCatEvents] = useState<EventItem[]>([]);
+    const [catPage, setCatPage] = useState(1);
+    const [catHasMore, setCatHasMore] = useState(true);
+
     const [loadingMore, setLoadingMore] = useState(false);
+    const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
+    // Initial load: project, first page of all events, and categories
     useEffect(() => {
         const fetchProject = async () => {
-            const res = await fetch(`/api/project/${params.id}`);
-            if (!res.ok) {
+            const [projectRes, eventsRes, categoriesRes] = await Promise.all([
+                fetch(`/api/project/${params.id}`),
+                fetch(`/api/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}`),
+                fetch(`/api/project/${params.id}/categories`),
+            ]);
+
+            if (!projectRes.ok) {
                 setNotFoundState(true);
                 setLoading(false);
                 return;
             }
 
-            const projectData = await res.json();
+            const projectData = await projectRes.json();
             setProject(projectData);
 
-            const eventsRes = await fetch(`/api/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}`);
-            if (!eventsRes.ok) {
-                setEvents([]);
-            } else {
+            if (eventsRes.ok) {
                 const eventsData = await eventsRes.json();
-                setEvents(eventsData);
+                setAllEvents(eventsData);
                 if (eventsData.length < EVENTS_PER_PAGE) {
-                    setHasMore(false);
+                    setAllHasMore(false);
                 }
             }
+
+            if (categoriesRes.ok) {
+                const categoriesData = await categoriesRes.json();
+                setCategories([
+                    { name: "all", count: categoriesData.total },
+                    ...categoriesData.categories,
+                ]);
+            }
+
             setLoading(false);
         };
         fetchProject();
     }, [params.id]);
 
-    const loadMore = async () => {
-        if (loadingMore || !hasMore) return;
+
+
+    const handleCategoryChange = async (category: string) => {
+        setSelectedCategory(category);
+        const isAll = category === "all";
+
+        if (isAll) {
+            setAllEvents([]);
+            setAllPage(1);
+            setAllHasMore(true);
+        } else {
+            setCatEvents([]);
+            setCatPage(1);
+            setCatHasMore(true);
+        }
         setLoadingMore(true);
-        const nextPage = page + 1;
-        const res = await fetch(`/api/project/${params.id}/events?page=${nextPage}&limit=${EVENTS_PER_PAGE}`);
+
+        const res = await fetch(
+            `/api/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}${
+                !isAll ? `&category=${category}` : ""
+            }`
+        );
         if (res.ok) {
             const data = await res.json();
-            setEvents((prev) => [...prev, ...data]);
-            setPage(nextPage);
-            if (data.length < EVENTS_PER_PAGE) {
-                setHasMore(false);
+            if (isAll) {
+                setAllEvents(data);
+                if (data.length < EVENTS_PER_PAGE) {
+                    setAllHasMore(false);
+                }
+            } else {
+                setCatEvents(data);
+                if (data.length < EVENTS_PER_PAGE) {
+                    setCatHasMore(false);
+                }
             }
         }
         setLoadingMore(false);
     };
 
+    // Infinite scroll observer
     useEffect(() => {
-        if (!sentinelRef.current || !hasMore || loading) return;
+        if (!sentinelRef.current || loading) return;
+        const isAll = selectedCategory === "all";
+        if (isAll && !allHasMore) return;
+        if (!isAll && !catHasMore) return;
+
+        const loadMore = async () => {
+            if (loadingMore) return;
+            if (isAll && !allHasMore) return;
+            if (!isAll && !catHasMore) return;
+
+            setLoadingMore(true);
+            const nextPage = isAll ? allPage + 1 : catPage + 1;
+            const url = `/api/project/${params.id}/events?page=${nextPage}&limit=${EVENTS_PER_PAGE}${
+                !isAll ? `&category=${selectedCategory}` : ""
+            }`;
+            const res = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                if (isAll) {
+                    setAllEvents((prev) => [...prev, ...data]);
+                    setAllPage(nextPage);
+                    if (data.length < EVENTS_PER_PAGE) setAllHasMore(false);
+                } else {
+                    setCatEvents((prev) => [...prev, ...data]);
+                    setCatPage(nextPage);
+                    if (data.length < EVENTS_PER_PAGE) setCatHasMore(false);
+                }
+            }
+            setLoadingMore(false);
+        };
 
         const observer = new IntersectionObserver(
             (entries) => {
@@ -100,7 +178,7 @@ export default function Page() {
 
         observer.observe(sentinelRef.current);
         return () => observer.disconnect();
-    }, [hasMore, loading, loadingMore, page, params.id]);
+    }, [selectedCategory, allHasMore, catHasMore, loading, loadingMore, allPage, catPage, params.id]);
 
     if (loading) {
         return (
@@ -114,18 +192,9 @@ export default function Page() {
         return notFound();
     }
 
-    const categories = [
-        { name: "all", count: events.length },
-        ...Array.from(
-            events.reduce((acc, event) => {
-                const cat = event.category || "none";
-                acc.set(cat, (acc.get(cat) || 0) + 1);
-                return acc;
-            }, new Map<string, number>())
-        ).map(([name, count]) => ({ name, count })),
-    ];
+    const displayedEvents = selectedCategory === "all" ? allEvents : catEvents;
 
-    const filteredEvents = events.filter((e) => {
+    const filteredEvents = displayedEvents.filter((e) => {
         const matchesCategory = selectedCategory === "all" || (e.category || "none") === selectedCategory;
         if (!searchQuery) return matchesCategory;
         const query = searchQuery.toLowerCase();
@@ -135,6 +204,8 @@ export default function Page() {
             (typeof e.content === "string" && e.content.toLowerCase().includes(query));
         return matchesCategory && matchesSearch;
     });
+
+    const hasMoreToLoad = selectedCategory === "all" ? allHasMore : catHasMore;
 
     return (
         <main>
@@ -155,9 +226,11 @@ export default function Page() {
                     <div className="flex items-center justify-between gap-3">
                         <h1 className="text-3xl font-semibold">Events</h1>
 
-                        <Button className="w-fit shrink-0" variant="default" size="sm">
-                            <Link href={`/project/${params.id}/settings`}>Project Settings</Link>
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button className="w-fit shrink-0" variant="default" size="sm">
+                                <Link href={`/project/${params.id}/settings`}>Project Settings</Link>
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="flex flex-col gap-3">
@@ -172,7 +245,7 @@ export default function Page() {
                             <div className="absolute top-1/2 right-0 -translate-y-1/2">
                                 <Select
                                     value={selectedCategory}
-                                    onValueChange={setSelectedCategory}
+                                    onValueChange={handleCategoryChange}
                                 >
                                     <SelectTrigger className="h-10 w-32 shrink-0 border-0 bg-transparent shadow-none focus:ring-0 focus:ring-offset-0">
                                         <SelectValue placeholder="Category" />
@@ -188,7 +261,7 @@ export default function Page() {
                                 </Select>
                             </div>
                         </div>
-                        {filteredEvents.length === 0 ? (
+                        {filteredEvents.length === 0 && !loadingMore ? (
                             <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 rounded-lg bg-muted/40 p-8 text-center">
                                 <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
                                     <Folder
@@ -209,7 +282,7 @@ export default function Page() {
                             <EventsList events={filteredEvents} />
                         )}
 
-                        {filteredEvents.length > 0 && hasMore && (
+                        {filteredEvents.length > 0 && hasMoreToLoad && (
                             <div ref={sentinelRef} className="flex items-center justify-center py-4">
                                 {loadingMore && (
                                     <Loader2 className="size-5 animate-spin text-muted-foreground" />

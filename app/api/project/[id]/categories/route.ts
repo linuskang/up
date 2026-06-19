@@ -56,29 +56,26 @@ export async function GET(
         )
     }
 
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get("page") || "1", 10)
-    const limit = parseInt(searchParams.get("limit") || "20", 10)
-    const category = searchParams.get("category")
-
-    const skip = (page - 1) * limit
-
-    const events = await prisma.event.findMany({
-        where: {
-            projectId: id,
-            ...(category && category !== "all"
-                ? { category: category === "none" ? null : category }
-                : {}),
-        },
-        orderBy: {
-            createdAt: "desc",
-        },
-        skip,
-        take: limit,
+    const totalCount = await prisma.event.count({
+        where: { projectId: id },
     })
 
+    const grouped = await prisma.event.groupBy({
+        by: ["category"],
+        where: { projectId: id },
+        _count: { id: true },
+    })
+
+    const categories = grouped.map((g) => ({
+        name: g.category ?? "none",
+        count: g._count.id,
+    }))
+
     return NextResponse.json(
-        events,
+        {
+            total: totalCount,
+            categories,
+        },
         {
             status: 200,
         }
