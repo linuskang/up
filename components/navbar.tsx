@@ -41,7 +41,6 @@ interface NavbarProps {
 
 const navItems: NavItem[] = [
     { label: "Projects", path: "/", icon: Folder },
-    { label: "Events", path: "/viewer", icon: Layers },
     { label: "Settings", path: "/settings", icon: Settings },
 ]
 
