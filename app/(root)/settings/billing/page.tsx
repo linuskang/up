@@ -3,6 +3,7 @@
 // Libraries
 import { authClient } from "@/client/auth";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 // Components
 import {
@@ -22,13 +23,24 @@ import {
     CardContent,
 } from "@/components/ui/card";
 import { Check } from "lucide-react";
+import type { UsageStats } from "@/types";
 
 export default function Page() {
     const { data: session } = authClient.useSession();
+    const [usage, setUsage] = useState<UsageStats | null>(null);
+
+    useEffect(() => {
+        fetch("/api/usage")
+            .then((r) => r.json())
+            .then((data) => setUsage(data))
+            .catch(() => {});
+    }, []);
 
     if (!session) {
         return null;
     }
+
+    const currentPlan = (usage?.plan ?? "Free").toLowerCase();
 
     return (
         <div className="flex min-h-svh flex-col gap-8 py-6">
@@ -59,51 +71,21 @@ export default function Page() {
                                 <p className="text-sm font-semibold text-foreground">Free</p>
                                 <p className="text-xs text-muted-foreground">Perfect for small projects to log critical events</p>
                             </div>
-                            <Label className="px-2 py-1 bg-muted rounded-md text-muted-foreground">
-                                Current Plan
-                            </Label>
+                            {currentPlan === "free" && (
+                                <Label className="px-2 py-1 bg-muted rounded-md text-muted-foreground">
+                                    Current Plan
+                                </Label>
+                            )}
                         </div>
                         <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Up to 1 project
+                                <Check className="h-4 w-4" /> 1 project
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Up to 50 events / month
+                                <Check className="h-4 w-4" /> 100 events / month
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Up to 7 days event retention
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Up to 1 member
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Community support
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="flex flex-col gap-4 rounded-lg bg-muted/40 p-4 mt-3">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-semibold text-foreground">Pro</p>
-                                <p className="text-xs text-muted-foreground">Higher quotas & advanced features for pro users¹</p>
-                            </div>
-                            <Button variant="default" size="sm">
-                                Upgrade
-                            </Button>
-                        </div>
-                        <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Up to 10 projects
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Up to 10,000 events / month²
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Up to 90 days event retention
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Up to 10 project members
+                                <Check className="h-4 w-4" /> 7 days event retention
                             </li>
                             <li className="flex items-center gap-2">
                                 <Check className="h-4 w-4" /> Analytics
@@ -117,55 +99,59 @@ export default function Page() {
                             <li className="flex items-center gap-2">
                                 <Check className="h-4 w-4" /> Audit logs
                             </li>
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Email support
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Extra Usage³
-                            </li>
                         </ul>
+                        {currentPlan === "free" && usage && (
+                            <div className="text-xs text-muted-foreground space-y-1">
+                                <p>Projects: {usage.projects.current} / {usage.projects.limit}</p>
+                                <p>Events this month: {usage.eventsMonth.current} / {usage.eventsMonth.limit}</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex flex-col gap-4 rounded-lg bg-muted/40 p-4 mt-3">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-semibold text-foreground">Max</p>
-                                <p className="text-xs text-muted-foreground">Unlimited quotas for power users</p>
+                                <p className="text-sm font-semibold text-foreground">Pro</p>
+                                <p className="text-xs text-muted-foreground">Higher quotas & advanced features for pro users</p>
                             </div>
-                            <Button variant="default" size="sm">
-                                Contact Sales
-                            </Button>
+                            {currentPlan === "pro" ? (
+                                <Label className="px-2 py-1 bg-muted rounded-md text-muted-foreground">
+                                    Current Plan
+                                </Label>
+                            ) : (
+                                <Button variant="default" size="sm">
+                                    <Link href="mailto:up@linus.my">Contact Sales</Link>
+                                </Button>
+                            )}
                         </div>
                         <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Everything in Pro, plus:
+                                <Check className="h-4 w-4" /> Everything in Free, plus:
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Unlimited projects
+                                <Check className="h-4 w-4" /> Up to 100 projects
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Unlimited events / month
+                                <Check className="h-4 w-4" /> Up to 100,000 events / month
                             </li>
                             <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Unlimited event retention
+                                <Check className="h-4 w-4" /> Up to 90 days event retention
                             </li>
-                            <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4" /> Unlimited project members
-                            </li>
-
                         </ul>
+                        {currentPlan === "pro" && usage && (
+                            <div className="text-xs text-muted-foreground space-y-1">
+                                <p>Projects: {usage.projects.current} / {usage.projects.limit}</p>
+                                <p>Events this month: {usage.eventsMonth.current} / {usage.eventsMonth.limit}</p>
+                            </div>
+                        )}
                     </div>
 
                     <p className="mt-4 text-xs text-muted-foreground">
-                        ¹ Pro plan perks are available to all beta users for free during the beta period, which will end on July 31, 2026. After the beta period, users will need to upgrade to the Pro plan to continue enjoying these perks.
-                    </p>
-
-                    <p className="text-xs text-muted-foreground mt-2">
-                        ² Maximum event payload is 512KB. This may change in the future. To increase this limit, please contact support.
+                        Pro plan perks are available to all beta users for free during the beta period, which will end on July 31, 2026. After the beta period, users will need to upgrade to the Pro plan to continue enjoying these perks.
                     </p>
 
                     <div className="text-xs text-muted-foreground mt-2">
-                        ³ Extra Usage is available to pro plan subscribers who exceed the included quotas:
+                        Extra Usage is available to pro plan subscribers who exceed the included quotas:
                         <ul className="list-disc list-inside mt-1 mb-1">
                             <li>$2.50 per 1,000 events / month</li>
                         </ul>

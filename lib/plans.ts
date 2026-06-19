@@ -5,8 +5,8 @@ export const plans = {
         retentionDays: 7,
     },
     pro: {
-        maxProjects: 10,
-        maxEventsPerMonth: 10000,
+        maxProjects: 100,
+        maxEventsPerMonth: 100000,
         retentionDays: 90,
     }
 }
