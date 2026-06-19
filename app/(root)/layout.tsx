@@ -3,12 +3,13 @@
 // Libraries
 import { useState } from "react"
 import { authClient } from "@/client/auth"
-import { redirect } from "next/navigation"
+import { redirect, usePathname } from "next/navigation"
 
 // Components
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Navbar from "@/components/navbar"
+import ProjectNavbar from "@/components/project/navbar"
 
 export default function RootLayout({
     children,
@@ -16,6 +17,8 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     const { data: session, isPending } = authClient.useSession()
+    const pathname = usePathname()
+    const isProjectRoute = pathname.startsWith("/project/")
     const [resendLoading, setResendLoading] = useState(false)
     const [resendSent, setResendSent] = useState(false)
     const [resendError, setResendError] = useState<string | null>(null)
@@ -121,7 +124,11 @@ export default function RootLayout({
 
     return (
         <>
-            <Navbar user={session.user} />
+            {isProjectRoute ? (
+                <ProjectNavbar user={session.user} />
+            ) : (
+                <Navbar user={session.user} />
+            )}
             <div className="mx-auto w-full max-w-lg px-4">
                 {children}
             </div>
