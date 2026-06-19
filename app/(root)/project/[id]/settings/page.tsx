@@ -650,10 +650,10 @@ export default function Page() {
             </div>
 
             <Dialog open={requestLogDetailOpen} onOpenChange={setRequestLogDetailOpen}>
-                <DialogContent className="bg-card ring-0 sm:max-w-lg">
+                <DialogContent className="w-full max-w-[calc(100vw-2rem)] bg-card ring-0 sm:max-w-lg">
                     <DialogHeader>
                         <DialogTitle>Request Details</DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="break-all">
                             {selectedRequestLog?.method} {selectedRequestLog?.endpoint}
                         </DialogDescription>
                     </DialogHeader>
@@ -677,7 +677,7 @@ export default function Page() {
                         {selectedRequestLog?.requestBody && (
                             <div className="space-y-1">
                                 <Label className="text-sm text-muted-foreground">Request Body</Label>
-                                <pre className="max-h-[200px] overflow-auto rounded-md bg-black/30 p-3 font-mono text-xs whitespace-pre">
+                                <pre className="max-h-[200px] w-full overflow-auto rounded-md bg-black/30 p-3 font-mono text-xs whitespace-pre-wrap break-all">
                                     {formatJson(selectedRequestLog.requestBody)}
                                 </pre>
                             </div>
@@ -685,14 +685,14 @@ export default function Page() {
                         {selectedRequestLog?.responseBody && (
                             <div className="space-y-1">
                                 <Label className="text-sm text-muted-foreground">Response Body</Label>
-                                <pre className="max-h-[200px] overflow-auto rounded-md bg-black/30 p-3 font-mono text-xs whitespace-pre">
+                                <pre className="max-h-[200px] w-full overflow-auto rounded-md bg-black/30 p-3 font-mono text-xs whitespace-pre-wrap break-all">
                                     {formatJson(selectedRequestLog.responseBody)}
                                 </pre>
                             </div>
                         )}
                     </div>
                     <DialogFooter>
-                        <Button className="cursor-pointer" onClick={() => setRequestLogDetailOpen(false)}>
+                        <Button className="w-fit cursor-pointer" onClick={() => setRequestLogDetailOpen(false)}>
                             Close
                         </Button>
                     </DialogFooter>
