@@ -30,6 +30,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2, Copy, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import {
@@ -54,20 +55,9 @@ import { authClient } from "@/client/auth"
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { ApiKey } from "@/types";
+import { RequestLog } from "@/types";
 
-interface ApiKey {
-    id: string
-    name: string
-    createdAt: string
-    lastUsed: string | null
-    active: boolean
-    addedBy: {
-        id: string
-        name: string
-        email: string
-        image?: string
-    }
-}
 
 export default function Page() {
     const params = useParams();
@@ -92,13 +82,18 @@ export default function Page() {
     const [auditLogs, setAuditLogs] = useState<{ message: string; createdAt: string; user: { name: string; image: string | null } | null }[]>([]);
     const [auditLogPage, setAuditLogPage] = useState(1);
     const AUDIT_LOGS_PER_PAGE = 5;
-
+    const [requestLogPage, setRequestLogPage] = useState(1);
+    const [requestLogs, setRequestLogs] = useState<RequestLog[]>([]);
+    const [selectedRequestLog, setSelectedRequestLog] = useState<RequestLog | null>(null);
+    const [requestLogDetailOpen, setRequestLogDetailOpen] = useState(false);
+    const REQUEST_LOGS_PER_PAGE = 5;
     useEffect(() => {
         const fetchData = async () => {
-            const [projectRes, keysRes, auditLogsRes] = await Promise.all([
+            const [projectRes, keysRes, auditLogsRes, requestLogsRes] = await Promise.all([
                 fetch(`/api/project/${params.id}`),
                 fetch(`/api/project/${params.id}/keys`),
                 fetch(`/api/project/${params.id}/auditlogs`),
+                fetch(`/api/project/${params.id}/requestlogs`),
             ]);
 
             if (!projectRes.ok) {
@@ -119,6 +114,11 @@ export default function Page() {
             if (auditLogsRes.ok) {
                 const auditLogsData = await auditLogsRes.json();
                 setAuditLogs(auditLogsData.auditLogs || []);
+            }
+
+            if (requestLogsRes.ok) {
+                const requestLogsData = await requestLogsRes.json();
+                setRequestLogs(requestLogsData.requestLogs || []);
             }
 
             setLoading(false);
@@ -213,6 +213,15 @@ export default function Page() {
             navigator.clipboard.writeText(createdKey);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
+        }
+    };
+
+    const formatJson = (body: string | null) => {
+        if (!body) return null;
+        try {
+            return JSON.stringify(JSON.parse(body), null, 2);
+        } catch {
+            return body;
         }
     };
 
@@ -519,6 +528,177 @@ export default function Page() {
                     </div>
                 )}
             </div>
+
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-semibold">Recent Requests</h2>
+                </div>
+
+                {requestLogs.length === 0 ? (
+                    <div className="rounded-xl bg-card ring-0">
+                        <div className="p-4 text-center">
+                            <Empty>
+                                <EmptyHeader>
+                                    <EmptyTitle>No requests yet</EmptyTitle>
+                                    <EmptyDescription>
+                                        Requests to this project will appear here.
+                                    </EmptyDescription>
+                                </EmptyHeader>
+                            </Empty>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-3">
+                        <div className="overflow-hidden rounded-xl bg-card">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="border-border/40 hover:bg-transparent">
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Method</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Endpoint</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Status</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Time</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 pr-4 text-right text-muted-foreground">Details</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {requestLogs
+                                        .slice((requestLogPage - 1) * REQUEST_LOGS_PER_PAGE, requestLogPage * REQUEST_LOGS_PER_PAGE)
+                                        .map((log) => (
+                                            <TableRow
+                                                key={log.id}
+                                                className="border-border/40 transition-colors hover:bg-accent/50"
+                                            >
+                                                <TableCell className="w-fit whitespace-nowrap pl-4">
+                                                    <Badge variant={log.method === "GET" ? "default" : log.method === "POST" ? "secondary" : log.method === "DELETE" ? "destructive" : "outline"}>
+                                                        {log.method}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="max-w-[200px] truncate whitespace-nowrap pl-4 font-medium text-foreground">
+                                                    {log.endpoint}
+                                                </TableCell>
+                                                <TableCell className="w-fit whitespace-nowrap pl-4">
+                                                    <span className={`text-sm font-medium ${log.status >= 200 && log.status < 300 ? "text-green-500" : log.status >= 400 ? "text-red-500" : "text-yellow-500"}`}>
+                                                        {log.status}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="w-fit whitespace-nowrap pl-4 text-muted-foreground">
+                                                    {new Date(log.createdAt).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell className="w-fit whitespace-nowrap pl-4 pr-4 text-right">
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setSelectedRequestLog(log);
+                                                            setRequestLogDetailOpen(true);
+                                                        }}
+                                                    >
+                                                        View
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+
+                        {requestLogs.length > REQUEST_LOGS_PER_PAGE && (
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setRequestLogPage((p) => Math.max(1, p - 1));
+                                            }}
+                                            aria-disabled={requestLogPage === 1}
+                                            className={requestLogPage === 1 ? "pointer-events-none opacity-50" : ""}
+                                        />
+                                    </PaginationItem>
+                                    {Array.from({ length: Math.ceil(requestLogs.length / REQUEST_LOGS_PER_PAGE) }, (_, i) => i + 1).map((page) => (
+                                        <PaginationItem key={page}>
+                                            <PaginationLink
+                                                href="#"
+                                                isActive={page === requestLogPage}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setRequestLogPage(page);
+                                                }}
+                                                className="border-0"
+                                            >
+                                                {page}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    ))}
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setRequestLogPage((p) => Math.min(Math.ceil(requestLogs.length / REQUEST_LOGS_PER_PAGE), p + 1));
+                                            }}
+                                            aria-disabled={requestLogPage === Math.ceil(requestLogs.length / REQUEST_LOGS_PER_PAGE)}
+                                            className={requestLogPage === Math.ceil(requestLogs.length / REQUEST_LOGS_PER_PAGE) ? "pointer-events-none opacity-50" : ""}
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            <Dialog open={requestLogDetailOpen} onOpenChange={setRequestLogDetailOpen}>
+                <DialogContent className="bg-card ring-0 sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Request Details</DialogTitle>
+                        <DialogDescription>
+                            {selectedRequestLog?.method} {selectedRequestLog?.endpoint}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm">
+                            <span className="text-muted-foreground">Status:</span>
+                            <span className={`font-medium ${selectedRequestLog && selectedRequestLog.status >= 200 && selectedRequestLog.status < 300 ? "text-green-500" : selectedRequestLog && selectedRequestLog.status >= 400 ? "text-red-500" : "text-yellow-500"}`}>
+                                {selectedRequestLog?.status}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <span className="text-muted-foreground">User Agent:</span>
+                            <span className="font-medium text-foreground">{selectedRequestLog?.userAgent}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <span className="text-muted-foreground">Time:</span>
+                            <span className="font-medium text-foreground">
+                                {selectedRequestLog ? new Date(selectedRequestLog.createdAt).toLocaleString() : ""}
+                            </span>
+                        </div>
+                        {selectedRequestLog?.requestBody && (
+                            <div className="space-y-1">
+                                <Label className="text-sm text-muted-foreground">Request Body</Label>
+                                <pre className="max-h-[200px] overflow-auto rounded-md bg-black/30 p-3 font-mono text-xs whitespace-pre">
+                                    {formatJson(selectedRequestLog.requestBody)}
+                                </pre>
+                            </div>
+                        )}
+                        {selectedRequestLog?.responseBody && (
+                            <div className="space-y-1">
+                                <Label className="text-sm text-muted-foreground">Response Body</Label>
+                                <pre className="max-h-[200px] overflow-auto rounded-md bg-black/30 p-3 font-mono text-xs whitespace-pre">
+                                    {formatJson(selectedRequestLog.responseBody)}
+                                </pre>
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button className="cursor-pointer" onClick={() => setRequestLogDetailOpen(false)}>
+                            Close
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                     <h2 className="text-sm font-semibold">Project Settings</h2>

@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     let totalDeleted = 0
-    const details: Record<string, { events: number; auditLogs: number }> = {}
+    const details: Record<string, { events: number; auditLogs: number; requestLogs: number }> = {}
 
     for (const [planKey, planConfig] of Object.entries(plans)) {
         const cutoff = new Date(
@@ -56,11 +56,25 @@ export async function POST(request: NextRequest) {
             },
         })
 
+        const requestLogResult = await prisma.requestLog.deleteMany({
+            where: {
+                project: {
+                    owner: {
+                        plan: planKey.toUpperCase() as Plan,
+                    },
+                },
+                createdAt: {
+                    lt: cutoff,
+                },
+            },
+        })
+
         details[planKey] = {
             events: eventResult.count,
             auditLogs: auditLogResult.count,
+            requestLogs: requestLogResult.count,
         }
-        totalDeleted += eventResult.count + auditLogResult.count
+        totalDeleted += eventResult.count + auditLogResult.count + requestLogResult.count
     }
 
     return NextResponse.json(

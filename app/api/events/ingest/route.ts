@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
         },
         select: {
             ownerId: true,
+            id: true,
         },
     })
 
@@ -116,10 +117,23 @@ export async function POST(req: NextRequest) {
     const usage = await Usage.increment(user.id)
     const userPlan = user.plan.toLowerCase() as keyof typeof plans
     const limit = plans[userPlan].maxEventsPerMonth
+    const body = await req.json()
 
     if (usage.eventCount > limit) {
         await Usage.decrement(user.id)
-
+        await Api.log(
+            project.id,
+            "/api/events/ingest",
+            "POST",
+            429,
+            req.headers.get("user-agent"),
+            JSON.stringify(body),
+            JSON.stringify(
+                {
+                    error: "Monthly event quota exceeded. Upgrade your plan to ingest more events.",
+                }
+            )
+        )
         return NextResponse.json(
             {
                 error: "Monthly event quota exceeded. Upgrade your plan to ingest more events.",
@@ -130,12 +144,23 @@ export async function POST(req: NextRequest) {
         )
     }
 
-    const body = await req.json()
-
-
     const parseResult = eventSchema.safeParse(body)
 
     if (!parseResult.success) {
+        await Api.log(
+            project.id,
+            "/api/events/ingest",
+            "POST",
+            400,
+            req.headers.get("user-agent"),
+            JSON.stringify(body),
+            JSON.stringify(
+                {
+                    error: "Invalid request body",
+                }
+            )
+        )
+
         return NextResponse.json(
             {
                 error: "Invalid request body",
@@ -162,6 +187,20 @@ export async function POST(req: NextRequest) {
                 actions: events.actions ?? undefined,
             }
         }
+    )
+
+    await Api.log(
+        project.id,
+        "/api/events/ingest",
+        "POST",
+        201,
+        req.headers.get("user-agent"),
+        JSON.stringify(body),
+        JSON.stringify(
+            {
+                success: true,
+            }
+        )
     )
 
     return NextResponse.json(
