@@ -57,6 +57,26 @@ model Project {
   events      Event[]
   auditLogs   AuditLog[]
   requestLogs RequestLog[]
+  webhooks    Webhook[]
+}
+
+model Webhook {
+  id        String  @id @default(uuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  name         String
+  subscription String
+  url          String
+  enabled      Boolean @default(true)
+
+  lastTriggered DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([projectId, subscription])
 }
 
 model AuditLog {

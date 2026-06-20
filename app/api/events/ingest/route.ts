@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { Api, Usage } from "@/server/utils"
+import { Api, Usage, Project } from "@/server/utils"
 import { plans } from "@/lib/plans"
 import { z } from "zod"
 import { prisma } from "@/server/prisma"
@@ -202,6 +202,14 @@ export async function POST(req: NextRequest) {
             }
         )
     )
+
+    if (result.category) {
+        await Project.triggerWebhooks(
+            project.id,
+            result.category,
+            result,
+        )
+    }
 
     return NextResponse.json(
         {

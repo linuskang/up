@@ -109,3 +109,33 @@ export interface RequestLog {
     responseBody: string | null
     createdAt: string
 }
+
+export interface WebhookEventPayload {
+    id: string
+    title: string
+    icon: string
+    content: string | null
+    category: string | null
+    fields: unknown
+    events: unknown
+    data: unknown
+    actions: unknown
+    createdAt: Date
+    projectId: string
+}
+
+export interface Webhook {
+    id: string,
+    projectId: string,
+    project: {
+        id: string,
+        name: string,
+    },
+    name: string,
+    subscription: string,
+    url: string,
+    enabled: boolean,
+    lastTriggered: string | null,
+    createdAt: string,
+    updatedAt: string,
+}

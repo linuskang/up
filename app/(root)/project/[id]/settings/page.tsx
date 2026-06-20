@@ -57,6 +57,8 @@ import { toast } from "sonner";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ApiKey } from "@/types";
 import { RequestLog } from "@/types";
+import { Webhook } from "@/types"
+import { Switch } from "@/components/ui/switch"
 
 
 export default function Page() {
@@ -87,6 +89,21 @@ export default function Page() {
     const [selectedRequestLog, setSelectedRequestLog] = useState<RequestLog | null>(null);
     const [requestLogDetailOpen, setRequestLogDetailOpen] = useState(false);
     const REQUEST_LOGS_PER_PAGE = 5;
+    const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+    const [webhookPage, setWebhookPage] = useState(1);
+    const WEBHOOKS_PER_PAGE = 5;
+    const [createWebhookOpen, setCreateWebhookOpen] = useState(false);
+    const [newWebhookName, setNewWebhookName] = useState("");
+    const [newWebhookSubscription, setNewWebhookSubscription] = useState("");
+    const [newWebhookUrl, setNewWebhookUrl] = useState("");
+    const [isCreatingWebhook, setIsCreatingWebhook] = useState(false);
+    const [editingWebhook, setEditingWebhook] = useState<Webhook | null>(null);
+    const [editWebhookOpen, setEditWebhookOpen] = useState(false);
+    const [editWebhookName, setEditWebhookName] = useState("");
+    const [editWebhookSubscription, setEditWebhookSubscription] = useState("");
+    const [editWebhookUrl, setEditWebhookUrl] = useState("");
+    const [editWebhookEnabled, setEditWebhookEnabled] = useState(true);
+    const [isEditingWebhook, setIsEditingWebhook] = useState(false);
 
     function getPageNumbers(current: number, total: number): (number | "...")[] {
         if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -102,11 +119,12 @@ export default function Page() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const [projectRes, keysRes, auditLogsRes, requestLogsRes] = await Promise.all([
+            const [projectRes, keysRes, auditLogsRes, requestLogsRes, webhooksRes] = await Promise.all([
                 fetch(`/api/project/${params.id}`),
                 fetch(`/api/project/${params.id}/keys`),
                 fetch(`/api/project/${params.id}/auditlogs`),
                 fetch(`/api/project/${params.id}/requestlogs`),
+                fetch(`/api/project/${params.id}/webhooks`),
             ]);
 
             if (!projectRes.ok) {
@@ -132,6 +150,11 @@ export default function Page() {
             if (requestLogsRes.ok) {
                 const requestLogsData = await requestLogsRes.json();
                 setRequestLogs(requestLogsData.requestLogs || []);
+            }
+
+            if (webhooksRes.ok) {
+                const webhooksData = await webhooksRes.json();
+                setWebhooks(webhooksData.webhooks || []);
             }
 
             setLoading(false);
@@ -205,6 +228,92 @@ export default function Page() {
         }
     };
 
+    const createWebhook = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsCreatingWebhook(true);
+
+        const res = await fetch(`/api/project/${params.id}/webhooks`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: newWebhookName,
+                subscription: newWebhookSubscription,
+                url: newWebhookUrl,
+            }),
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            setWebhooks((prev) => [...prev, data.webhook]);
+            setNewWebhookName("");
+            setNewWebhookSubscription("");
+            setNewWebhookUrl("");
+            setCreateWebhookOpen(false);
+            toast.success("Webhook created.");
+        } else {
+            toast.error("Failed to create webhook.");
+        }
+
+        setIsCreatingWebhook(false);
+    };
+
+    const deleteWebhook = async (webhookId: string) => {
+        const res = await fetch(`/api/project/${params.id}/webhooks`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ webhookId }),
+        });
+
+        if (res.ok) {
+            setWebhooks((prev) => prev.filter((w) => w.id !== webhookId));
+            toast.success("Webhook deleted.");
+        } else {
+            toast.error("Failed to delete webhook.");
+        }
+    };
+
+    const updateWebhook = async (webhookId: string, data: { name?: string; url?: string; subscription?: string; enabled?: boolean }) => {
+        const res = await fetch(`/api/project/${params.id}/webhooks`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ webhookId, ...data }),
+        });
+
+        if (res.ok) {
+            const resData = await res.json();
+            setWebhooks((prev) =>
+                prev.map((w) => (w.id === webhookId ? resData.webhook : w))
+            );
+            toast.success("Webhook updated.");
+        } else {
+            toast.error("Failed to update webhook.");
+        }
+    };
+
+    const openEditWebhook = (webhook: Webhook) => {
+        setEditingWebhook(webhook);
+        setEditWebhookName(webhook.name);
+        setEditWebhookSubscription(webhook.subscription);
+        setEditWebhookUrl(webhook.url);
+        setEditWebhookEnabled(webhook.enabled);
+        setEditWebhookOpen(true);
+    };
+
+    const saveEditWebhook = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingWebhook) return;
+        setIsEditingWebhook(true);
+        await updateWebhook(editingWebhook.id, {
+            name: editWebhookName,
+            url: editWebhookUrl,
+            subscription: editWebhookSubscription,
+            enabled: editWebhookEnabled,
+        });
+        setIsEditingWebhook(false);
+        setEditWebhookOpen(false);
+        setEditingWebhook(null);
+    };
+
     const deleteProject = async () => {
         setIsDeleting(true);
 
@@ -237,6 +346,7 @@ export default function Page() {
             return body;
         }
     };
+
 
     if (isPending || loading) {
         return (
@@ -724,6 +834,284 @@ export default function Page() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-semibold">Webhooks</h2>
+                    <Dialog open={createWebhookOpen} onOpenChange={setCreateWebhookOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="cursor-pointer" size="sm">Create Webhook</Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-card ring-0 sm:max-w-lg">
+                            <DialogHeader>
+                                <DialogTitle>Create Webhook</DialogTitle>
+                                <DialogDescription>
+                                    Send real-time events to your own endpoint.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={createWebhook} className="space-y-3">
+                                <div>
+                                    <Label htmlFor="webhook-name">Name *</Label>
+                                    <Input
+                                        id="webhook-name"
+                                        placeholder="My Webhook"
+                                        value={newWebhookName}
+                                        onChange={(e) => setNewWebhookName(e.target.value)}
+                                        className="bg-input border-0"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="webhook-subscription">Subscription *</Label>
+                                    <Input
+                                        id="webhook-subscription"
+                                        placeholder="event.created"
+                                        value={newWebhookSubscription}
+                                        onChange={(e) => setNewWebhookSubscription(e.target.value)}
+                                        className="bg-input border-0"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="webhook-url">URL *</Label>
+                                    <Input
+                                        id="webhook-url"
+                                        placeholder="https://example.com/webhook"
+                                        value={newWebhookUrl}
+                                        onChange={(e) => setNewWebhookUrl(e.target.value)}
+                                        className="bg-input border-0"
+                                        type="url"
+                                        required
+                                    />
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit" className="cursor-pointer" disabled={isCreatingWebhook}>
+                                        {isCreatingWebhook ? "Creating..." : "Create Webhook"}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Dialog open={editWebhookOpen} onOpenChange={setEditWebhookOpen}>
+                        <DialogContent className="bg-card ring-0 sm:max-w-lg">
+                            <DialogHeader>
+                                <DialogTitle>Edit Webhook</DialogTitle>
+                                <DialogDescription>
+                                    Update webhook settings.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={saveEditWebhook} className="space-y-3">
+                                <div>
+                                    <Label htmlFor="edit-webhook-name">Name *</Label>
+                                    <Input
+                                        id="edit-webhook-name"
+                                        placeholder="My Webhook"
+                                        value={editWebhookName}
+                                        onChange={(e) => setEditWebhookName(e.target.value)}
+                                        className="bg-input border-0"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="edit-webhook-subscription">Subscription *</Label>
+                                    <Input
+                                        id="edit-webhook-subscription"
+                                        placeholder="event.created"
+                                        value={editWebhookSubscription}
+                                        onChange={(e) => setEditWebhookSubscription(e.target.value)}
+                                        className="bg-input border-0"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="edit-webhook-url">URL *</Label>
+                                    <Input
+                                        id="edit-webhook-url"
+                                        placeholder="https://example.com/webhook"
+                                        value={editWebhookUrl}
+                                        onChange={(e) => setEditWebhookUrl(e.target.value)}
+                                        className="bg-input border-0"
+                                        type="url"
+                                        required
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Switch
+                                        id="edit-webhook-enabled"
+                                        checked={editWebhookEnabled}
+                                        onCheckedChange={setEditWebhookEnabled}
+                                    />
+                                    <Label htmlFor="edit-webhook-enabled" className="text-sm text-muted-foreground">
+                                        {editWebhookEnabled ? "Enabled" : "Disabled"}
+                                    </Label>
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit" className="cursor-pointer" disabled={isEditingWebhook}>
+                                        {isEditingWebhook ? "Saving..." : "Save Changes"}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+
+                {webhooks.length === 0 ? (
+                    <div className="rounded-xl bg-card ring-0">
+                        <div className="p-4 text-center">
+                            <Empty>
+                                <EmptyHeader>
+                                    <EmptyTitle>No Webhooks Yet</EmptyTitle>
+                                    <EmptyDescription>
+                                        Create a webhook to receive real-time events from this project.
+                                    </EmptyDescription>
+                                </EmptyHeader>
+                            </Empty>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-3">
+                        <div className="overflow-hidden rounded-xl bg-card">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="border-border/40 hover:bg-transparent">
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Name</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">URL</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Subscription</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Status</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Last Triggered</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 text-muted-foreground">Created</TableHead>
+                                        <TableHead className="w-fit whitespace-nowrap pl-4 pr-4 text-right text-muted-foreground">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {webhooks
+                                        .slice((webhookPage - 1) * WEBHOOKS_PER_PAGE, webhookPage * WEBHOOKS_PER_PAGE)
+                                        .map((webhook) => (
+                                            <TableRow
+                                                key={webhook.id}
+                                                className="border-border/40 transition-colors hover:bg-accent/50"
+                                            >
+                                                <TableCell className="w-fit whitespace-nowrap pl-4 font-medium text-foreground">
+                                                    {webhook.name}
+                                                </TableCell>
+                                                <TableCell className="max-w-[200px] truncate whitespace-nowrap pl-4 text-muted-foreground">
+                                                    {webhook.url}
+                                                </TableCell>
+                                                <TableCell className="w-fit whitespace-nowrap pl-4">
+                                                    {webhook.subscription}
+                                                </TableCell>
+                                                <TableCell className="w-fit whitespace-nowrap pl-4">
+                                                    <span className={`text-sm font-medium ${webhook.enabled ? "text-green-500" : "text-muted-foreground"}`}>
+                                                        {webhook.enabled ? "Enabled" : "Disabled"}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="w-fit whitespace-nowrap pl-4 text-muted-foreground">
+                                                    {webhook.lastTriggered
+                                                        ? new Date(webhook.lastTriggered).toLocaleString()
+                                                        : "Never"}
+                                                </TableCell>
+                                                <TableCell className="w-fit whitespace-nowrap pl-4 text-muted-foreground">
+                                                    {new Date(webhook.createdAt).toLocaleDateString()}
+                                                </TableCell>
+                                                <TableCell className="w-fit whitespace-nowrap pl-4 pr-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <Button
+                                                            variant="secondary"
+                                                            size="sm"
+                                                            className="h-7 text-xs"
+                                                            onClick={() => openEditWebhook(webhook)}
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    size="sm"
+                                                                    className="h-7 text-xs"
+                                                                >
+                                                                    Delete
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent className="bg-card ring-0">
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>Delete Webhook?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This will permanently delete the &quot;{webhook.name}&quot; webhook.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel className="border-0">Cancel</AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                        onClick={() => deleteWebhook(webhook.id)}
+                                                                    >
+                                                                        Delete
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+
+                        {webhooks.length > WEBHOOKS_PER_PAGE && (
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setWebhookPage((p) => Math.max(1, p - 1));
+                                            }}
+                                            aria-disabled={webhookPage === 1}
+                                            className={webhookPage === 1 ? "pointer-events-none opacity-50" : ""}
+                                        />
+                                    </PaginationItem>
+                                    {getPageNumbers(webhookPage, Math.ceil(webhooks.length / WEBHOOKS_PER_PAGE)).map((page, idx) =>
+                                        page === "..." ? (
+                                            <PaginationItem key={`webhook-ellipsis-${idx}`}>
+                                                <PaginationEllipsis />
+                                            </PaginationItem>
+                                        ) : (
+                                            <PaginationItem key={page}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    isActive={page === webhookPage}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setWebhookPage(page);
+                                                    }}
+                                                    className="border-0"
+                                                >
+                                                    {page}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        )
+                                    )}
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setWebhookPage((p) => Math.min(Math.ceil(webhooks.length / WEBHOOKS_PER_PAGE), p + 1));
+                                            }}
+                                            aria-disabled={webhookPage === Math.ceil(webhooks.length / WEBHOOKS_PER_PAGE)}
+                                            className={webhookPage === Math.ceil(webhooks.length / WEBHOOKS_PER_PAGE) ? "pointer-events-none opacity-50" : ""}
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        )}
+                    </div>
+                )}
+            </div>
 
             <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
