@@ -134,3 +134,27 @@
         @apply font-sans;
     }
 }
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: rotate(0deg) translateX(0);
+    }
+
+    25% {
+        transform: rotate(-2deg) translateX(-1px);
+    }
+
+    50% {
+        transform: rotate(2deg) translateX(1px);
+    }
+
+    75% {
+        transform: rotate(-2deg) translateX(-1px);
+    }
+}
+
+.animate-shake {
+    animation: shake 0.3s ease-in-out infinite;
+}
