@@ -2,4 +2,4 @@
 set -e
 
 echo "Starting application..."
-exec node server.js
+exec node apps/upstream/server.js
