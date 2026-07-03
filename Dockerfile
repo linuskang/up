@@ -26,6 +26,7 @@ ENV RESEND_EMAIL_FROM=dummy@example.com
 WORKDIR /app/apps/upstream
 RUN npx prisma generate
 RUN npm run build
+RUN ls -la /app/apps/upstream/.next/standalone/server.js || (echo "ERROR: server.js not found in .next/standalone" && exit 1)
 
 FROM node:26-alpine AS runner
 WORKDIR /app/apps/upstream
