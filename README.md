@@ -57,6 +57,8 @@ That's just scratching the surface. You can log complex events with json, events
 
 Additionally, you can install Upstream on your phone or device as a PWA app at https://up.linus.my/install.
 
+If you need help getting started with ``upstream-sdk``, check out [linusdotmy/upstream-playground](https://github.com/linusdotmy/upstream-playground)
+
 ## What's so different about Upstream compared to other platforms like Seq?
 
 Seq and Datadog are designed for the product analytics space. They ingest large volumes of events and provide powerful querying capabilities & statistics for your application.
