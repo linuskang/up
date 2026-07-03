@@ -26,7 +26,7 @@ ENV RESEND_EMAIL_FROM=dummy@example.com
 WORKDIR /app/apps/upstream
 RUN npx prisma generate
 RUN npm run build
-RUN ls -la /app/apps/upstream/.next/standalone/server.js || (echo "ERROR: server.js not found in .next/standalone" && exit 1)
+RUN ls -la /app/apps/upstream/.next/standalone/apps/upstream/server.js
 
 FROM node:26-alpine AS runner
 WORKDIR /app/apps/upstream
@@ -40,8 +40,8 @@ RUN adduser --system --uid 1001 nextjs
 
 RUN chown -R nextjs:nodejs /app
 
-COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/standalone/apps/upstream/./ ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/standalone/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/generated ./generated
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/prisma ./prisma
