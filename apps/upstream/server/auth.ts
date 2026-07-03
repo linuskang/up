@@ -7,7 +7,9 @@ import { render } from "@react-email/render"
 import { ResetPasswordEmail } from "@/emails/reset-password-email"
 import { VerificationEmail } from "@/emails/verification-email"
 
-const resend = new Resend(env.RESEND_API_KEY)
+function getResend() {
+    return new Resend(env.RESEND_API_KEY)
+}
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -43,7 +45,7 @@ export const auth = betterAuth({
         { pretty: true }
       )
 
-      await resend.emails.send({
+      await getResend().emails.send({
         from: env.RESEND_EMAIL_FROM,
         to: data.user.email,
         subject: "Verify your email",
@@ -63,7 +65,7 @@ export const auth = betterAuth({
         { pretty: true }
       )
 
-      await resend.emails.send({
+      await getResend().emails.send({
         from: env.RESEND_EMAIL_FROM,
         to: data.user.email,
         subject: "Reset your password",
