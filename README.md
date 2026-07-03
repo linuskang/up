@@ -55,15 +55,17 @@ That's just scratching the surface. You can log complex events with json, events
 | `data`     | `unknown`         | No       | `{"subscriptionId":"sub_abc123"}` |
 | `actions`  | `Action[]`        | No       | `[{"title":"View Invoice","type":"default","url":"https://example.com"}]` |
 
+Additionally, you can install Upstream on your phone or device as a PWA app at https://up.linus.my/install.
+
 ## What's so different about Upstream compared to other platforms like Seq?
 
 Seq and Datadog are designed for the product analytics space. They ingest large volumes of events and provide powerful querying capabilities & statistics for your application.
 
-Upstream is designed for the critical logs/events space. We focus on delivering a beautiful, intuitive experience for viewing and querying your most important events on the fly. You can use Upstream for your product's audit logs, triggering workflows, and logging complex events.
+Upstream is designed for the critical logs/events space with a beautiful, intuitive experience for viewing and querying your most important events on the fly. You can use Upstream for your product's audit logs, triggering workflows, and logging complex events.
 
-We have:
+To sum up, Upstream has:
 
-- Arguably the best UI for querying events on the go, especially for mobile.
+- Arguably the better UI for querying events on the go, especially for mobile.
 - Full API, easily ingest and query logs from your apps.
 - Action buttons and contextIds are our main differentiators.
 - Built for easy integration with your apps, no complex setup required.
