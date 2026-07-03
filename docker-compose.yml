@@ -1,41 +1,29 @@
-version: "3.8"
-
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/linuskang/up:latest
     ports:
-      - "3001:3000"
-    environment:
-      DATABASE_URL: postgresql://upstream:upstream@10.0.7.132:15432/upstream
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-      RESEND_EMAIL_FROM: ${RESEND_EMAIL_FROM}
-    # depends_on:
-    #   db:
-    #     condition: service_healthy
+      - "3000:3000"
+    env_file: .env
     restart: unless-stopped
-
-  # db:
-  #   image: postgres:17-alpine
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #     POSTGRES_DB: upstream
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U postgres -d upstream"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
-  #   restart: unless-stopped
-
+    depends_on:
+      - db
+    networks:
+      - upstream_net
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: upstream
+      POSTGRES_PASSWORD: upstream
+      POSTGRES_DB: upstream
+    volumes:
+      - upstream_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - upstream_net
 volumes:
-  postgres_data:
+  upstream_data:
+networks:
+  upstream_net:
+    driver: bridge

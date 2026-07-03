@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,14 +9,15 @@
 !.yarn/versions
 
 # testing
-/coverage
+coverage
 
 # next.js
-/.next/
-/out/
+**/.next/
+out/
 
 # production
-/build
+build
+dist/
 
 # misc
 .DS_Store
@@ -35,4 +36,8 @@ pnpm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/generated
+# turbo
+.turbo
+
+# generated
+**/generated

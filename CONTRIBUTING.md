@@ -1,48 +1,48 @@
 # Contributing
 
-Thank you for your interest in contributing to this project!
+> ![NOTE]
+> This guide isn't done yet and is still being worked on. I've tried my best to get everything you need to start tinkering with Upstream here but there might be some stuff missing. Apologies.
 
-## Getting Started
+## Upstream App: Setting up dev environment
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/<your-username>/up.linus.my.git`
-3. Install dependencies: `npm ci`
-4. Set up environment variables (copy `.env.example` to `.env` and fill in)
-5. Generate Prisma client: `npx prisma generate`
+Clone the repository:
 
-## Development Workflow
+```bash
+git clone https://github.com/linuskang/up
+```
 
-- Create a new branch from `main`: `git checkout -b feature/my-feature`
-- Make your changes
-- Run linting: `npm run lint`
-- Run type checking: `npm run typecheck`
-- Build the project: `npm run build`
-- Commit your changes with a clear message
-- Push to your fork and open a pull request
+Enter and install dependencies:
 
-## Pull Request Guidelines
+```bash
+cd up/apps/upstream
+npm i
+```
 
-- Ensure your PR description clearly describes the problem and solution
-- Link any related issues using `Closes #123`
-- Keep changes focused and minimal
-- Ensure CI passes before requesting review
-- Update relevant documentation if needed
+Declare ``.env`` inside of ``/apps/upstream``:
 
-## Code Style
+```bash
+cp .env.example ~/apps/upstream # edit the values to be yours
+```
 
-- Follow the existing code style
-- Run `npm run lint` before committing
-- Use TypeScript for all new code
-- Prefer functional components for React
+Run prisma migrations:
 
-## Reporting Bugs
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
 
-Please use the bug report issue template and include:
-- Steps to reproduce
-- Expected vs actual behavior
-- Environment details
-- Any relevant logs or screenshots
+And lastly, start the server:
 
-## Questions
+```bash
+npm run dev
+```
 
-For questions, please use [GitHub Discussions](https://github.com/linusdotmy/up.linus.my/discussions).
+Upstream will be available at http://localhost:3001
+
+## Packages
+
+1. Clone the repo
+2. ``npm install``
+3. Start tinkering
+4. When your done, run ``npm run build`` and ``npm run lint`` to check for errors.
+5. Your done! create a pr if you wish.

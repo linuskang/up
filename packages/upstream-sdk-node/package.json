@@ -1,0 +1,28 @@
+{
+    "name": "upstream-sdk",
+    "version": "0.2.1",
+    "description": "Simple and open logging for your next project.",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "lint": "echo 'No lint configured'",
+        "typecheck": "tsc --noEmit"
+    },
+    "files": [
+        "dist/"
+    ],
+    "keywords": [
+        "upstream",
+        "logging",
+        "sdk",
+        "events",
+        "logs"
+    ],
+    "license": "CC BY-NC 4.0",
+    "devDependencies": {
+        "@types/node": "^26.0.0",
+        "typescript": "^5.0.0"
+    }
+}

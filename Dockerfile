@@ -4,6 +4,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
+COPY apps/upstream/package.json ./apps/upstream/package.json
 RUN npm ci
 
 FROM node:26-alpine AS builder
@@ -22,11 +23,12 @@ ENV GITHUB_CLIENT_SECRET=dummy-client-secret
 ENV RESEND_API_KEY=dummy-api-key
 ENV RESEND_EMAIL_FROM=dummy@example.com
 
+WORKDIR /app/apps/upstream
 RUN npx prisma generate
 RUN npm run build
 
 FROM node:26-alpine AS runner
-WORKDIR /app
+WORKDIR /app/apps/upstream
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -37,12 +39,12 @@ RUN adduser --system --uid 1001 nextjs
 
 RUN chown -R nextjs:nodejs /app
 
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/entrypoint.sh ./entrypoint.sh
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/generated ./generated
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 USER nextjs

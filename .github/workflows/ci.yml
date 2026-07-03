@@ -5,12 +5,12 @@ on:
     branches: [main, master]
     paths-ignore:
       - '**/*.md'
-      - 'public/**'
+      - 'apps/upstream/public/**'
   pull_request:
     branches: [main, master]
     paths-ignore:
       - '**/*.md'
-      - 'public/**'
+      - 'apps/upstream/public/**'
   workflow_dispatch:
 
 concurrency:
@@ -70,7 +70,7 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma client
-        run: npx prisma generate
+        run: cd apps/upstream && npx prisma generate
 
       - name: Run type check
         run: npm run typecheck
@@ -104,7 +104,7 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma client
-        run: npx prisma generate
+        run: cd apps/upstream && npx prisma generate
 
       - name: Run build
         run: npm run build
