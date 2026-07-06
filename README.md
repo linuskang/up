@@ -6,8 +6,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/upstream-v0.2.3-blue" alt="Upstream" />
-  <img src="https://img.shields.io/npm/v/upstream-sdk" alt="npm version" />
-  <img src="https://img.shields.io/npm/dm/upstream-sdk" alt="npm downloads" />
+  <img src="https://img.shields.io/npm/v/@upstreamlabs/sdk" alt="npm version" />
+  <img src="https://img.shields.io/npm/dm/@upstreamlabs/sdk" alt="npm downloads" />
   <img src="https://img.shields.io/badge/license-CC_BY_NC_4.0-red" alt="License" />
   <a href="https://github.com/linuskang/up/actions/workflows/ci.yml">
     <img src="https://github.com/linuskang/up/actions/workflows/ci.yml/badge.svg" alt="Build" />
