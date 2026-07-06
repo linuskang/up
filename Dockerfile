@@ -17,7 +17,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 
 ENV DATABASE_URL=postgresql://localhost:5432/db
 ENV BETTER_AUTH_SECRET=dummy-secret
-ENV BETTER_AUTH_URL=http://localhost:3000
+ENV BETTER_AUTH_URL=https://up.linus.my
 ENV GITHUB_CLIENT_ID=dummy-client-id
 ENV GITHUB_CLIENT_SECRET=dummy-client-secret
 ENV RESEND_API_KEY=dummy-api-key
@@ -44,6 +44,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/static ./apps/upstream/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/public ./apps/upstream/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/.next/server ./apps/upstream/.next/server
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/generated ./apps/upstream/generated
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/prisma ./apps/upstream/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/apps/upstream/entrypoint.sh ./entrypoint.sh
