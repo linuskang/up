@@ -4,11 +4,11 @@ export default function manifest(): MetadataRoute.Manifest {
     return {
         name: "Upstream",
         short_name: "Upstream",
-        description: "A simple logging platform built for developers.",
+        description: "A simple and open logging platform for your next project",
         start_url: "/",
         display: "standalone",
-        background_color: "#0a0a0a",
-        theme_color: "#0a0a0a",
+        background_color: "#131415",
+        theme_color: "#131415",
         orientation: "any",
         scope: "/",
         icons: [
