@@ -2,10 +2,10 @@
   <img width="192" height="192" alt="192x192" src="https://github.com/user-attachments/assets/4c97f877-4fba-4146-885c-26f945bb6682" />
 </p>
 
-<h1 align="center">Upstream</h1>
+<h1 align="center">Upstream: Simple and open logging</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/upstream-v0.2.2-blue" alt="Upstream" />
+  <img src="https://img.shields.io/badge/upstream-v0.2.3-blue" alt="Upstream" />
   <img src="https://img.shields.io/npm/v/upstream-sdk" alt="npm version" />
   <img src="https://img.shields.io/npm/dm/upstream-sdk" alt="npm downloads" />
   <img src="https://img.shields.io/badge/license-CC_BY_NC_4.0-red" alt="License" />
@@ -73,9 +73,17 @@ To sum up, Upstream has:
 - Built for easy integration with your apps, no complex setup required.
 - Upstream was built to easily view your most critical logs on the fly, with a expressive interface. If you don't need easy access to important logs, Upstream isn't for you.
 
-## How about contributing?
+## Some notes
 
-Thanks for considering to help this project. You can read the contributing.md to get a local dev server running and make some cool features, however I'm not currently accepting outside contributions as Upstream is still in early phases of development. If you have a feature request, feel free to open a issue.
+We are very very early in this project. Expect bugs.
+
+We are not accepting contributions yet.
+
+There's no public docs site yet, checkout the miscellaneous markdown files in [docs](/docs).
+
+### If you REALLY want to contibute still...
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or PR. We use vouch to organise trust levels in this repository.
 
 ## License
 
