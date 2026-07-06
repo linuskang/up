@@ -138,7 +138,7 @@ export function Event({
     }
 
     return (
-        <Card className="mx-auto w-full gap-0 bg-muted/40 p-3 ring-0">
+        <Card className="mx-auto w-full gap-0 bg-muted/40 p-3 text-left ring-0">
             <CardHeader
                 className={`group flex flex-row items-center space-y-0 p-0 transition-opacity ${extras ? "cursor-pointer select-none hover:opacity-80" : ""}`}
                 onClick={() => extras && setOpen(!open)}

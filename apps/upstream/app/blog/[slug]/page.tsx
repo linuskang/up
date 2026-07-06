@@ -5,8 +5,8 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { MarkdownRenderer } from "@/components/homepage/markdown-render"
-import { Navbar } from "@/components/homepage/navbar"
+import { MarkdownRenderer } from "@/components/markdown-render"
+import { Navbar } from "@/app/home/navbar"
 
 interface Props {
     params: Promise<{ slug: string }>

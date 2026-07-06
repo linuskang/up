@@ -4,7 +4,7 @@ import matter from "gray-matter"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar } from "lucide-react"
-import { Navbar } from "@/components/homepage/navbar"
+import { Navbar } from "@/app/home/navbar"
 
 interface PostMeta {
     slug: string

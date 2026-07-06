@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 
-import { RotatingEvents } from "@/components/homepage/rotating-events"
-import { Navbar } from "@/components/homepage/navbar"
-import { ShakingCards } from "@/components/homepage/shaking-cards"
-import { CodeBlock } from "@/components/homepage/code-block"
+import { EventsList } from "@/components/event"
+import { Navbar } from "@/app/home/navbar"
+import { ShakingCards } from "@/app/home/shaking-cards"
+import { CodeBlock } from "@/app/home/code-block"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { DemoEvents } from "./demo-events"
 import {
     Accordion,
     AccordionContent,
@@ -21,7 +22,7 @@ export default function Home() {
     return (
         <div className="flex min-h-screen flex-col">
             <Navbar />
-            <section className="relative flex flex-col items-center justify-center px-4 pt-20 pb-16 text-center sm:pt-32 sm:pb-20">
+            <section className="relative flex flex-col px-4 pt-20 pb-16 text-center sm:pt-32 sm:pb-20">
                 <div className="mx-auto w-full max-w-2xl space-y-6 px-2 sm:px-0">
                     <h1 className="text-3xl leading-tight font-bold tracking-tight text-foreground sm:text-5xl">
                         Simple and open logging for your next project.
@@ -50,8 +51,10 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className="mx-auto mt-8 w-full sm:mt-12">
-                    <RotatingEvents />
+                <div className="mx-auto mt-8 w-full max-w-md sm:mt-12">
+                    <EventsList
+                        events={DemoEvents}
+                    />
                 </div>
             </section>
 
