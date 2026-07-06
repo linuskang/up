@@ -88,6 +88,9 @@ jobs:
       BETTER_AUTH_URL: http://localhost:3000
       GITHUB_CLIENT_ID: dummy-client-id
       GITHUB_CLIENT_SECRET: dummy-client-secret
+      GOOGLE_CLIENT_ID: dummy-client-id
+      GOOGLE_CLIENT_SECRET: dummy-client
+      ALLOW_SIGNUP: true
       RESEND_API_KEY: dummy-api-key
       RESEND_EMAIL_FROM: dummy@example.com
     steps:
