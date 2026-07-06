@@ -19,7 +19,7 @@ export const env = createEnv({
             .default("false")
             .transform((value) => value === "true"),
 
-        RESEND_API_KEY: z.string().optional(),
+        RESEND_API_KEY: z.string(),
         RESEND_EMAIL_FROM: z.string(),
 
         CRON_SECRET: z.string().optional(),
