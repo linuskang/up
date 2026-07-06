@@ -22,6 +22,9 @@ ENV GITHUB_CLIENT_ID=dummy-client-id
 ENV GITHUB_CLIENT_SECRET=dummy-client-secret
 ENV RESEND_API_KEY=dummy-api-key
 ENV RESEND_EMAIL_FROM=dummy@example.com
+ENV GOOGLE_CLIENT_ID=dummy-client-id
+ENV GOOGLE_CLIENT_SECRET=dummy-client-secret
+ENV ALLOW_SIGNUP=true
 
 WORKDIR /app/apps/upstream
 RUN npx prisma generate
