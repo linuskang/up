@@ -126,7 +126,6 @@ export function Event({
     const extras = Boolean(
         content || actions?.length || data || fields?.length || events?.length
     )
-    const [showFullJson, setShowFullJson] = useState(false)
     const [copied, setCopied] = useState(false)
 
     const copyJson = () => {
@@ -160,7 +159,9 @@ export function Event({
                                 .toLowerCase()}
                         </p>
 
-                        <p className="ml-2 truncate text-base leading-snug text-foreground">
+                        <p
+                            className={`ml-2 text-base leading-snug text-foreground ${open ? "whitespace-normal break-words" : "truncate"}`}
+                        >
                             {title}
                         </p>
 
@@ -189,22 +190,33 @@ export function Event({
             >
                 <div className="min-h-0 overflow-hidden">
                     {content && (
-                        <div className="text-sm leading-relaxed text-muted-foreground">
+                        <div className="whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">
                             {content}
                         </div>
                     )}
                     {fields && (
                         <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
-                            {fields.map((field, index) => (
-                                <div key={index} className="flex flex-col">
-                                    <span className="text-sm text-muted-foreground">
-                                        {field.name}
-                                    </span>
-                                    <span className="text-sm font-medium text-foreground">
-                                        {field.value}
-                                    </span>
-                                </div>
-                            ))}
+                            {fields.map((field, index) => {
+                                const isEmpty =
+                                    !field.value || field.value.trim() === ""
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex min-w-0 flex-col"
+                                    >
+                                        <span className="text-sm text-muted-foreground">
+                                            {field.name}
+                                        </span>
+                                        <span
+                                            className={`min-w-0 break-words text-sm font-medium ${isEmpty ? "text-muted-foreground/60 italic" : "text-foreground"}`}
+                                        >
+                                            {isEmpty
+                                                ? "Empty Content"
+                                                : field.value}
+                                        </span>
+                                    </div>
+                                )
+                            })}
                         </div>
                     )}
                     {events && (
@@ -245,40 +257,18 @@ export function Event({
                                 )}
                             </Button>
 
-                            <div
-                                className={`relative rounded bg-muted/60 text-xs ${showFullJson ? "" : "max-h-48 overflow-hidden"}`}
-                            >
+                            <div className="max-h-80 overflow-auto rounded bg-muted/60 text-xs">
                                 <SyntaxHighlighter
                                     language="json"
                                     style={vscDarkPlus}
                                     customStyle={{
                                         margin: 0,
-                                        padding:
-                                            "0.75rem 0.75rem 2.5rem 0.75rem",
+                                        padding: "0.75rem",
                                         background: "transparent",
                                     }}
                                 >
                                     {JSON.stringify(data, null, 2)}
                                 </SyntaxHighlighter>
-
-                                {!showFullJson && (
-                                    <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-20 bg-gradient-to-t from-muted to-transparent" />
-                                )}
-
-                                <div className="absolute right-0 bottom-0 left-0 z-10">
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        onClick={() =>
-                                            setShowFullJson(!showFullJson)
-                                        }
-                                        className="h-9 w-full rounded-none rounded-b border-0 bg-muted text-xs shadow-none hover:bg-muted"
-                                    >
-                                        {showFullJson
-                                            ? "Show less"
-                                            : "Show all JSON"}
-                                    </Button>
-                                </div>
                             </div>
                         </div>
                     )}

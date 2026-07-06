@@ -38,13 +38,6 @@ export function Navbar() {
                         size="sm"
                         className="px-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground sm:px-2 sm:text-xs"
                     >
-                        <Link href="/blog">Blog</Link>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="px-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground sm:px-2 sm:text-xs"
-                    >
                         <Link
                             target="_blank"
                             href="https://github.com/linusdotmy/upstream"
@@ -56,7 +49,7 @@ export function Navbar() {
                         size="sm"
                         className="px-1.5 text-[11px] font-medium sm:px-2 sm:text-xs"
                     >
-                        <Link href="/">Open app</Link>
+                        <Link href="/login">Sign in</Link>
                     </Button>
                 </div>
             </div>

@@ -60,12 +60,12 @@ export function User() {
 
                 <DropdownMenuItem asChild>
                     <Link
-                        href="https://upstream.linus.my/docs"
+                        href="https://up.linus.my/home"
                         target="_blank"
                         className="flex cursor-pointer items-center gap-2"
                     >
                         <ExternalLink className="size-3.5 text-muted-foreground" />
-                        Docs
+                        Homepage
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

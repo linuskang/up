@@ -32,7 +32,7 @@ export default function RootLayout({
     }
 
     if (!session) {
-        redirect("/login")
+        redirect("/home")
     }
 
     const resendVerification = async () => {
@@ -88,8 +88,8 @@ export default function RootLayout({
                                 {resendSent
                                     ? "Email sent!"
                                     : resendLoading
-                                      ? "Sending..."
-                                      : "Resend verification email"}
+                                        ? "Sending..."
+                                        : "Resend verification email"}
                             </Button>
 
                             {resendSent && (
