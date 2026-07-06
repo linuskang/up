@@ -36,7 +36,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
-ENV NODE_OPTIONS="--network-family-autoselection-attempt-timeout=500"
+ENV NODE_OPTIONS="--no-network-family-autoselection --dns-result-order=ipv4first"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
