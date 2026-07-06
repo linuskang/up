@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Smartphone, Monitor, Download, Check, Share, Loader2 } from "lucide-react"
+import {
+    Smartphone,
+    Monitor,
+    Download,
+    Check,
+    Share,
+    Loader2,
+} from "lucide-react"
 import { toast } from "sonner"
 
 type BeforeInstallPromptEvent = Event & {
@@ -13,10 +20,13 @@ type BeforeInstallPromptEvent = Event & {
 
 export function PwaInstaller() {
     const [mounted, setMounted] = useState(false)
-    const [platform, setPlatform] = useState<"ios" | "android" | "desktop">("desktop")
+    const [platform, setPlatform] = useState<"ios" | "android" | "desktop">(
+        "desktop"
+    )
     const [isStandalone, setIsStandalone] = useState(false)
     const [isInstalled, setIsInstalled] = useState(false)
-    const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+    const [deferredPrompt, setDeferredPrompt] =
+        useState<BeforeInstallPromptEvent | null>(null)
     const [promptFired, setPromptFired] = useState(false)
 
     useEffect(() => {
@@ -32,16 +42,24 @@ export function PwaInstaller() {
         else if (isAndroid) setPlatform("android")
         else setPlatform("desktop")
 
-        const standalone = window.matchMedia("(display-mode: standalone)").matches
+        const standalone = window.matchMedia(
+            "(display-mode: standalone)"
+        ).matches
         setIsStandalone(standalone)
 
         if (standalone) {
             setIsInstalled(true)
         } else if ("getInstalledRelatedApps" in navigator) {
-            const nav = navigator as Navigator & { getInstalledRelatedApps: () => Promise<{ platform: string; url?: string }[]> }
-            nav.getInstalledRelatedApps().then((apps) => {
-                if (apps.length > 0) setIsInstalled(true)
-            }).catch(() => { })
+            const nav = navigator as Navigator & {
+                getInstalledRelatedApps: () => Promise<
+                    { platform: string; url?: string }[]
+                >
+            }
+            nav.getInstalledRelatedApps()
+                .then((apps) => {
+                    if (apps.length > 0) setIsInstalled(true)
+                })
+                .catch(() => {})
         }
 
         const handler = (e: Event) => {
@@ -72,7 +90,8 @@ export function PwaInstaller() {
             })
         } else if (platform === "android") {
             toast.info("Install on Android", {
-                description: "Tap the menu (three dots) and select Add to Home screen.",
+                description:
+                    "Tap the menu (three dots) and select Add to Home screen.",
             })
         } else if (!promptFired) {
             toast.error("Install not available", {
@@ -81,7 +100,8 @@ export function PwaInstaller() {
             })
         } else {
             toast.info("Install on Desktop", {
-                description: "Use the menu → More tools → Create shortcut → Open as window.",
+                description:
+                    "Use the menu → More tools → Create shortcut → Open as window.",
             })
         }
     }
@@ -101,8 +121,12 @@ export function PwaInstaller() {
         return (
             <Card className="w-full max-w-md bg-background ring-1 ring-foreground/10">
                 <CardContent className="flex flex-col items-center gap-4 py-8">
-                    <p className="text-center text-lg font-medium">You are using the Upstream app!</p>
-                    <p className="text-center text-sm text-muted-foreground">Thanks for installing.</p>
+                    <p className="text-center text-lg font-medium">
+                        You are using the Upstream app!
+                    </p>
+                    <p className="text-center text-sm text-muted-foreground">
+                        Thanks for installing.
+                    </p>
                 </CardContent>
             </Card>
         )
@@ -115,9 +139,17 @@ export function PwaInstaller() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                         <Check className="h-6 w-6 text-primary" />
                     </div>
-                    <p className="text-center text-lg font-medium">Upstream is already installed</p>
+                    <p className="text-center text-lg font-medium">
+                        Upstream is already installed
+                    </p>
                     <p className="text-center text-sm text-muted-foreground">
-                        Open it from your {platform === "android" ? "Home screen" : platform === "ios" ? "Home screen" : "Start menu or dock"}.
+                        Open it from your{" "}
+                        {platform === "android"
+                            ? "Home screen"
+                            : platform === "ios"
+                              ? "Home screen"
+                              : "Start menu or dock"}
+                        .
                     </p>
                 </CardContent>
             </Card>
@@ -126,8 +158,10 @@ export function PwaInstaller() {
 
     return (
         <div className="flex w-full max-w-md flex-col gap-4">
-
-            <Button onClick={handleInstall} className="w-full h-12 text-base gap-2">
+            <Button
+                onClick={handleInstall}
+                className="h-12 w-full gap-2 text-base"
+            >
                 <Download className="h-7 w-7" />
                 Install Upstream
             </Button>
@@ -142,8 +176,8 @@ export function PwaInstaller() {
 function IOSInstructions() {
     return (
         <Card className="bg-background ring-1 ring-foreground/10">
-            <CardHeader className="text-center pb-2">
-                <CardTitle className="text-xl flex items-center justify-center gap-2">
+            <CardHeader className="pb-2 text-center">
+                <CardTitle className="flex items-center justify-center gap-2 text-xl">
                     <Smartphone className="h-5 w-5" /> Install on iOS
                 </CardTitle>
             </CardHeader>
@@ -152,7 +186,8 @@ function IOSInstructions() {
                     1. Open this page in <strong>Safari</strong>.
                 </p>
                 <p className="flex items-center gap-2">
-                    2. Tap the <Share className="h-4 w-4 inline" /> Share button.
+                    2. Tap the <Share className="inline h-4 w-4" /> Share
+                    button.
                 </p>
                 <p>
                     3. Tap <strong>Add to Home Screen</strong>.
@@ -168,14 +203,15 @@ function IOSInstructions() {
 function AndroidInstructions() {
     return (
         <Card className="bg-background ring-1 ring-foreground/10">
-            <CardHeader className="text-center pb-2">
-                <CardTitle className="text-xl flex items-center justify-center gap-2">
+            <CardHeader className="pb-2 text-center">
+                <CardTitle className="flex items-center justify-center gap-2 text-xl">
                     <Smartphone className="h-5 w-5" /> Install on Android
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
                 <p>
-                    1. Tap the menu (three dots) in the top right of your browser.
+                    1. Tap the menu (three dots) in the top right of your
+                    browser.
                 </p>
                 <p>
                     2. Tap <strong>Add to Home screen</strong>.
@@ -191,8 +227,8 @@ function AndroidInstructions() {
 function DesktopInstructions() {
     return (
         <Card className="bg-background ring-1 ring-foreground/10">
-            <CardHeader className="text-center pb-2">
-                <CardTitle className="text-xl flex items-center justify-center gap-2">
+            <CardHeader className="pb-2 text-center">
+                <CardTitle className="flex items-center justify-center gap-2 text-xl">
                     <Monitor className="h-5 w-5" /> Install on Desktop
                 </CardTitle>
             </CardHeader>

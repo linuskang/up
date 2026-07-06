@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/server/auth"
+import { getSession } from "@/server/auth"
 import { Project } from "@/server/utils"
 import { prisma } from "@/server/prisma"
 
@@ -15,15 +15,11 @@ export async function GET(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -32,61 +28,55 @@ export async function GET(
 
     const { id } = await params
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
 
-            select: {
-                name: true,
-                id: true,
-                owner: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        image: true,
-                    }
+        select: {
+            name: true,
+            id: true,
+            owner: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
                 },
-                apiKeys: {
-                    select: {
-                        id: true,
-                        name: true,
-                        createdAt: true,
-                        active: true,
-                        lastUsed: true,
-                        addedBy: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                image: true,
-                            }
+            },
+            apiKeys: {
+                select: {
+                    id: true,
+                    name: true,
+                    createdAt: true,
+                    active: true,
+                    lastUsed: true,
+                    addedBy: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
                         },
                     },
                 },
-            }
-        }
-    )
+            },
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }
         )
     }
 
-    return NextResponse.json(
-        {
-            project
-        }
-    )
+    return NextResponse.json({
+        project,
+    })
 }
 
 export async function PATCH(
@@ -97,15 +87,11 @@ export async function PATCH(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -117,32 +103,26 @@ export async function PATCH(
 
     if (!body.name) {
         return NextResponse.json(
-            {
-                error: "Missing required fields",
-            },
+            "Missing required fields",
             {
                 status: 400,
             }
         )
     }
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
-            select: {
-                id: true,
-            }
-        }
-    )
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
+        select: {
+            id: true,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }
@@ -150,17 +130,11 @@ export async function PATCH(
     }
 
     await Project.rename(id, body.name)
-    await Project.log(
-        id,
-        session.user.id,
-        `Renamed project to ${body.name}`
-    )
+    await Project.log(id, session.user.id, `Renamed project to ${body.name}`)
 
-    return NextResponse.json(
-        {
-            success: true,
-        }
-    )
+    return NextResponse.json({
+        success: true,
+    })
 }
 
 export async function DELETE(
@@ -171,15 +145,11 @@ export async function DELETE(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -188,24 +158,20 @@ export async function DELETE(
 
     const { id } = await params
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
 
-            select: {
-                id: true,
-            }
-        }
-    )
+        select: {
+            id: true,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }
@@ -214,9 +180,7 @@ export async function DELETE(
 
     await Project.delete(id)
 
-    return NextResponse.json(
-        {
-            success: true,
-        }
-    )
+    return NextResponse.json({
+        success: true,
+    })
 }

@@ -93,12 +93,17 @@ export default function Page() {
 
     return (
         <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-10 sm:px-6">
-            <Card className="w-full sm:w-auto bg-background ring-0">
+            <Card className="w-full bg-background ring-0 sm:w-auto">
                 <CardHeader className="gap-2 pb-2 text-center">
-                    <CardTitle className="text-5xl font-bold">Upstream</CardTitle>
+                    <CardTitle className="text-5xl font-bold">
+                        Upstream
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form className="flex flex-col gap-5 sm:min-w-90" onSubmit={login}>
+                    <form
+                        className="flex flex-col gap-5 sm:min-w-90"
+                        onSubmit={login}
+                    >
                         <Field>
                             <Button
                                 variant="outline"
@@ -126,7 +131,9 @@ export default function Page() {
                         </FieldSeparator>
                         <Field className="-mt-2">
                             <FieldGroup>
-                                <FieldLabel className="text-sm">Account Email</FieldLabel>
+                                <FieldLabel className="text-sm">
+                                    Account Email
+                                </FieldLabel>
                                 <Input
                                     type="email"
                                     value={email}
@@ -140,11 +147,15 @@ export default function Page() {
                         </Field>
                         <Field className="-mt-2">
                             <FieldGroup>
-                                <FieldLabel className="text-sm">Your Password</FieldLabel>
+                                <FieldLabel className="text-sm">
+                                    Your Password
+                                </FieldLabel>
                                 <Input
                                     type="password"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
                                     autoComplete="current-password"
                                     required
                                     placeholder="Enter your password"
@@ -180,10 +191,13 @@ export default function Page() {
                         {needsVerification && (
                             <div className="flex max-w-sm flex-col gap-3 rounded-lg bg-card p-4">
                                 <div className="flex flex-col gap-1">
-                                    <p className="text-sm font-medium">Email not verified</p>
+                                    <p className="text-sm font-medium">
+                                        Email not verified
+                                    </p>
                                     <p className="text-xs text-muted-foreground">
-                                        Please check your inbox for a verification link. If you need
-                                        a new one, click the button below.
+                                        Please check your inbox for a
+                                        verification link. If you need a new
+                                        one, click the button below.
                                     </p>
                                 </div>
                                 <Button
@@ -196,12 +210,13 @@ export default function Page() {
                                     {resendSent
                                         ? "Email sent!"
                                         : resendLoading
-                                            ? "Sending..."
-                                            : "Resend verification email"}
+                                          ? "Sending..."
+                                          : "Resend verification email"}
                                 </Button>
                                 {resendSent && (
                                     <p className="text-center text-xs text-green-600">
-                                        Check your inbox for the verification link.
+                                        Check your inbox for the verification
+                                        link.
                                     </p>
                                 )}
                             </div>

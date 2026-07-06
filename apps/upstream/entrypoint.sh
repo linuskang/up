@@ -1,5 +1,5 @@
 #!/bin/sh
 set -e
 
-echo "Starting application..."
+echo "Starting Upstream Server..."
 exec node apps/upstream/server.js

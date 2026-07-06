@@ -1,6 +1,12 @@
 import { authClient } from "@/client/auth"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Download, ExternalLink, Settings, LogOut } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -31,9 +37,12 @@ export function User() {
                     </div>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" >
+            <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                    <Link href="/settings" className="flex cursor-pointer items-center gap-2">
+                    <Link
+                        href="/settings"
+                        className="flex cursor-pointer items-center gap-2"
+                    >
                         <Settings className="size-3.5 text-muted-foreground" />
                         Settings
                     </Link>
@@ -47,22 +56,27 @@ export function User() {
                     Sign out
                 </DropdownMenuItem>
 
-
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                    <Link href="https://upstream.linus.my/docs" target="_blank" className="flex cursor-pointer items-center gap-2">
+                    <Link
+                        href="https://upstream.linus.my/docs"
+                        target="_blank"
+                        className="flex cursor-pointer items-center gap-2"
+                    >
                         <ExternalLink className="size-3.5 text-muted-foreground" />
                         Docs
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/install" className="flex cursor-pointer items-center gap-2">
+                    <Link
+                        href="/install"
+                        className="flex cursor-pointer items-center gap-2"
+                    >
                         <Download className="size-3.5 text-muted-foreground" />
                         Install App
                     </Link>
                 </DropdownMenuItem>
-
             </DropdownMenuContent>
         </DropdownMenu>
     )

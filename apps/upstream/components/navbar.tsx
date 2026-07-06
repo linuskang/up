@@ -21,7 +21,7 @@ import Link from "next/link"
 
 // Components
 import { Button } from "@/components/ui/button"
-import { Folder, Layers, Settings } from "lucide-react"
+import { Folder, Settings } from "lucide-react"
 import { User } from "@/components/user"
 
 // Types
@@ -31,28 +31,25 @@ interface NavItem {
     icon?: ElementType
 }
 
-interface NavbarProps {
-    user: {
-        name?: string | null
-        email: string
-        image?: string | null
-    }
-}
-
 const navItems: NavItem[] = [
     { label: "Projects", path: "/", icon: Folder },
     { label: "Settings", path: "/settings", icon: Settings },
 ]
 
-export default function Navbar({ user }: NavbarProps) {
+export default function Navbar() {
     const pathname = usePathname()
 
     return (
         <nav className="sticky top-0 z-50 w-full bg-background px-3 py-1">
-            <div className="mx-auto grid max-w-5xl grid-cols-[auto_1fr_auto] items-center gap-2 ">
+            <div className="mx-auto grid max-w-5xl grid-cols-[auto_1fr_auto] items-center gap-2">
                 <div className="flex items-center gap-1">
                     <Link href="/">
-                        <Image src="/logo.png" width={45} height={45} alt="Logo" />
+                        <Image
+                            src="/logo.png"
+                            width={45}
+                            height={45}
+                            alt="Logo"
+                        />
                     </Link>
                 </div>
 
@@ -64,13 +61,18 @@ export default function Navbar({ user }: NavbarProps) {
                             <Link href={item.path} key={item.path}>
                                 <Button
                                     variant="ghost"
-                                    className={`rounded-base flex items-center gap-1.5 px-2.5 py-2.5 text-xs font-medium transition-colors ${isActive
-                                        ? "bg-muted text-foreground"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                                        }`}
+                                    className={`rounded-base flex items-center gap-1.5 px-2.5 py-2.5 text-xs font-medium transition-colors ${
+                                        isActive
+                                            ? "bg-muted text-foreground"
+                                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    }`}
                                 >
                                     {Icon && <Icon className="size-5" />}
-                                    <span className={`${isActive ? "inline" : "hidden"} sm:inline`}>{item.label}</span>
+                                    <span
+                                        className={`${isActive ? "inline" : "hidden"} sm:inline`}
+                                    >
+                                        {item.label}
+                                    </span>
                                 </Button>
                             </Link>
                         )

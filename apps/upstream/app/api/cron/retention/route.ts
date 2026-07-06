@@ -16,14 +16,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (authHeader !== expected) {
-        return NextResponse.json(
-            { error: "Unauthorized" },
-            { status: 401 }
-        )
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     let totalDeleted = 0
-    const details: Record<string, { events: number; auditLogs: number; requestLogs: number }> = {}
+    const details: Record<
+        string,
+        { events: number; auditLogs: number; requestLogs: number }
+    > = {}
 
     for (const [planKey, planConfig] of Object.entries(plans)) {
         const cutoff = new Date(
@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
             auditLogs: auditLogResult.count,
             requestLogs: requestLogResult.count,
         }
-        totalDeleted += eventResult.count + auditLogResult.count + requestLogResult.count
+        totalDeleted +=
+            eventResult.count + auditLogResult.count + requestLogResult.count
     }
 
     return NextResponse.json(

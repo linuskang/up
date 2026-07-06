@@ -24,7 +24,12 @@ export async function generateStaticParams() {
 
 export default async function PostPage({ params }: Props) {
     const { slug } = await params
-    const filePath = path.join(process.cwd(), "public", "blog-content", `${slug}.md`)
+    const filePath = path.join(
+        process.cwd(),
+        "public",
+        "blog-content",
+        `${slug}.md`
+    )
 
     if (!fs.existsSync(filePath)) notFound()
 
@@ -36,7 +41,12 @@ export default async function PostPage({ params }: Props) {
             <Navbar />
             <div className="mx-auto w-full max-w-2xl px-4 pt-24 pb-16">
                 <div className="mb-2">
-                    <Button variant="ghost" className="text-muted-foreground" size="sm" asChild>
+                    <Button
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        size="sm"
+                        asChild
+                    >
                         <Link href="/blog" className="gap-1.5">
                             Go back
                         </Link>
@@ -56,11 +66,14 @@ export default async function PostPage({ params }: Props) {
                         {data.date && (
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Calendar className="size-3.5" />
-                                {new Date(data.date).toLocaleDateString("en-US", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                })}
+                                {new Date(data.date).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                    }
+                                )}
                             </div>
                         )}
                     </header>

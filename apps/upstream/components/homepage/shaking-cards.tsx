@@ -16,11 +16,16 @@ interface ShakingCardsProps {
 
 export function ShakingCards({ cards, className }: ShakingCardsProps) {
     return (
-        <div className={cn("flex flex-wrap items-start justify-center gap-4", className)}>
+        <div
+            className={cn(
+                "flex flex-wrap items-start justify-center gap-4",
+                className
+            )}
+        >
             {cards.map((card) => (
                 <div
                     key={card.label}
-                    className="group relative flex flex-col items-center animate-shake"
+                    className="group animate-shake relative flex flex-col items-center"
                 >
                     <div className="relative overflow-hidden rounded-2xl border-[3px] border-amber-500 bg-zinc-900 shadow-2xl">
                         <Image

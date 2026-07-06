@@ -51,40 +51,52 @@ const components: Components = {
     },
     h1({ children }) {
         return (
-            <h1 className="mb-4 mt-8 text-2xl font-bold tracking-tight text-foreground first:mt-0">
+            <h1 className="mt-8 mb-4 text-2xl font-bold tracking-tight text-foreground first:mt-0">
                 {children}
             </h1>
         )
     },
     h2({ children }) {
         return (
-            <h2 className="mb-3 mt-8 text-xl font-semibold tracking-tight text-foreground">
+            <h2 className="mt-8 mb-3 text-xl font-semibold tracking-tight text-foreground">
                 {children}
             </h2>
         )
     },
     h3({ children }) {
         return (
-            <h3 className="mb-2 mt-6 text-lg font-semibold tracking-tight text-foreground">
+            <h3 className="mt-6 mb-2 text-lg font-semibold tracking-tight text-foreground">
                 {children}
             </h3>
         )
     },
     p({ children }) {
-        return <p className="mb-4 leading-relaxed text-muted-foreground last:mb-0">{children}</p>
+        return (
+            <p className="mb-4 leading-relaxed text-muted-foreground last:mb-0">
+                {children}
+            </p>
+        )
     },
     ul({ children }) {
-        return <ul className="mb-4 ml-6 list-disc space-y-1 text-muted-foreground">{children}</ul>
+        return (
+            <ul className="mb-4 ml-6 list-disc space-y-1 text-muted-foreground">
+                {children}
+            </ul>
+        )
     },
     ol({ children }) {
-        return <ol className="mb-4 ml-6 list-decimal space-y-1 text-muted-foreground">{children}</ol>
+        return (
+            <ol className="mb-4 ml-6 list-decimal space-y-1 text-muted-foreground">
+                {children}
+            </ol>
+        )
     },
     li({ children }) {
         return <li className="leading-relaxed">{children}</li>
     },
     blockquote({ children }) {
         return (
-            <blockquote className="my-4 border-l-2 border-primary pl-4 italic text-muted-foreground">
+            <blockquote className="my-4 border-l-2 border-primary pl-4 text-muted-foreground italic">
                 {children}
             </blockquote>
         )
@@ -107,7 +119,9 @@ const components: Components = {
     table({ children }) {
         return (
             <div className="my-4 overflow-x-auto rounded-lg border border-border">
-                <table className="w-full border-collapse text-sm">{children}</table>
+                <table className="w-full border-collapse text-sm">
+                    {children}
+                </table>
             </div>
         )
     },
@@ -129,7 +143,11 @@ const components: Components = {
         )
     },
     strong({ children }) {
-        return <strong className="font-semibold text-foreground">{children}</strong>
+        return (
+            <strong className="font-semibold text-foreground">
+                {children}
+            </strong>
+        )
     },
     em({ children }) {
         return <em className="italic">{children}</em>

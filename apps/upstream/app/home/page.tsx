@@ -28,17 +28,22 @@ export default function Home() {
                     </h1>
 
                     <p className="mx-auto max-w-lg text-sm text-muted-foreground sm:text-base">
-                        Upstream is a simple logging platform for developers. View your events in a beautifully designed dashboard with powerful searching capabilities.
+                        Upstream is a simple logging platform for developers.
+                        View your events in a beautifully designed dashboard
+                        with powerful searching capabilities.
                     </p>
 
                     <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                        <Button size="lg" className="w-full sm:w-auto gap-2 text-sm font-semibold">
+                        <Button
+                            size="lg"
+                            className="w-full gap-2 text-sm font-semibold sm:w-auto"
+                        >
                             <Link href="/register">Create a free account</Link>
                         </Button>
                         <Button
                             variant="ghost"
                             size="lg"
-                            className="w-full sm:w-auto gap-2 text-sm font-semibold"
+                            className="w-full gap-2 text-sm font-semibold sm:w-auto"
                         >
                             <Link href="/docs">View the docs</Link>
                         </Button>
@@ -56,7 +61,9 @@ export default function Home() {
                         Houston we have a problem..
                     </h2>
                     <p className="mx-auto max-w-lg text-base text-muted-foreground">
-                        Every day, hundreds of developers are sending notifications on messaging platforms for their most critical events.
+                        Every day, hundreds of developers are sending
+                        notifications on messaging platforms for their most
+                        critical events.
                     </p>
                 </div>
 
@@ -81,8 +88,9 @@ export default function Home() {
                     ]}
                 />
 
-                <p className="mx-auto max-w-lg text-base text-muted-foreground mt-5">
-                    In other words - a clunky workflow that doesn&apos;t scale well.
+                <p className="mx-auto mt-5 max-w-lg text-base text-muted-foreground">
+                    In other words - a clunky workflow that doesn&apos;t scale
+                    well.
                 </p>
             </section>
 
@@ -90,13 +98,16 @@ export default function Home() {
                 <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                     Introducing Upstream
                 </h2>
-                <p className="mx-auto max-w-lg text-base text-muted-foreground mt-4">
-                    A simple logging platform for developers. View your events in a beautifully designed dashboard with powerful searching capabilities. Integrate in minutes with our simple SDK and API.
+                <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground">
+                    A simple logging platform for developers. View your events
+                    in a beautifully designed dashboard with powerful searching
+                    capabilities. Integrate in minutes with our simple SDK and
+                    API.
                 </p>
 
                 <div className="mt-5 flex w-full max-w-lg flex-col gap-5">
-                    <Card className="overflow-hidden rounded-xl bg-card ring-0 p-0 gap-0 md:min-h-[250px]">
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 flex-1 p-0 min-h-0">
+                    <Card className="gap-0 overflow-hidden rounded-xl bg-card p-0 ring-0 md:min-h-[250px]">
+                        <CardContent className="grid min-h-0 flex-1 grid-cols-1 p-0 md:grid-cols-2">
                             <div className="relative h-64 w-full md:h-full">
                                 <Image
                                     src="/homepage/feature-1.jpg"
@@ -107,13 +118,14 @@ export default function Home() {
                                 />
                             </div>
 
-                            <div className="flex flex-col justify-center gap-3 p-5 md:p-6 text-left">
+                            <div className="flex flex-col justify-center gap-3 p-5 text-left md:p-6">
                                 <h3 className="text-lg font-semibold tracking-tight text-foreground">
                                     Run actions on events.
                                 </h3>
 
                                 <p className="text-sm text-muted-foreground">
-                                    Use actions to trigger product workflows in your event.
+                                    Use actions to trigger product workflows in
+                                    your event.
                                 </p>
 
                                 <Button variant="default" className="w-max">
@@ -123,15 +135,16 @@ export default function Home() {
                         </CardContent>
                     </Card>
 
-                    <Card className="overflow-hidden rounded-xl bg-card ring-0 p-0 gap-0 md:min-h-[250px]">
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 flex-1 p-0 min-h-0">
-                            <div className="flex flex-col justify-center gap-3 p-5 md:p-6 text-left">
+                    <Card className="gap-0 overflow-hidden rounded-xl bg-card p-0 ring-0 md:min-h-[250px]">
+                        <CardContent className="grid min-h-0 flex-1 grid-cols-1 p-0 md:grid-cols-2">
+                            <div className="flex flex-col justify-center gap-3 p-5 text-left md:p-6">
                                 <h3 className="text-lg font-semibold tracking-tight text-foreground">
                                     Critical events → Phone. Immediately.
                                 </h3>
 
                                 <p className="text-sm text-muted-foreground">
-                                    Get notified of critical events on your phone with our PWA app.
+                                    Get notified of critical events on your
+                                    phone with our PWA app.
                                 </p>
 
                                 <Button variant="default" className="w-max">
@@ -139,7 +152,7 @@ export default function Home() {
                                 </Button>
                             </div>
 
-                            <div className="relative h-64 w-full md:h-full md:order-last order-first">
+                            <div className="relative order-first h-64 w-full md:order-last md:h-full">
                                 <Image
                                     src="/homepage/feature-2.jpg"
                                     alt="Upstream search interface"
@@ -151,8 +164,8 @@ export default function Home() {
                         </CardContent>
                     </Card>
 
-                    <Card className="overflow-hidden rounded-xl bg-card ring-0 p-0 gap-0 md:min-h-[250px]">
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 flex-1 p-0 min-h-0">
+                    <Card className="gap-0 overflow-hidden rounded-xl bg-card p-0 ring-0 md:min-h-[250px]">
+                        <CardContent className="grid min-h-0 flex-1 grid-cols-1 p-0 md:grid-cols-2">
                             <div className="relative h-64 w-full md:h-full">
                                 <Image
                                     src="/homepage/feature-3.jpg"
@@ -163,13 +176,14 @@ export default function Home() {
                                 />
                             </div>
 
-                            <div className="flex flex-col justify-center gap-3 p-5 md:p-6 text-left">
+                            <div className="flex flex-col justify-center gap-3 p-5 text-left md:p-6">
                                 <h3 className="text-lg font-semibold tracking-tight text-foreground">
                                     Log complex events with contextIds.
                                 </h3>
 
                                 <p className="text-sm text-muted-foreground">
-                                    Use contexts to link events together and view them in the dashboard.
+                                    Use contexts to link events together and
+                                    view them in the dashboard.
                                 </p>
 
                                 <Button variant="default" className="w-max">
@@ -179,19 +193,20 @@ export default function Home() {
                         </CardContent>
                     </Card>
 
-                    <Card className="overflow-hidden rounded-xl bg-card ring-0 p-0 gap-0 md:min-h-[250px]">
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 flex-1 p-0 min-h-0">
-                            <div className="flex flex-col justify-center gap-3 p-5 md:p-6 text-left">
+                    <Card className="gap-0 overflow-hidden rounded-xl bg-card p-0 ring-0 md:min-h-[250px]">
+                        <CardContent className="grid min-h-0 flex-1 grid-cols-1 p-0 md:grid-cols-2">
+                            <div className="flex flex-col justify-center gap-3 p-5 text-left md:p-6">
                                 <h3 className="text-lg font-semibold tracking-tight text-foreground">
                                     Log JSON with ease.
                                 </h3>
 
                                 <p className="text-sm text-muted-foreground">
-                                    Have complex event data? No problem. Log it as JSON.
+                                    Have complex event data? No problem. Log it
+                                    as JSON.
                                 </p>
                             </div>
 
-                            <div className="relative h-64 w-full md:h-full md:order-last order-first">
+                            <div className="relative order-first h-64 w-full md:order-last md:h-full">
                                 <Image
                                     src="/homepage/feature-4.jpg"
                                     alt="Upstream search interface"
@@ -211,7 +226,8 @@ export default function Home() {
                         Integrate on a Friday
                     </h2>
                     <p className="mx-auto max-w-lg text-base text-muted-foreground">
-                        Start sending events in literally minutes with our simple SDK.
+                        Start sending events in literally minutes with our
+                        simple SDK.
                     </p>
                 </div>
 
@@ -230,7 +246,7 @@ up.events.ingest({
 
                 <div className="my-4 flex justify-center">
                     <svg
-                        className="h-8 w-8 text-muted-foreground "
+                        className="h-8 w-8 text-muted-foreground"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -262,55 +278,94 @@ up.events.ingest({
                 <Accordion
                     type="single"
                     collapsible
-                    className="max-w-lg border-none bg-card mt-5"
+                    className="mt-5 max-w-lg border-none bg-card"
                 >
                     <AccordionItem value="differences" className="border-none">
-                        <AccordionTrigger className="text-base">What makes this different compared to others like Seq and Datadog?</AccordionTrigger>
+                        <AccordionTrigger className="text-base">
+                            What makes this different compared to others like
+                            Seq and Datadog?
+                        </AccordionTrigger>
                         <AccordionContent>
                             <div>
                                 <p>
-                                    Seq and Datadog are designed for the product analytics space. They ingest large volumes of events and provide powerful querying capabilities & statistics for your application.
+                                    Seq and Datadog are designed for the product
+                                    analytics space. They ingest large volumes
+                                    of events and provide powerful querying
+                                    capabilities & statistics for your
+                                    application.
                                 </p>
 
                                 <p className="mt-2">
-                                    Upstream is designed for the critical logs/events space. We focus on delivering a beautiful, intuitive experience for viewing and querying your most important events on the fly. You can use Upstream for your product&apos;s audit logs, triggering workflows, and logging complex events.
+                                    Upstream is designed for the critical
+                                    logs/events space. We focus on delivering a
+                                    beautiful, intuitive experience for viewing
+                                    and querying your most important events on
+                                    the fly. You can use Upstream for your
+                                    product&apos;s audit logs, triggering
+                                    workflows, and logging complex events.
                                 </p>
 
                                 <p className="mt-2">We have:</p>
-                                <ul className="list-disc pl-6 mt-2">
-                                    <li>Arguably the best UI for querying events on the go, especially for mobile.</li>
-                                    <li>Full API, easily ingest and query logs from your apps.</li>
-                                    <li>Action buttons and contextIds are our main differentiators.</li>
-                                    <li>Built for easy integration with your apps, no complex setup required.</li>
+                                <ul className="mt-2 list-disc pl-6">
+                                    <li>
+                                        Arguably the best UI for querying events
+                                        on the go, especially for mobile.
+                                    </li>
+                                    <li>
+                                        Full API, easily ingest and query logs
+                                        from your apps.
+                                    </li>
+                                    <li>
+                                        Action buttons and contextIds are our
+                                        main differentiators.
+                                    </li>
+                                    <li>
+                                        Built for easy integration with your
+                                        apps, no complex setup required.
+                                    </li>
                                 </ul>
                                 <p className="mt-2">
-                                    Upstream was built to easily view your most critical logs on the fly, with a expressive interface. If you don&apos;t need easy access to important logs, Upstream isn&apos;t for you.
+                                    Upstream was built to easily view your most
+                                    critical logs on the fly, with a expressive
+                                    interface. If you don&apos;t need easy
+                                    access to important logs, Upstream
+                                    isn&apos;t for you.
                                 </p>
                             </div>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="usage" className="border-none">
-                        <AccordionTrigger className="text-base">Who is using Upstream?</AccordionTrigger>
+                        <AccordionTrigger className="text-base">
+                            Who is using Upstream?
+                        </AccordionTrigger>
                         <AccordionContent>
                             <p>
-                                Because Upstream is still extremely new, we don&apos;t have any major public customers yet.
+                                Because Upstream is still extremely new, we
+                                don&apos;t have any major public customers yet.
                             </p>
                             <p>
-                                However, I&apos;ve personally been using it in production for the past couple months because I got tired of having to carry a laptop around to see events.
+                                However, I&apos;ve personally been using it in
+                                production for the past couple months because I
+                                got tired of having to carry a laptop around to
+                                see events.
                             </p>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="sdk" className="border-none">
-                        <AccordionTrigger className="text-base">You don&apos;t have an SDK for my framework</AccordionTrigger>
+                        <AccordionTrigger className="text-base">
+                            You don&apos;t have an SDK for my framework
+                        </AccordionTrigger>
                         <AccordionContent>
                             <p>
-                                We thought of that too! Since Upstream is still relatively new, we&apos;re
-                                currently working on expanding our SDK support.
+                                We thought of that too! Since Upstream is still
+                                relatively new, we&apos;re currently working on
+                                expanding our SDK support.
                             </p>
 
                             <p className="mt-4">
-                                If your language isn&apos;t supported by our SDKs, you can still send events
-                                using our Ingestion API. See the{" "}
+                                If your language isn&apos;t supported by our
+                                SDKs, you can still send events using our
+                                Ingestion API. See the{" "}
                                 <Link href="/docs" className="underline">
                                     docs
                                 </Link>{" "}
@@ -319,15 +374,20 @@ up.events.ingest({
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="getstarted" className="border-none">
-                        <AccordionTrigger className="text-base">I&apos;m sold! How do I get started?</AccordionTrigger>
+                        <AccordionTrigger className="text-base">
+                            I&apos;m sold! How do I get started?
+                        </AccordionTrigger>
                         <AccordionContent>
                             <p>
-                                Cool! Register a free account <Link href="/register" className="underline">here</Link>.
+                                Cool! Register a free account{" "}
+                                <Link href="/register" className="underline">
+                                    here
+                                </Link>
+                                .
                             </p>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-
             </section>
 
             <section className="-mt-30 flex flex-col items-center px-4 py-16 sm:py-24">
@@ -338,16 +398,20 @@ up.events.ingest({
                                 Seen enough? Get started for free.
                             </h2>
                             <p className="max-w-lg text-base text-muted-foreground">
-                                Integrate Upstream into your project in minutes. No credit card required.
+                                Integrate Upstream into your project in minutes.
+                                No credit card required.
                             </p>
                             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                                <Button size="lg" className="w-full sm:w-auto gap-2 text-sm font-semibold">
+                                <Button
+                                    size="lg"
+                                    className="w-full gap-2 text-sm font-semibold sm:w-auto"
+                                >
                                     <Link href="/register">Get started</Link>
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="lg"
-                                    className="w-full sm:w-auto gap-2 text-sm font-semibold"
+                                    className="w-full gap-2 text-sm font-semibold sm:w-auto"
                                 >
                                     <Link href="/docs">Documentation</Link>
                                 </Button>

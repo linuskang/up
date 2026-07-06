@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/server/auth"
+import { getSession } from "@/server/auth"
 import { prisma } from "@/server/prisma"
 
 interface RouteParams {
@@ -7,24 +7,18 @@ interface RouteParams {
 }
 
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     {
         params,
     }: {
         params: Promise<RouteParams>
     }
 ) {
-    const session = await auth.api.getSession(
-        {
-            headers: request.headers,
-        }
-    )
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -33,23 +27,19 @@ export async function GET(
 
     const { id } = await params
 
-    const project = await prisma.project.findFirst(
-        {
-            where: {
-                id: id,
-                ownerId: session.user.id,
-            },
-            select: {
-                id: true,
-            }
-        }
-    )
+    const project = await prisma.project.findFirst({
+        where: {
+            id: id,
+            ownerId: session.user.id,
+        },
+        select: {
+            id: true,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }

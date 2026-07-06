@@ -1,6 +1,6 @@
 {
-    "name": "upstream-monorepo",
-    "version": "0.2.1",
+    "name": "upstream",
+    "version": "0.2.3",
     "author": "linuskang",
     "private": true,
     "workspaces": [

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/prisma"
 import { Project } from "@/server/utils"
-import { auth } from "@/server/auth"
+import { getSession } from "@/server/auth"
 
 interface postParams {
     id: string
@@ -15,15 +15,11 @@ export async function GET(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -32,50 +28,44 @@ export async function GET(
 
     const { id } = await params
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
-            include: {
-                apiKeys: {
-                    include: {
-                        addedBy: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                image: true,
-                            },
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
+        include: {
+            apiKeys: {
+                include: {
+                    addedBy: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
                         },
                     },
                 },
             },
-        }
-    )
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }
         )
     }
 
-    const keys = project.apiKeys.map((key) => (
-        {
-            id: key.id,
-            name: key.name,
-            createdAt: key.createdAt,
-            lastUsed: key.lastUsed,
-            addedBy: key.addedBy,
-            active: key.active,
-        }
-    ))
+    const keys = project.apiKeys.map((key) => ({
+        id: key.id,
+        name: key.name,
+        createdAt: key.createdAt,
+        lastUsed: key.lastUsed,
+        addedBy: key.addedBy,
+        active: key.active,
+    }))
 
     return NextResponse.json({
         keys,
@@ -90,15 +80,11 @@ export async function POST(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -107,20 +93,16 @@ export async function POST(
 
     const { id } = await params
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
-        }
-    )
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }
@@ -141,18 +123,12 @@ export async function POST(
     }
 
     const key = await Project.addApiKey(id, session.user.id, body.name)
-    await Project.log(
-        id,
-        session.user.id,
-        `Created API key ${body.name}`
-    )
+    await Project.log(id, session.user.id, `Created API key ${body.name}`)
 
-    return NextResponse.json(
-        {
-            success: true,
-            key,
-        }
-    )
+    return NextResponse.json({
+        success: true,
+        key,
+    })
 }
 
 export async function DELETE(
@@ -163,15 +139,11 @@ export async function DELETE(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -183,49 +155,37 @@ export async function DELETE(
 
     if (!body.keyId) {
         return NextResponse.json(
-            {
-                error: "Missing required fields",
-            },
+            "Missing required fields",
             {
                 status: 400,
             }
         )
     }
 
-    const key = await prisma.apiKey.findUnique(
-        {
-            where: {
-                id: body.keyId,
-                projectId: id,
-            },
-        }
-    )
+    const key = await prisma.apiKey.findUnique({
+        where: {
+            id: body.keyId,
+            projectId: id,
+        },
+    })
 
     if (!key) {
         return NextResponse.json(
-            {
-                error: "API key not found",
-            },
+            "API key not found",
             {
                 status: 404,
             }
         )
     }
 
-    await prisma.apiKey.delete(
-        {
-            where: {
-                id: body.keyId,
-                projectId: id,
-            },
-        }
-    )
+    await prisma.apiKey.delete({
+        where: {
+            id: body.keyId,
+            projectId: id,
+        },
+    })
 
-    await Project.log(
-        id,
-        session.user.id,
-        `Deleted API key ${key.name}`
-    )
+    await Project.log(id, session.user.id, `Deleted API key ${key.name}`)
 
     return NextResponse.json(
         {

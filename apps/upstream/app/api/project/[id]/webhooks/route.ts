@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/server/auth"
+import { getSession } from "@/server/auth"
 import { Project } from "@/server/utils"
 import { prisma } from "@/server/prisma"
 
@@ -15,15 +15,11 @@ export async function GET(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: await request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -32,23 +28,19 @@ export async function GET(
 
     const { id } = await params
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
-            include: {
-                webhooks: true,
-            },
-        }
-    )
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
+        include: {
+            webhooks: true,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }
@@ -73,15 +65,11 @@ export async function POST(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: await request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -94,29 +82,23 @@ export async function POST(
 
     if (!body.name || !body.subscription || !body.url) {
         return NextResponse.json(
-            {
-                error: "Missing required fields",
-            },
+            "Missing required fields",
             {
                 status: 400,
             }
         )
     }
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
-        }
-    )
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }
@@ -127,15 +109,10 @@ export async function POST(
         id,
         body.name,
         body.subscription,
-        body.url,
+        body.url
     )
 
-    await Project.log(
-        id,
-        session.user.id,
-        `Created webhook ${body.name}`
-
-    )
+    await Project.log(id, session.user.id, `Created webhook ${body.name}`)
 
     return NextResponse.json(
         {
@@ -155,15 +132,11 @@ export async function DELETE(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: await request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -185,14 +158,12 @@ export async function DELETE(
         )
     }
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
-        }
-    )
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
@@ -205,14 +176,12 @@ export async function DELETE(
         )
     }
 
-    const webhook = await prisma.webhook.findUnique(
-        {
-            where: {
-                id: body.webhookId,
-                projectId: id,
-            },
-        }
-    )
+    const webhook = await prisma.webhook.findUnique({
+        where: {
+            id: body.webhookId,
+            projectId: id,
+        },
+    })
 
     if (!webhook) {
         return NextResponse.json(
@@ -225,19 +194,13 @@ export async function DELETE(
         )
     }
 
-    await prisma.webhook.delete(
-        {
-            where: {
-                id: body.webhookId,
-            },
-        }
-    )
+    await prisma.webhook.delete({
+        where: {
+            id: body.webhookId,
+        },
+    })
 
-    await Project.log(
-        id,
-        session.user.id,
-        `Deleted webhook ${webhook.name}`
-    )
+    await Project.log(id, session.user.id, `Deleted webhook ${webhook.name}`)
 
     return NextResponse.json(
         {
@@ -257,9 +220,7 @@ export async function PATCH(
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: await request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
@@ -287,14 +248,12 @@ export async function PATCH(
         )
     }
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            },
-        }
-    )
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
@@ -307,14 +266,12 @@ export async function PATCH(
         )
     }
 
-    const webhook = await prisma.webhook.findUnique(
-        {
-            where: {
-                id: body.webhookId,
-                projectId: id,
-            },
-        }
-    )
+    const webhook = await prisma.webhook.findUnique({
+        where: {
+            id: body.webhookId,
+            projectId: id,
+        },
+    })
 
     if (!webhook) {
         return NextResponse.json(
@@ -333,20 +290,14 @@ export async function PATCH(
     if (body.subscription !== undefined) data.subscription = body.subscription
     if (body.enabled !== undefined) data.enabled = body.enabled
 
-    const updated = await prisma.webhook.update(
-        {
-            where: {
-                id: body.webhookId,
-            },
-            data,
-        }
-    )
+    const updated = await prisma.webhook.update({
+        where: {
+            id: body.webhookId,
+        },
+        data,
+    })
 
-    await Project.log(
-        id,
-        session.user.id,
-        `Updated webhook ${body.name}`
-    )
+    await Project.log(id, session.user.id, `Updated webhook ${body.name}`)
 
     return NextResponse.json(
         {

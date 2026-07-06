@@ -1,4 +1,3 @@
-
 // i hate typescript >:(
 
 export interface UsageStats {
@@ -125,17 +124,17 @@ export interface WebhookEventPayload {
 }
 
 export interface Webhook {
-    id: string,
-    projectId: string,
+    id: string
+    projectId: string
     project: {
-        id: string,
-        name: string,
-    },
-    name: string,
-    subscription: string,
-    url: string,
-    enabled: boolean,
-    lastTriggered: string | null,
-    createdAt: string,
-    updatedAt: string,
+        id: string
+        name: string
+    }
+    name: string
+    subscription: string
+    url: string
+    enabled: boolean
+    lastTriggered: string | null
+    createdAt: string
+    updatedAt: string
 }

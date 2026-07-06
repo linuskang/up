@@ -87,7 +87,7 @@ export function EventsList({ events }: Events) {
             {groups.map((group, groupIndex) => (
                 <div key={groupIndex} className="flex flex-col gap-2">
                     {hasMultipleDays && (
-                        <p className="py-1 text-sm text-semibold text-muted-foreground">
+                        <p className="text-semibold py-1 text-sm text-muted-foreground">
                             Events on {formatDate(group.date)}
                         </p>
                     )}
@@ -151,11 +151,13 @@ export function Event({
                 <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 pl-3">
                     <CardTitle className="flex w-full flex-1 items-center text-sm leading-none font-medium">
                         <p className="shrink-0 text-base leading-none font-medium text-muted-foreground">
-                            {new Date(createdAt).toLocaleTimeString("en-US", {
-                                hour: "numeric",
-                                minute: "2-digit",
-                                hour12: true,
-                            }).toLowerCase()}
+                            {new Date(createdAt)
+                                .toLocaleTimeString("en-US", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                })
+                                .toLowerCase()}
                         </p>
 
                         <p className="ml-2 truncate text-base leading-snug text-foreground">
@@ -208,7 +210,10 @@ export function Event({
                     {events && (
                         <div className="mt-3 space-y-3">
                             {events.map((event, index) => (
-                                <div key={index} className="flex items-center gap-3">
+                                <div
+                                    key={index}
+                                    className="flex items-center gap-3"
+                                >
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted/20 text-xs">
                                         {event.icon}
                                     </div>
@@ -248,7 +253,8 @@ export function Event({
                                     style={vscDarkPlus}
                                     customStyle={{
                                         margin: 0,
-                                        padding: "0.75rem 0.75rem 2.5rem 0.75rem",
+                                        padding:
+                                            "0.75rem 0.75rem 2.5rem 0.75rem",
                                         background: "transparent",
                                     }}
                                 >
@@ -263,10 +269,14 @@ export function Event({
                                     <Button
                                         variant="secondary"
                                         size="sm"
-                                        onClick={() => setShowFullJson(!showFullJson)}
+                                        onClick={() =>
+                                            setShowFullJson(!showFullJson)
+                                        }
                                         className="h-9 w-full rounded-none rounded-b border-0 bg-muted text-xs shadow-none hover:bg-muted"
                                     >
-                                        {showFullJson ? "Show less" : "Show all JSON"}
+                                        {showFullJson
+                                            ? "Show less"
+                                            : "Show all JSON"}
                                     </Button>
                                 </div>
                             </div>
@@ -279,7 +289,9 @@ export function Event({
                                     key={index}
                                     variant={action.type}
                                     size="sm"
-                                    onClick={() => window.open(action.url, "_blank")}
+                                    onClick={() =>
+                                        window.open(action.url, "_blank")
+                                    }
                                 >
                                     {action.title}
                                 </Button>

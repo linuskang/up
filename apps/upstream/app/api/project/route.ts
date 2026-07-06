@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/server/auth"
+import { getSession } from "@/server/auth"
 import { Project } from "@/server/utils"
 import { plans } from "@/lib/plans"
 import { prisma } from "@/server/prisma"
 
-export async function GET(request: NextRequest) {
-    const session = await auth.api.getSession({
-        headers: await request.headers,
-    })
+export async function GET(_request: NextRequest) {
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -41,15 +37,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    const session = await auth.api.getSession({
-        headers: await request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -60,9 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (!body.name) {
         return NextResponse.json(
-            {
-                error: "Missing required fields",
-            },
+            "Missing required fields",
             {
                 status: 400,
             }
@@ -80,14 +70,12 @@ export async function POST(request: NextRequest) {
         },
     })
 
-    const userPlan = user?.plan.toLowerCase() as keyof typeof plans ?? "free"
+    const userPlan = (user?.plan.toLowerCase() as keyof typeof plans) ?? "free"
     const limit = plans[userPlan].maxProjects
 
     if (projectCount >= limit) {
         return NextResponse.json(
-            {
-                error: "Project limit reached. Upgrade your plan to create more projects.",
-            },
+            "Project limit reached. Upgrade your plan to create more projects.",
             {
                 status: 403,
             }

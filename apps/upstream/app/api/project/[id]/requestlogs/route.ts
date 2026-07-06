@@ -1,28 +1,24 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/prisma"
-import { auth } from "@/server/auth"
+import { getSession } from "@/server/auth"
 
 interface postParams {
     id: string
 }
 
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     {
         params,
     }: {
         params: Promise<postParams>
     }
 ) {
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    })
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }
@@ -31,33 +27,27 @@ export async function GET(
 
     const { id } = await params
 
-    const project = await prisma.project.findUnique(
-        {
-            where: {
-                id,
-                ownerId: session.user.id,
-            }
-        }
-    )
+    const project = await prisma.project.findUnique({
+        where: {
+            id,
+            ownerId: session.user.id,
+        },
+    })
 
     if (!project) {
         return NextResponse.json(
-            {
-                error: "Project not found",
-            },
+            "Project not found",
             {
                 status: 404,
             }
         )
     }
 
-    const requestLogs = await prisma.requestLog.findMany(
-        {
-            where: {
-                projectId: id,
-            }
-        }
-    )
+    const requestLogs = await prisma.requestLog.findMany({
+        where: {
+            projectId: id,
+        },
+    })
 
     return NextResponse.json(
         {

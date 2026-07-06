@@ -24,7 +24,9 @@ export default function InstallPage() {
                     </Link>
                 </Button>
                 <h1 className="text-3xl font-bold">Install Upstream</h1>
-                <p className="text-muted-foreground">Download our PWA app to use Upstream on your device.</p>
+                <p className="text-muted-foreground">
+                    Download our PWA app to use Upstream on your device.
+                </p>
             </div>
             <PwaInstaller />
         </div>

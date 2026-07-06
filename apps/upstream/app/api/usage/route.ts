@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/server/auth"
+import { getSession } from "@/server/auth"
 import { Usage } from "@/server/utils"
 
-export async function GET(request: NextRequest) {
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    })
+export async function GET(_request: NextRequest) {
+    const session = await getSession()
 
     if (!session) {
         return NextResponse.json(
-            {
-                error: "Unauthorized",
-            },
+            "Unauthorized",
             {
                 status: 401,
             }

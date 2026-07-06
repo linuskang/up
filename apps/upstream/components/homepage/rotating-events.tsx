@@ -11,7 +11,11 @@ interface EventTemplate {
     fields?: { name: string; value: string }[]
     events?: { icon: string; time: string; content: ReactNode }[]
     data?: unknown
-    actions?: { title: string; type: "default" | "secondary" | "ghost"; url: string }[]
+    actions?: {
+        title: string
+        type: "default" | "secondary" | "ghost"
+        url: string
+    }[]
 }
 
 interface EventItem extends EventTemplate {
@@ -190,7 +194,8 @@ const EVENT_TEMPLATES: EventTemplate[] = [
     {
         title: "User feedback received",
         icon: "💬",
-        content: "The app is great, but I wish the dark mode was more contrasty.",
+        content:
+            "The app is great, but I wish the dark mode was more contrasty.",
     },
     {
         title: "Feature flag toggled",
@@ -211,15 +216,32 @@ const EVENT_TEMPLATES: EventTemplate[] = [
 function makeInitialState(): EventItem[] {
     const now = new Date()
     return [
-        { ...EVENT_TEMPLATES[0], id: "init-0", createdAt: new Date(now.getTime() - 0).toISOString() },
-        { ...EVENT_TEMPLATES[1], id: "init-1", createdAt: new Date(now.getTime() - 60_000).toISOString() },
-        { ...EVENT_TEMPLATES[2], id: "init-2", createdAt: new Date(now.getTime() - 120_000).toISOString() },
-        { ...EVENT_TEMPLATES[3], id: "init-3", createdAt: new Date(now.getTime() - 180_000).toISOString() },
+        {
+            ...EVENT_TEMPLATES[0],
+            id: "init-0",
+            createdAt: new Date(now.getTime() - 0).toISOString(),
+        },
+        {
+            ...EVENT_TEMPLATES[1],
+            id: "init-1",
+            createdAt: new Date(now.getTime() - 60_000).toISOString(),
+        },
+        {
+            ...EVENT_TEMPLATES[2],
+            id: "init-2",
+            createdAt: new Date(now.getTime() - 120_000).toISOString(),
+        },
+        {
+            ...EVENT_TEMPLATES[3],
+            id: "init-3",
+            createdAt: new Date(now.getTime() - 180_000).toISOString(),
+        },
     ]
 }
 
 function randomEvent(): EventItem {
-    const template = EVENT_TEMPLATES[Math.floor(Math.random() * EVENT_TEMPLATES.length)]
+    const template =
+        EVENT_TEMPLATES[Math.floor(Math.random() * EVENT_TEMPLATES.length)]
     const offset = Math.floor(Math.random() * 60) * 60 * 1000
     return {
         ...template,
@@ -313,11 +335,12 @@ export function RotatingEvents() {
 
     return (
         <div
-            className="mx-auto w-full max-w-[400px] px-2 sm:px-0 h-[360px] overflow-y-auto overscroll-behavior-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            style={{ overflowAnchor: 'none' }}
+            className="overscroll-behavior-contain mx-auto h-[360px] w-full max-w-[400px] [scrollbar-width:none] overflow-y-auto px-2 sm:px-0 [&::-webkit-scrollbar]:hidden"
+            style={{ overflowAnchor: "none" }}
         >
             {items.map((item) => {
-                const collapsed = item.id === enteringId || item.id === leavingId
+                const collapsed =
+                    item.id === enteringId || item.id === leavingId
                 return (
                     <div
                         key={item.id}

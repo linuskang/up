@@ -4,44 +4,42 @@ import { plans } from "@/lib/plans"
 import { z } from "zod"
 import { prisma } from "@/server/prisma"
 
-const eventSchema = z.object(
-    {
-        title: z.string().min(1),
-        icon: z.string().min(1),
-        content: z.string().optional().nullable(),
-        category: z.string().optional().nullable(),
-        fields: z
-            .array(
-                z.object({
-                    name: z.string(),
-                    value: z.string(),
-                })
-            )
-            .optional()
-            .nullable(),
-        events: z
-            .array(
-                z.object({
-                    icon: z.string(),
-                    time: z.string(),
-                    content: z.string(),
-                })
-            )
-            .optional()
-            .nullable(),
-        data: z.any().optional().nullable(),
-        actions: z
-            .array(
-                z.object({
-                    title: z.string(),
-                    type: z.enum(["default", "secondary", "ghost"]),
-                    url: z.string().url(),
-                })
-            )
-            .optional()
-            .nullable(),
-    }
-)
+const eventSchema = z.object({
+    title: z.string().min(1),
+    icon: z.string().min(1),
+    content: z.string().optional().nullable(),
+    category: z.string().optional().nullable(),
+    fields: z
+        .array(
+            z.object({
+                name: z.string(),
+                value: z.string(),
+            })
+        )
+        .optional()
+        .nullable(),
+    events: z
+        .array(
+            z.object({
+                icon: z.string(),
+                time: z.string(),
+                content: z.string(),
+            })
+        )
+        .optional()
+        .nullable(),
+    data: z.any().optional().nullable(),
+    actions: z
+        .array(
+            z.object({
+                title: z.string(),
+                type: z.enum(["default", "secondary", "ghost"]),
+                url: z.string().url(),
+            })
+        )
+        .optional()
+        .nullable(),
+})
 
 export async function POST(req: NextRequest) {
     const apiKey = req.headers.get("x-api-key")
@@ -128,11 +126,9 @@ export async function POST(req: NextRequest) {
             429,
             req.headers.get("user-agent"),
             JSON.stringify(body),
-            JSON.stringify(
-                {
-                    error: "Monthly event quota exceeded. Upgrade your plan to ingest more events.",
-                }
-            )
+            JSON.stringify({
+                error: "Monthly event quota exceeded. Upgrade your plan to ingest more events.",
+            })
         )
         return NextResponse.json(
             {
@@ -154,11 +150,9 @@ export async function POST(req: NextRequest) {
             400,
             req.headers.get("user-agent"),
             JSON.stringify(body),
-            JSON.stringify(
-                {
-                    error: "Invalid request body",
-                }
-            )
+            JSON.stringify({
+                error: "Invalid request body",
+            })
         )
 
         return NextResponse.json(
@@ -173,21 +167,19 @@ export async function POST(req: NextRequest) {
 
     const events = parseResult.data
 
-    const result = await prisma.event.create(
-        {
-            data: {
-                projectId: keyValidation.projectId!,
-                title: events.title,
-                icon: events.icon,
-                content: events.content,
-                category: events.category,
-                fields: events.fields ?? undefined,
-                events: events.events ?? undefined,
-                data: events.data ?? undefined,
-                actions: events.actions ?? undefined,
-            }
-        }
-    )
+    const result = await prisma.event.create({
+        data: {
+            projectId: keyValidation.projectId!,
+            title: events.title,
+            icon: events.icon,
+            content: events.content,
+            category: events.category,
+            fields: events.fields ?? undefined,
+            events: events.events ?? undefined,
+            data: events.data ?? undefined,
+            actions: events.actions ?? undefined,
+        },
+    })
 
     await Api.log(
         project.id,
@@ -196,19 +188,13 @@ export async function POST(req: NextRequest) {
         201,
         req.headers.get("user-agent"),
         JSON.stringify(body),
-        JSON.stringify(
-            {
-                success: true,
-            }
-        )
+        JSON.stringify({
+            success: true,
+        })
     )
 
     if (result.category) {
-        await Project.triggerWebhooks(
-            project.id,
-            result.category,
-            result,
-        )
+        await Project.triggerWebhooks(project.id, result.category, result)
     }
 
     return NextResponse.json(

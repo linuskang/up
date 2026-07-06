@@ -4,7 +4,9 @@ import crypto from "crypto"
 import { UsageStats, WebhookEventPayload } from "@/types"
 
 export class Api {
-    static async validateKey(apiKey: string): Promise<{ valid: boolean; projectId?: string }> {
+    static async validateKey(
+        apiKey: string
+    ): Promise<{ valid: boolean; projectId?: string }> {
         if (!apiKey.startsWith("up_")) {
             return { valid: false }
         }
@@ -42,21 +44,19 @@ export class Api {
         requestBody: string | null,
         responseBody: string | null
     ) {
-        const res = await prisma.requestLog.create(
-            {
-                data: {
-                    projectId,
-                    endpoint,
-                    method,
-                    status,
-                    userAgent,
-                    requestBody: requestBody ?? undefined,
-                    responseBody: responseBody ?? undefined,
-                }
-            }
-        )
+        const res = await prisma.requestLog.create({
+            data: {
+                projectId,
+                endpoint,
+                method,
+                status,
+                userAgent,
+                requestBody: requestBody ?? undefined,
+                responseBody: responseBody ?? undefined,
+            },
+        })
 
-        return res;
+        return res
     }
 }
 
@@ -151,7 +151,9 @@ export class Usage {
         const plan = (user?.plan ?? "FREE").toLowerCase() as keyof typeof plans
         const planConfig = plans[plan]
 
-        const planDisplay = (user?.plan ?? "FREE").toLowerCase().replace(/^\w/, (c) => c.toUpperCase())
+        const planDisplay = (user?.plan ?? "FREE")
+            .toLowerCase()
+            .replace(/^\w/, (c) => c.toUpperCase())
 
         return {
             plan: planDisplay,
@@ -251,80 +253,66 @@ export class Project {
         return project?.owner ?? null
     }
 
-    static async log(
-        projectId: string,
-        userId: string,
-        message: string
-    ) {
-        const res = await prisma.auditLog.create(
-            {
-                data: {
-                    projectId,
-                    userId,
-                    message,
-                }
-            }
-        )
+    static async log(projectId: string, userId: string, message: string) {
+        const res = await prisma.auditLog.create({
+            data: {
+                projectId,
+                userId,
+                message,
+            },
+        })
 
-        return res;
+        return res
     }
 
     static async newWebhook(
         projectId: string,
         name: string,
         subscription: string,
-        url: string,
+        url: string
     ) {
-        const res = await prisma.webhook.create(
-            {
-                data: {
-                    projectId,
-                    name,
-                    subscription,
-                    url,
-                }
-            }
-        )
+        const res = await prisma.webhook.create({
+            data: {
+                projectId,
+                name,
+                subscription,
+                url,
+            },
+        })
 
-        return res;
+        return res
     }
 
     static async getWebhooks(projectId: string) {
-        const webhooks = await prisma.webhook.findMany(
-            {
-                where: {
-                    projectId,
-                }
-            }
-        )
+        const webhooks = await prisma.webhook.findMany({
+            where: {
+                projectId,
+            },
+        })
 
-        return webhooks;
+        return webhooks
     }
 
     static async triggerWebhooks(
         projectId: string,
         subscription: string,
-        event: WebhookEventPayload,
+        event: WebhookEventPayload
     ) {
-        const webhooks = await prisma.webhook.findMany(
-            {
-                where: {
-                    projectId,
-                    subscription,
-                    enabled: true
-                }
-            }
-        )
+        const webhooks = await prisma.webhook.findMany({
+            where: {
+                projectId,
+                subscription,
+                enabled: true,
+            },
+        })
 
         for (const webhook of webhooks) {
-            await prisma.webhook.update(
-                {
-                    where: { id: webhook.id },
-                    data: {
-                        lastTriggered: new Date(),
-                    },
-                }
-            )
+            await prisma.webhook.update({
+                where: { id: webhook.id },
+                data: {
+                    lastTriggered: new Date(),
+                },
+            })
 
             fetch(webhook.url, {
                 method: "POST",

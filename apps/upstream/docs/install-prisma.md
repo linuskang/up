@@ -1,1 +1,0 @@
-https://www.prisma.io/docs/prisma-orm/quickstart/prisma-postgres

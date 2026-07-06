@@ -45,13 +45,17 @@ export default function BlogPage() {
 
                 <div className="mt-8 space-y-4">
                     {posts.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No posts yet.</p>
+                        <p className="text-sm text-muted-foreground">
+                            No posts yet.
+                        </p>
                     ) : (
                         posts.map((post) => (
                             <Link key={post.slug} href={`/blog/${post.slug}`}>
-                                <Card className="transition-colors hover:bg-card/80 bg-card ring-0 mb-4">
+                                <Card className="mb-4 bg-card ring-0 transition-colors hover:bg-card/80">
                                     <CardHeader>
-                                        <CardTitle className="text-base">{post.title}</CardTitle>
+                                        <CardTitle className="text-base">
+                                            {post.title}
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-2">
                                         {post.description && (
@@ -63,11 +67,16 @@ export default function BlogPage() {
                                             {post.date && (
                                                 <span className="flex items-center gap-1">
                                                     <Calendar className="size-3.5" />
-                                                    {new Date(post.date).toLocaleDateString("en-US", {
-                                                        year: "numeric",
-                                                        month: "long",
-                                                        day: "numeric",
-                                                    })}
+                                                    {new Date(
+                                                        post.date
+                                                    ).toLocaleDateString(
+                                                        "en-US",
+                                                        {
+                                                            year: "numeric",
+                                                            month: "long",
+                                                            day: "numeric",
+                                                        }
+                                                    )}
                                                 </span>
                                             )}
                                         </div>

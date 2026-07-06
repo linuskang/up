@@ -8,5 +8,5 @@ export const plans = {
         maxProjects: 100,
         maxEventsPerMonth: 100000,
         retentionDays: 90,
-    }
+    },
 }
