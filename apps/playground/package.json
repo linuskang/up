@@ -1,0 +1,22 @@
+{
+    "name": "@upstreamlabs/playground",
+    "version": "0.0.0",
+    "author": "linuskang",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "log": "tsx src/index.ts",
+        "build": "tsc",
+        "typecheck": "tsc --noEmit",
+        "lint": "echo 'No lint configured'",
+        "format": "prettier --write \"src/**/*.ts\""
+    },
+    "dependencies": {
+        "@upstreamlabs/sdk": "^0.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "^26.0.0",
+        "tsx": "^4.22.4",
+        "typescript": "^5.0.0"
+    }
+}

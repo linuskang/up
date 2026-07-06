@@ -1,8 +1,9 @@
 {
-    "name": "upstream-sdk",
-    "version": "0.2.1",
-    "description": "Simple and open logging for your next project.",
+    "name": "@upstreamlabs/sdk",
+    "version": "0.0.1",
+    "description": "Simple and open logging for your next project",
     "main": "dist/index.js",
+    "private": false,
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
