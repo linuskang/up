@@ -19,7 +19,7 @@
         "@prisma/adapter-pg": "^7.8.0",
         "@prisma/client": "^7.8.0",
         "@react-email/components": "^1.0.12",
-        "@react-email/render": "^2.0.8",
+        "@react-email/render": "^2.1.0",
         "@t3-oss/env-nextjs": "^0.13.11",
         "@types/pg": "^8.20.0",
         "better-auth": "^1.6.15",
