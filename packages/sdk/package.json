@@ -1,10 +1,13 @@
 {
-    "name": "@upstreamlabs/sdk",
-    "version": "0.0.1",
-    "description": "Simple and open logging for your next project",
+    "name": "@uplabs/sdk",
+    "version": "0.1.0",
+    "description": "Simple and open event logging for your next project",
     "main": "dist/index.js",
     "private": false,
     "types": "dist/index.d.ts",
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "build": "tsc",
         "dev": "tsc --watch",
@@ -16,7 +19,9 @@
     ],
     "keywords": [
         "upstream",
+        "events",
         "logging",
+        "analytics",
         "sdk",
         "events",
         "logs"
