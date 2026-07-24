@@ -1,5 +1,5 @@
 {
-    "name": "@upstreamlabs/playground",
+    "name": "@uplabs/playground",
     "version": "0.0.0",
     "author": "linuskang",
     "type": "module",
@@ -12,7 +12,7 @@
         "format": "prettier --write \"src/**/*.ts\""
     },
     "dependencies": {
-        "@upstreamlabs/sdk": "^0.0.1"
+        "@uplabs/sdk": "^0.1.0"
     },
     "devDependencies": {
         "@types/node": "^26.1.1",

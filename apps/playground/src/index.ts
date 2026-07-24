@@ -1,4 +1,4 @@
-import { Upstream } from "@upstreamlabs/sdk";
+import { Upstream } from "@uplabs/sdk";
 import dotenv from "dotenv";
 
 dotenv.config();
