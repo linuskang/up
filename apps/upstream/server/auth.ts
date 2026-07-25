@@ -9,18 +9,18 @@ import { Email } from "./resend"
 export async function getSession() {
     return auth.api.getSession({
         headers: await headers(),
-    });
+    })
 }
 
 export async function requireSession() {
     const session = await auth.api.getSession({
-        headers: await headers()
-    });
+        headers: await headers(),
+    })
 
     if (!session) {
-        redirect("/auth/login");
+        redirect("/auth/login")
     }
-    return session;
+    return session
 }
 
 export const auth = betterAuth({

@@ -18,12 +18,9 @@ export async function GET(
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const { id } = await params
@@ -39,12 +36,9 @@ export async function GET(
     })
 
     if (!project) {
-        return NextResponse.json(
-            "Project not found",
-            {
-                status: 404,
-            }
-        )
+        return NextResponse.json("Project not found", {
+            status: 404,
+        })
     }
 
     return NextResponse.json(
@@ -68,12 +62,9 @@ export async function POST(
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const { id } = await params
@@ -81,12 +72,9 @@ export async function POST(
     const body = await request.json()
 
     if (!body.name || !body.subscription || !body.url) {
-        return NextResponse.json(
-            "Missing required fields",
-            {
-                status: 400,
-            }
-        )
+        return NextResponse.json("Missing required fields", {
+            status: 400,
+        })
     }
 
     const project = await prisma.project.findUnique({
@@ -97,12 +85,9 @@ export async function POST(
     })
 
     if (!project) {
-        return NextResponse.json(
-            "Project not found",
-            {
-                status: 404,
-            }
-        )
+        return NextResponse.json("Project not found", {
+            status: 404,
+        })
     }
 
     const webhook = await Project.newWebhook(
@@ -135,12 +120,9 @@ export async function DELETE(
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const { id } = await params

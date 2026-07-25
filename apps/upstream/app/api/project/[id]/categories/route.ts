@@ -17,12 +17,9 @@ export async function GET(
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const { id } = await params
@@ -38,12 +35,9 @@ export async function GET(
     })
 
     if (!project) {
-        return NextResponse.json(
-            "Project not found",
-            {
-                status: 404,
-            }
-        )
+        return NextResponse.json("Project not found", {
+            status: 404,
+        })
     }
 
     const totalCount = await prisma.event.count({

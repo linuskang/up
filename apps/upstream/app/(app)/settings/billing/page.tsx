@@ -28,7 +28,7 @@ export default function Page() {
         fetch("/api/usage")
             .then((r) => r.json())
             .then((data) => setUsage(data))
-            .catch(() => { })
+            .catch(() => {})
     }, [])
 
     if (!session) {
@@ -148,9 +148,9 @@ export default function Page() {
 
                     <p className="mt-4 text-xs text-muted-foreground">
                         Pro plan perks are available to all beta users for free
-                        during the beta period.
-                        After the beta period, users will need to upgrade to the
-                        Pro plan to continue enjoying these perks.
+                        during the beta period. After the beta period, users
+                        will need to upgrade to the Pro plan to continue
+                        enjoying these perks.
                     </p>
 
                     <div className="mt-2 text-xs text-muted-foreground">

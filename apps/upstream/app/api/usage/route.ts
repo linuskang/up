@@ -6,12 +6,9 @@ export async function GET(_request: NextRequest) {
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const stats = await Usage.getStats(session.user.id)

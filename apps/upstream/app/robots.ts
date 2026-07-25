@@ -1,16 +1,11 @@
-import type { MetadataRoute } from "next";
-import { env } from "@/env";
+import type { MetadataRoute } from "next"
+import { env } from "@/env"
 
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
             userAgent: "*",
-            allow: [
-                "/",
-                "/home",
-                "/blog",
-                "/docs",
-            ],
+            allow: ["/", "/home", "/blog", "/docs"],
             disallow: [
                 "/api/",
                 "/project/",
@@ -24,5 +19,5 @@ export default function robots(): MetadataRoute.Robots {
             ],
         },
         sitemap: `${env.BETTER_AUTH_URL}/sitemap.xml`,
-    };
+    }
 }

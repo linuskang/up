@@ -17,5 +17,8 @@
     "devDependencies": {
         "turbo": "^2.10.5"
     },
-    "packageManager": "npm@10.8.0"
+    "packageManager": "npm@10.8.0",
+    "dependencies": {
+        "axios": "^1.18.1"
+    }
 }

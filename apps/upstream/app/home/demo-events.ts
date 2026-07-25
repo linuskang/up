@@ -34,13 +34,13 @@ export const DemoEvents: EventProps[] = [
             {
                 title: "View in Stripe",
                 url: "#",
-                type: "default"
+                type: "default",
             },
             {
                 title: "Mark as safe",
                 url: "#",
-                type: "secondary"
-            }
+                type: "secondary",
+            },
         ],
         createdAt: new Date().toISOString(),
     },
@@ -58,7 +58,7 @@ export const DemoEvents: EventProps[] = [
         data: {
             id: "1234567890abcdef",
             object: "user",
-            email: "user@example.com"
+            email: "user@example.com",
         },
         events: [
             {
@@ -75,20 +75,20 @@ export const DemoEvents: EventProps[] = [
                 content: "user: email verified",
                 icon: "✅",
                 time: "10:10 am",
-            }
+            },
         ],
         actions: [
             {
                 title: "View user profile",
                 url: "#",
-                type: "default"
+                type: "default",
             },
             {
                 title: "Send welcome email",
                 url: "#",
-                type: "secondary"
-            }
+                type: "secondary",
+            },
         ],
         createdAt: new Date().toISOString(),
-    }
+    },
 ]

@@ -52,9 +52,7 @@ export default function Home() {
                 </div>
 
                 <div className="mx-auto mt-8 w-full max-w-md sm:mt-12">
-                    <EventsList
-                        events={DemoEvents}
-                    />
+                    <EventsList events={DemoEvents} />
                 </div>
             </section>
 

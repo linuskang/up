@@ -160,7 +160,7 @@ export function Event({
                         </p>
 
                         <p
-                            className={`ml-2 text-base leading-snug text-foreground ${open ? "whitespace-normal break-words" : "truncate"}`}
+                            className={`ml-2 text-base leading-snug text-foreground ${open ? "break-words whitespace-normal" : "truncate"}`}
                         >
                             {title}
                         </p>
@@ -190,7 +190,7 @@ export function Event({
             >
                 <div className="min-h-0 overflow-hidden">
                     {content && (
-                        <div className="whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">
+                        <div className="text-sm leading-relaxed break-words whitespace-pre-wrap text-muted-foreground">
                             {content}
                         </div>
                     )}
@@ -208,7 +208,7 @@ export function Event({
                                             {field.name}
                                         </span>
                                         <span
-                                            className={`min-w-0 break-words text-sm font-medium ${isEmpty ? "text-muted-foreground/60 italic" : "text-foreground"}`}
+                                            className={`min-w-0 text-sm font-medium break-words ${isEmpty ? "text-muted-foreground/60 italic" : "text-foreground"}`}
                                         >
                                             {isEmpty
                                                 ? "Empty Content"

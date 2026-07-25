@@ -18,12 +18,9 @@ export async function GET(
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const { id } = await params
@@ -50,12 +47,9 @@ export async function GET(
     })
 
     if (!project) {
-        return NextResponse.json(
-            "Project not found",
-            {
-                status: 404,
-            }
-        )
+        return NextResponse.json("Project not found", {
+            status: 404,
+        })
     }
 
     const keys = project.apiKeys.map((key) => ({
@@ -83,12 +77,9 @@ export async function POST(
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const { id } = await params
@@ -101,12 +92,9 @@ export async function POST(
     })
 
     if (!project) {
-        return NextResponse.json(
-            "Project not found",
-            {
-                status: 404,
-            }
-        )
+        return NextResponse.json("Project not found", {
+            status: 404,
+        })
     }
 
     const body = await request.json()
@@ -142,24 +130,18 @@ export async function DELETE(
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const { id } = await params
     const body = await request.json()
 
     if (!body.keyId) {
-        return NextResponse.json(
-            "Missing required fields",
-            {
-                status: 400,
-            }
-        )
+        return NextResponse.json("Missing required fields", {
+            status: 400,
+        })
     }
 
     const key = await prisma.apiKey.findUnique({
@@ -170,12 +152,9 @@ export async function DELETE(
     })
 
     if (!key) {
-        return NextResponse.json(
-            "API key not found",
-            {
-                status: 404,
-            }
-        )
+        return NextResponse.json("API key not found", {
+            status: 404,
+        })
     }
 
     await prisma.apiKey.delete({

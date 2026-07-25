@@ -8,12 +8,9 @@ export async function GET(_request: NextRequest) {
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const projects = await prisma.project.findMany({
@@ -40,23 +37,17 @@ export async function POST(request: NextRequest) {
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.json(
-            "Unauthorized",
-            {
-                status: 401,
-            }
-        )
+        return NextResponse.json("Unauthorized", {
+            status: 401,
+        })
     }
 
     const body = await request.json()
 
     if (!body.name) {
-        return NextResponse.json(
-            "Missing required fields",
-            {
-                status: 400,
-            }
-        )
+        return NextResponse.json("Missing required fields", {
+            status: 400,
+        })
     }
 
     // Check project quota

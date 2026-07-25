@@ -1,8 +1,15 @@
 "use client"
 
+// Libraries
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { authClient } from "@/client/auth"
+import Link from "next/link"
+import Image from "next/image"
+
+// Components
 import { Folder, ArrowUpRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@uplabs/ui/components/button"
 import {
     Table,
     TableBody,
@@ -10,7 +17,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
+} from "@uplabs/ui/components/table"
 import {
     Pagination,
     PaginationContent,
@@ -18,20 +25,15 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@/components/ui/pagination"
-import { authClient } from "@/client/auth"
-import Link from "next/link"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
+} from "@uplabs/ui/components/pagination"
 
+// Types
 interface Project {
     id: string
     name: string
 }
 
 import { UsageStats } from "@/types"
-
-const ITEMS_PER_PAGE = 5
 
 export default function Page() {
     const router = useRouter()
@@ -64,10 +66,10 @@ export default function Page() {
         fetchUsage()
     }, [session])
 
-    const totalPages = Math.ceil(projects.length / ITEMS_PER_PAGE)
+    const totalPages = Math.ceil(projects.length / 5)
     const paginatedProjects = projects.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
+        (currentPage - 1) * 5,
+        currentPage * 5
     )
 
     if (sessionPending || projectsLoading || usageLoading) {
@@ -119,7 +121,7 @@ export default function Page() {
                             Account Plan
                         </p>
                         <p className="text-xl font-bold text-foreground">
-                            {usage?.plan ?? "Free"}
+                            {usage?.plan}
                         </p>
                     </div>
                 </div>
@@ -130,7 +132,7 @@ export default function Page() {
                     <h2 className="text-sm font-semibold text-foreground">
                         Your Projects
                     </h2>
-                    <Button className="cursor-pointer bg-primary text-xs font-bold text-primary-foreground hover:bg-primary/80">
+                    <Button variant="primary">
                         <Link href="/new-project">Create Project</Link>
                     </Button>
                 </div>
@@ -219,8 +221,6 @@ export default function Page() {
                                             <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
                                                 <Button
                                                     variant="secondary"
-                                                    size="sm"
-                                                    className="h-7 text-xs"
                                                     onClick={(e) => {
                                                         e.stopPropagation()
                                                         router.push(
