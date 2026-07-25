@@ -28,7 +28,7 @@ export default function Page() {
         fetch("/api/usage")
             .then((r) => r.json())
             .then((data) => setUsage(data))
-            .catch(() => {})
+            .catch(() => { })
     }, [])
 
     if (!session) {
@@ -103,19 +103,6 @@ export default function Page() {
                                 <Check className="h-4 w-4" /> Audit logs
                             </li>
                         </ul>
-                        {currentPlan === "free" && usage && (
-                            <div className="space-y-1 text-xs text-muted-foreground">
-                                <p>
-                                    Projects: {usage.projects.current} /{" "}
-                                    {usage.projects.limit}
-                                </p>
-                                <p>
-                                    Events this month:{" "}
-                                    {usage.eventsMonth.current} /{" "}
-                                    {usage.eventsMonth.limit}
-                                </p>
-                            </div>
-                        )}
                     </div>
 
                     <div className="mt-3 flex flex-col gap-4 rounded-lg bg-muted/40 p-4">
@@ -125,8 +112,7 @@ export default function Page() {
                                     Pro
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    Higher quotas & advanced features for pro
-                                    users
+                                    Higher quotas & advanced features
                                 </p>
                             </div>
                             {currentPlan === "pro" ? (
@@ -158,24 +144,11 @@ export default function Page() {
                                 event retention
                             </li>
                         </ul>
-                        {currentPlan === "pro" && usage && (
-                            <div className="space-y-1 text-xs text-muted-foreground">
-                                <p>
-                                    Projects: {usage.projects.current} /{" "}
-                                    {usage.projects.limit}
-                                </p>
-                                <p>
-                                    Events this month:{" "}
-                                    {usage.eventsMonth.current} /{" "}
-                                    {usage.eventsMonth.limit}
-                                </p>
-                            </div>
-                        )}
                     </div>
 
                     <p className="mt-4 text-xs text-muted-foreground">
                         Pro plan perks are available to all beta users for free
-                        during the beta period, which will end on July 31, 2026.
+                        during the beta period.
                         After the beta period, users will need to upgrade to the
                         Pro plan to continue enjoying these perks.
                     </p>
