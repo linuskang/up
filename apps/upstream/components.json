@@ -1,25 +1,27 @@
 {
-    "$schema": "https://ui.shadcn.com/schema.json",
-    "style": "radix-mira",
-    "rsc": true,
-    "tsx": true,
-    "tailwind": {
-        "config": "",
-        "css": "app/globals.css",
-        "baseColor": "neutral",
-        "cssVariables": true,
-        "prefix": ""
-    },
-    "iconLibrary": "lucide",
-    "rtl": false,
-    "aliases": {
-        "components": "@/components",
-        "utils": "@uplabs/ui/lib/utils",
-        "ui": "@uplabs/ui/components",
-        "lib": "@uplabs/ui/lib",
-        "hooks": "@uplabs/ui/hooks"
-    },
-    "menuColor": "default-translucent",
-    "menuAccent": "subtle",
-    "registries": {}
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "radix-mira",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "rtl": false,
+  "menuColor": "default-translucent",
+  "menuAccent": "subtle",
+  "aliases": {
+    "components": "@/components",
+    "utils": "@uplabs/ui/lib/utils",
+    "ui": "@uplabs/ui/components",
+    "lib": "@uplabs/ui/lib",
+    "hooks": "@uplabs/ui/hooks"
+  },
+  "registries": {
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
+  }
 }

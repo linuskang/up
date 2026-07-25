@@ -26,8 +26,8 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@uplabs/ui/components/breadcrumb"
+import { Form } from "@/components/ui/form"
 
-import { Form } from "@/components/form"
 import { PageLayout } from "@/components/layout"
 
 // Types
