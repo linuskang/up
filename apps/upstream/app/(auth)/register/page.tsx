@@ -2,211 +2,208 @@
 
 // Libraries
 import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { CircleQuestionMark } from "lucide-react"
+import { toast } from "sonner"
 import { authClient } from "@/client/auth"
-import { redirect } from "next/navigation"
 
 // Components
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-    FieldSeparator,
-} from "@/components/ui/field"
-import { Github, Google } from "@/components/icons"
-import { Checkbox } from "@/components/ui/checkbox"
-import { toast } from "sonner"
+import { Github } from "@/components/icons"
+import { Form } from "@/components/ui/form"
+import { Button } from "@uplabs/ui/components/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@uplabs/ui/components/card"
+import { Checkbox } from "@uplabs/ui/components/checkbox"
+import { Input } from "@uplabs/ui/components/input"
+import styles from "../login/page.module.css"
+
+type RegisterForm = {
+    name: string
+    email: string
+    password: string
+    agree: boolean
+}
 
 export default function Page() {
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [error, setError] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
-    const [agree, setAgree] = useState(false)
-
-    const signUp = async (form: React.FormEvent<HTMLFormElement>) => {
-        form.preventDefault()
-        setError(null)
-        setLoading(true)
-
-        const { error } = await authClient.signUp.email({
-            name,
-            email,
-            password,
-        })
-
-        if (error) {
-            setError(error.message || "An error occured")
-            setLoading(false)
-            return
-        } else {
-            toast.success(
-                "Account created successfully! Please check your email to verify your account."
-            )
-            redirect("/login")
-            setLoading(false)
-        }
-    }
-
-    const github = async () => {
-        setError(null)
-        setLoading(true)
-
-        await authClient.signIn.social({
-            provider: "github",
-        })
-    }
-
-    const google = async () => {
-        setError(null)
-        setLoading(true)
-
-        await authClient.signIn.social({
-            provider: "google",
-        })
-    }
+    const router = useRouter()
+    const [authError, setAuthError] = useState<string | null>(null)
 
     return (
-        <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-10 sm:px-6">
-            <Card className="w-full bg-background ring-0 sm:w-auto">
-                <CardHeader className="gap-2 pb-2 text-center">
-                    <CardTitle className="text-5xl font-bold">
-                        Upstream
+        <div className="relative isolate flex min-h-svh items-center justify-center overflow-hidden px-4 py-8">
+            <div className={styles.background} aria-hidden="true" />
+            <Card className="relative z-10 w-full max-w-sm gap-5 bg-card-2 p-5 ring-0 backdrop-blur-xl">
+                <CardHeader className="flex flex-col items-center gap-3 p-0 text-center">
+                    <Image
+                        src="/icon-nobg.svg"
+                        alt="Upstream logo"
+                        width={100}
+                        height={100}
+                        priority
+                        className="scale-120"
+                    />
+
+                    <CardTitle className="-mt-3 text-3xl font-medium text-white/80">
+                        Create your account
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <form
-                        className="flex flex-col gap-5 sm:min-w-90"
-                        onSubmit={signUp}
+
+                <CardContent className="space-y-5 p-3">
+                    <Button
+                        variant="primary"
+                        className="flex w-full items-center justify-center gap-2"
+                        onClick={async () => {
+                            await authClient.signIn.social({
+                                provider: "github",
+                            })
+                        }}
                     >
-                        <Field>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                onClick={github}
-                                disabled={loading}
-                                className="h-10 w-full cursor-pointer justify-center gap-2 border-none text-sm"
-                            >
-                                <Github />
-                                Register with GitHub
-                            </Button>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                onClick={google}
-                                disabled={loading}
-                                className="h-10 w-full cursor-pointer justify-center gap-2 border-none text-sm"
-                            >
-                                <Google />
-                                Register with Google
-                            </Button>
-                        </Field>
-                        <FieldSeparator className="text-sm">
-                            Or register with
-                        </FieldSeparator>
-                        <Field className="-mt-2">
-                            <FieldGroup>
-                                <FieldLabel className="text-sm">
-                                    Your Name
-                                </FieldLabel>
+                        <Github />
+                        Continue with GitHub
+                    </Button>
+
+                    <Form<RegisterForm>
+                        formOptions={{
+                            defaultValues: {
+                                name: "",
+                                email: "",
+                                password: "",
+                                agree: false,
+                            },
+                        }}
+                        onSubmit={async (data) => {
+                            setAuthError(null)
+
+                            const { error } = await authClient.signUp.email({
+                                name: data.name,
+                                email: data.email,
+                                password: data.password,
+                            })
+
+                            if (error) {
+                                setAuthError(
+                                    error.message || "Something went wrong"
+                                )
+                                return
+                            }
+
+                            toast.success(
+                                "Account created. Check your email to verify your account."
+                            )
+                            router.push("/login")
+                        }}
+                    >
+                        <div className="mb-2">
+                            <Form.Label<RegisterForm> name="name">
+                                Your name
+                            </Form.Label>
+                            <Form.Field<RegisterForm> name="name" required>
                                 <Input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="name"
                                     autoComplete="name"
-                                    required
-                                    placeholder="Your Name"
-                                    className="-mt-3 h-10 border-0 !text-sm text-xl ring-primary"
+                                    className="h-8"
                                 />
-                            </FieldGroup>
-                        </Field>
-                        <Field className="-mt-2">
-                            <FieldGroup>
-                                <FieldLabel className="text-sm">
-                                    Account Email
-                                </FieldLabel>
+                            </Form.Field>
+                            <Form.Error
+                                name="name"
+                                className="mt-1 text-sm text-destructive"
+                            />
+                        </div>
+
+                        <div className="mb-2">
+                            <Form.Label<RegisterForm> name="email">
+                                Your email
+                            </Form.Label>
+                            <Form.Field<RegisterForm> name="email" required>
                                 <Input
                                     type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="email"
                                     autoComplete="email"
-                                    required
-                                    placeholder="your@email.com"
-                                    className="-mt-3 h-10 border-0 !text-sm text-xl"
+                                    className="h-8"
                                 />
-                            </FieldGroup>
-                        </Field>
-                        <Field className="-mt-2">
-                            <FieldGroup>
-                                <FieldLabel className="text-sm">
-                                    Your Password
-                                </FieldLabel>
+                            </Form.Field>
+                            <Form.Error
+                                name="email"
+                                className="mt-1 text-sm text-destructive"
+                            />
+                        </div>
+
+                        <div className="mb-3">
+                            <Form.Label<RegisterForm> name="password">
+                                Your password
+                            </Form.Label>
+                            <Form.Field<RegisterForm>
+                                name="password"
+                                required
+                                rules={{ minLength: 8 }}
+                            >
                                 <Input
                                     type="password"
-                                    value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
-                                    autoComplete="current-password"
-                                    required
-                                    placeholder="Enter your password"
-                                    className="-mt-3 h-10 border-0 !text-sm text-base"
+                                    placeholder="password"
+                                    autoComplete="new-password"
+                                    className="h-8"
                                 />
-                            </FieldGroup>
-                        </Field>
-                        <Field className="-mt-2">
-                            <label className="flex items-center gap-2 text-sm">
-                                <Checkbox
-                                    checked={agree}
-                                    onCheckedChange={(checked) =>
-                                        setAgree(checked === true)
-                                    }
-                                    disabled={loading}
-                                    aria-label="I agree to the Terms of Service"
-                                />
-                                <span>
-                                    I agree to the{" "}
-                                    <Link
-                                        href="/terms"
-                                        className="font-semibold transition hover:text-primary"
-                                    >
-                                        Terms of Service
-                                    </Link>
-                                </span>
-                            </label>
-                        </Field>
-                        <Field>
-                            <Button
-                                type="submit"
-                                disabled={loading || !agree}
-                                className="h-10 w-full cursor-pointer text-sm font-bold"
+                            </Form.Field>
+                            <Form.Error
+                                name="password"
+                                className="mt-1 text-sm text-destructive"
                             >
-                                {loading
-                                    ? "Creating Account..."
-                                    : "Create Account"}
-                            </Button>
+                                {(error) =>
+                                    error.type === "minLength"
+                                        ? "Password must be at least 8 characters"
+                                        : error.message
+                                }
+                            </Form.Error>
+                        </div>
 
-                            {error && (
-                                <div className="flex justify-center rounded-lg text-sm text-destructive">
-                                    {error}
-                                </div>
-                            )}
-                        </Field>
-                        <FieldDescription className="flex justify-center text-sm">
-                            Have an account?{" "}
-                            <Link
-                                href="/login"
-                                className="underline-none ml-1 font-bold !no-underline transition hover:text-white"
+                        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Form.Field<RegisterForm>
+                                name="agree"
+                                required="You must agree to the Terms of Service"
+                                override={({ field }) => ({
+                                    checked: field.value,
+                                    onCheckedChange: field.onChange,
+                                })}
                             >
-                                Login
-                            </Link>
-                        </FieldDescription>
-                    </form>
+                                <Checkbox aria-label="I agree to the Terms of Service" />
+                            </Form.Field>
+                            <span>
+                                I agree to the{" "}
+                                <Link
+                                    href="/terms"
+                                    className="font-semibold text-foreground hover:underline"
+                                >
+                                    Terms of Service
+                                </Link>
+                            </span>
+                        </label>
+                        <Form.Error
+                            name="agree"
+                            className="mt-1 text-sm text-destructive"
+                        />
+
+                        {authError && (
+                            <p className="mt-2 text-center text-sm text-destructive">
+                                {authError}
+                            </p>
+                        )}
+
+                        <Form.Submit>
+                            <Button
+                                variant="primary"
+                                className="mt-4 h-8 w-full"
+                            >
+                                Create account
+                            </Button>
+                        </Form.Submit>
+
+                        <Link
+                            href="/login"
+                            className="mt-2 flex items-center justify-center gap-1 text-xs font-semibold text-muted-foreground hover:underline"
+                        >
+                            Already have an account?
+                        </Link>
+                    </Form>
                 </CardContent>
             </Card>
         </div>

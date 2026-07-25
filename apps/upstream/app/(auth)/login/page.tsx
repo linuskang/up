@@ -37,8 +37,8 @@ export default function Page() {
                         className="scale-120"
                     />
 
-                    <CardTitle className="-mt-3 text-3xl font-medium text-white/80">
-                        Welcome to Upstream
+                    <CardTitle className="-mt-3 bg-gradient-to-b from-white to-white/50 bg-clip-text text-5xl font-medium text-transparent">
+                        Upstream
                     </CardTitle>
                 </CardHeader>
 

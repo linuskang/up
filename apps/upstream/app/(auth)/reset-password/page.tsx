@@ -1,153 +1,188 @@
 "use client"
 
 // Libraries
-import { useState, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { Suspense, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { ArrowLeft } from "lucide-react"
 import { authClient } from "@/client/auth"
 
 // Components
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Form } from "@/components/ui/form"
+import { Button } from "@uplabs/ui/components/button"
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@uplabs/ui/components/card"
+import { Input } from "@uplabs/ui/components/input"
+import styles from "../login/page.module.css"
 
-function ResetPasswordForm() {
+type ResetPasswordForm = {
+    password: string
+    confirmPassword: string
+}
+
+function ResetPasswordContent() {
+    const router = useRouter()
     const searchParams = useSearchParams()
     const token = searchParams.get("token")
-
-    const [newPassword, setNewPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
-    const [error, setError] = useState<string | null>(null)
+    const [authError, setAuthError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
-    const [loading, setLoading] = useState(false)
-
-    const handleSubmit = async (form: React.FormEvent<HTMLFormElement>) => {
-        form.preventDefault()
-        setError(null)
-        setSuccess(false)
-
-        if (!token) {
-            setError(
-                "Invalid or missing reset token. Please request a new password reset link."
-            )
-            return
-        }
-
-        if (newPassword !== confirmPassword) {
-            setError("Passwords do not match.")
-            return
-        }
-
-        if (newPassword.length < 8) {
-            setError("Password must be at least 8 characters.")
-            return
-        }
-
-        setLoading(true)
-
-        const { error } = await authClient.resetPassword({
-            newPassword,
-            token,
-        })
-
-        if (error) {
-            setError(error.message || "An error occurred")
-            setLoading(false)
-            return
-        }
-
-        setSuccess(true)
-        setLoading(false)
-    }
 
     return (
-        <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-10 sm:px-6">
-            <Card className="w-full bg-background ring-0 sm:w-auto">
-                <CardHeader className="gap-2 pb-2 text-center">
-                    <CardTitle className="text-5xl font-bold">
-                        Upstream
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <form
-                        className="flex flex-col gap-5 sm:min-w-90"
-                        onSubmit={handleSubmit}
-                    >
-                        <Field>
-                            <FieldGroup>
-                                <FieldLabel className="text-sm">
-                                    New Password
-                                </FieldLabel>
-                                <Input
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) =>
-                                        setNewPassword(e.target.value)
-                                    }
-                                    autoComplete="new-password"
-                                    required
-                                    placeholder="Enter new password"
-                                    className="-mt-3 h-10 border-0 !text-sm text-base"
-                                />
-                            </FieldGroup>
-                        </Field>
-                        <Field className="-mt-2">
-                            <FieldGroup>
-                                <FieldLabel className="text-sm">
-                                    Confirm Password
-                                </FieldLabel>
-                                <Input
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) =>
-                                        setConfirmPassword(e.target.value)
-                                    }
-                                    autoComplete="new-password"
-                                    required
-                                    placeholder="Confirm new password"
-                                    className="-mt-3 h-10 border-0 !text-sm text-base"
-                                />
-                            </FieldGroup>
-                        </Field>
-                        <Field>
-                            <Button
-                                type="submit"
-                                disabled={loading || !token}
-                                className="h-10 w-full cursor-pointer text-sm font-bold"
-                            >
-                                {loading ? "Resetting..." : "Reset password"}
-                            </Button>
+        <AuthShell>
+            <CardHeader className="flex flex-col items-center gap-3 p-0 text-center">
+                <Image
+                    src="/icon-nobg.svg"
+                    alt="Upstream logo"
+                    width={100}
+                    height={100}
+                    priority
+                    className="scale-120"
+                />
 
-                            {error && (
-                                <div className="flex justify-center rounded-lg text-sm text-destructive">
-                                    {error}
-                                </div>
-                            )}
-                            {success && (
-                                <div className="flex flex-col items-center gap-2 text-sm">
-                                    <span className="text-green-600">
-                                        Password reset successfully!
-                                    </span>
-                                    <Link
-                                        href="/login"
-                                        className="underline-none font-bold !no-underline transition hover:text-white"
-                                    >
-                                        Go to login
-                                    </Link>
-                                </div>
-                            )}
-                        </Field>
-                        <div className="flex justify-center text-sm">
-                            <Link
-                                href="/login"
-                                className="underline-none ml-1 font-bold !no-underline transition hover:text-white"
+                <CardTitle className="-mt-3 text-3xl font-medium text-white/80">
+                    Choose a new password
+                </CardTitle>
+            </CardHeader>
+
+            <CardContent className="p-3">
+                <Form<ResetPasswordForm>
+                    formOptions={{
+                        defaultValues: {
+                            password: "",
+                            confirmPassword: "",
+                        },
+                    }}
+                    onSubmit={async (data) => {
+                        setAuthError(null)
+                        setSuccess(false)
+
+                        if (!token) {
+                            setAuthError(
+                                "This reset link is invalid or missing its token."
+                            )
+                            return
+                        }
+
+                        const { error } = await authClient.resetPassword({
+                            newPassword: data.password,
+                            token,
+                        })
+
+                        if (error) {
+                            setAuthError(
+                                error.message || "Something went wrong"
+                            )
+                            return
+                        }
+
+                        setSuccess(true)
+                        router.replace("/login")
+                    }}
+                >
+                    <div className="mb-2">
+                        <Form.Label<ResetPasswordForm> name="password">
+                            New password
+                        </Form.Label>
+                        <Form.Field<ResetPasswordForm>
+                            name="password"
+                            required
+                            rules={{ minLength: 8 }}
+                        >
+                            <Input
+                                type="password"
+                                placeholder="new password"
+                                autoComplete="new-password"
+                                className="h-8"
+                            />
+                        </Form.Field>
+                        <Form.Error
+                            name="password"
+                            className="mt-1 text-sm text-destructive"
+                        >
+                            {(error) =>
+                                error.type === "minLength"
+                                    ? "Password must be at least 8 characters"
+                                    : error.message
+                            }
+                        </Form.Error>
+                    </div>
+
+                    <div className="mb-2">
+                        <Form.Label<ResetPasswordForm> name="confirmPassword">
+                            Confirm password
+                        </Form.Label>
+                        <Form.Field<ResetPasswordForm>
+                            name="confirmPassword"
+                            required
+                            rules={{
+                                validate: (value, values) =>
+                                    value === values.password ||
+                                    "Passwords do not match",
+                            }}
+                        >
+                            <Input
+                                type="password"
+                                placeholder="confirm password"
+                                autoComplete="new-password"
+                                className="h-8"
+                            />
+                        </Form.Field>
+                        <Form.Error
+                            name="confirmPassword"
+                            className="mt-1 text-sm text-destructive"
+                        />
+                    </div>
+
+                    {!token && (
+                        <p className="mt-2 text-center text-sm text-destructive">
+                            This reset link is invalid or missing its token.
+                        </p>
+                    )}
+
+                    {authError && (
+                        <p className="mt-2 text-center text-sm text-destructive">
+                            {authError}
+                        </p>
+                    )}
+
+                    {success && (
+                        <p className="mt-2 text-center text-sm text-green-500">
+                            Your password has been reset successfully.
+                        </p>
+                    )}
+
+                    <Form.Submit>
+                        {({ isSubmitting }) => (
+                            <Button
+                                variant="primary"
+                                className="mt-4 h-8 w-full"
+                                disabled={!token || success}
                             >
-                                Back to login
-                            </Link>
-                        </div>
-                    </form>
-                </CardContent>
+                                {isSubmitting
+                                    ? "Resetting..."
+                                    : success
+                                        ? "Password reset"
+                                        : "Reset password"}
+                            </Button>
+                        )}
+                    </Form.Submit>
+                </Form>
+            </CardContent>
+        </AuthShell>
+    )
+}
+
+function AuthShell({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="relative isolate flex min-h-svh items-center justify-center overflow-hidden px-4 py-8">
+            <div className={styles.background} aria-hidden="true" />
+            <Card className="relative z-10 w-full max-w-sm gap-5 bg-card-2 p-5 ring-0 backdrop-blur-xl">
+                {children}
             </Card>
         </div>
     )
@@ -157,12 +192,14 @@ export default function Page() {
     return (
         <Suspense
             fallback={
-                <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-10 sm:px-6">
-                    <div>Loading...</div>
-                </div>
+                <AuthShell>
+                    <div className="p-8 text-center text-sm text-muted-foreground">
+                        Loading reset link...
+                    </div>
+                </AuthShell>
             }
         >
-            <ResetPasswordForm />
+            <ResetPasswordContent />
         </Suspense>
     )
 }

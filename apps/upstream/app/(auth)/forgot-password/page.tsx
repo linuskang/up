@@ -2,101 +2,130 @@
 
 // Libraries
 import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { authClient } from "@/client/auth"
 
 // Components
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Form } from "@/components/ui/form"
+import { Button } from "@uplabs/ui/components/button"
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@uplabs/ui/components/card"
+import { Input } from "@uplabs/ui/components/input"
+import styles from "../login/page.module.css"
+
+type ForgotPasswordForm = {
+    email: string
+}
 
 export default function Page() {
-    const [email, setEmail] = useState("")
-    const [error, setError] = useState<string | null>(null)
+    const [authError, setAuthError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
-    const [loading, setLoading] = useState(false)
-
-    const handleSubmit = async (form: React.FormEvent<HTMLFormElement>) => {
-        form.preventDefault()
-        setError(null)
-        setSuccess(false)
-        setLoading(true)
-
-        const { error } = await authClient.requestPasswordReset({
-            email,
-            redirectTo: "/reset-password",
-        })
-
-        if (error) {
-            setError(error.message || "An error occurred")
-            setLoading(false)
-            return
-        }
-
-        setSuccess(true)
-        setLoading(false)
-    }
 
     return (
-        <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-10 sm:px-6">
-            <Card className="w-full bg-background ring-0 sm:w-auto">
-                <CardHeader className="gap-2 pb-2 text-center">
-                    <CardTitle className="text-5xl font-bold">
-                        Upstream
+        <div className="relative isolate flex min-h-svh items-center justify-center overflow-hidden px-4 py-8">
+            <div className={styles.background} aria-hidden="true" />
+            <Card className="relative z-10 w-full max-w-sm gap-5 bg-card-2 p-5 ring-0 backdrop-blur-xl">
+                <CardHeader className="flex flex-col items-center gap-3 p-0 text-center">
+                    <Image
+                        src="/icon-nobg.svg"
+                        alt="Upstream logo"
+                        width={100}
+                        height={100}
+                        priority
+                        className="scale-120"
+                    />
+
+                    <CardTitle className="-mt-3 text-3xl font-medium text-white/80">
+                        Reset your password
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <form
-                        className="flex flex-col gap-5 sm:min-w-90"
-                        onSubmit={handleSubmit}
+
+                <CardContent className="p-3">
+                    <Form<ForgotPasswordForm>
+                        formOptions={{
+                            defaultValues: {
+                                email: "",
+                            },
+                        }}
+                        onSubmit={async (data) => {
+                            setAuthError(null)
+                            setSuccess(false)
+
+                            const { error } =
+                                await authClient.requestPasswordReset({
+                                    email: data.email,
+                                    redirectTo: "/reset-password",
+                                })
+
+                            if (error) {
+                                setAuthError(
+                                    error.message || "Something went wrong"
+                                )
+                                return
+                            }
+
+                            setSuccess(true)
+                        }}
                     >
-                        <Field>
-                            <FieldGroup>
-                                <FieldLabel className="text-sm">
-                                    Account Email
-                                </FieldLabel>
+                        <div className="mb-2">
+                            <Form.Label<ForgotPasswordForm> name="email">
+                                Your email
+                            </Form.Label>
+                            <Form.Field<ForgotPasswordForm>
+                                name="email"
+                                required
+                            >
                                 <Input
                                     type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="email"
                                     autoComplete="email"
-                                    required
-                                    placeholder="your@email.com"
-                                    className="-mt-3 h-10 border-0 !text-sm text-xl"
+                                    className="h-8"
                                 />
-                            </FieldGroup>
-                        </Field>
-                        <Field>
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="h-10 w-full cursor-pointer text-sm font-bold"
-                            >
-                                {loading ? "Sending..." : "Send reset link"}
-                            </Button>
-
-                            {error && (
-                                <div className="flex justify-center rounded-lg text-sm text-destructive">
-                                    {error}
-                                </div>
-                            )}
-                            {success && (
-                                <div className="flex justify-center rounded-lg text-sm text-green-600">
-                                    If this email is registered, a reset link
-                                    has been sent!
-                                </div>
-                            )}
-                        </Field>
-                        <div className="flex justify-center text-sm">
-                            <Link
-                                href="/login"
-                                className="underline-none ml-1 font-bold !no-underline transition hover:text-white"
-                            >
-                                Back to login
-                            </Link>
+                            </Form.Field>
+                            <Form.Error
+                                name="email"
+                                className="mt-1 text-sm text-destructive"
+                            />
                         </div>
-                    </form>
+
+                        {authError && (
+                            <p className="mt-2 text-center text-sm text-destructive">
+                                {authError}
+                            </p>
+                        )}
+
+                        {success && (
+                            <p className="mt-2 text-center text-sm text-green-500">
+                                If that email is registered, a reset link has
+                                been sent.
+                            </p>
+                        )}
+
+                        <Form.Submit>
+                            {({ isSubmitting }) => (
+                                <Button
+                                    variant="primary"
+                                    className="mt-4 h-8 w-full"
+                                >
+                                    {isSubmitting
+                                        ? "Sending..."
+                                        : "Send reset link"}
+                                </Button>
+                            )}
+                        </Form.Submit>
+
+                        <Link
+                            href="/login"
+                            className="mt-3 flex items-center justify-center gap-1 text-xs font-semibold text-muted-foreground hover:underline"
+                        >
+                            Remember your password? Log in
+                        </Link>
+                    </Form>
                 </CardContent>
             </Card>
         </div>
