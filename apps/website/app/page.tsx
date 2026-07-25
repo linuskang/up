@@ -1,5 +1,3 @@
-"use client"
-
 import Link from "next/link"
 
 import { EventsList, Event } from "@uplabs/ui/components/event"
