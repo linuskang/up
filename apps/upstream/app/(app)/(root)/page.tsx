@@ -1,6 +1,7 @@
 "use client"
 
 // Libraries
+import axios from "axios"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/client/auth"
@@ -26,6 +27,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@uplabs/ui/components/pagination"
+import { Card } from "@uplabs/ui/components/card"
 
 // Types
 interface Project {
@@ -33,37 +35,63 @@ interface Project {
     name: string
 }
 
-import { UsageStats } from "@/types"
+interface Usage {
+    plan: string
+    projects: {
+        current: number
+        limit: number
+    }
+    eventsMonth: {
+        current: number
+        limit: number
+    }
+}
 
 export default function Page() {
     const router = useRouter()
-    const { data: session, isPending: sessionPending } = authClient.useSession()
-    const [projects, setProjects] = useState<Project[]>([])
-    const [projectsLoading, setProjectsLoading] = useState(true)
-    const [usage, setUsage] = useState<UsageStats | null>(null)
-    const [usageLoading, setUsageLoading] = useState(true)
+    const { data: session, isPending } = authClient.useSession()
+
     const [currentPage, setCurrentPage] = useState(1)
+
+    const [usageLoading, setUsageLoading] = useState(true)
+    const [projectsLoading, setProjectsLoading] = useState(true)
+    const [projects, setProjects] = useState<Project[]>([])
+    const [usage, setUsage] = useState<Usage>({
+        plan: "Free",
+        projects: {
+            current: 0,
+            limit: 1,
+        },
+        eventsMonth: {
+            current: 0,
+            limit: 100,
+        },
+    })
 
     useEffect(() => {
         if (!session) return
-        async function fetchProjects() {
-            const res = await fetch("/api/project")
-            if (res.ok) {
-                const data = await res.json()
-                setProjects(data.projects || [])
+
+        async function fetchUrls() {
+            setProjectsLoading(true)
+            setUsageLoading(true)
+
+            try {
+                await axios.get('/api/project').then((res) => {
+                    setProjects(res.data.projects)
+                })
+
+                await axios.get('/api/usage').then((res) => {
+                    setUsage(res.data)
+                })
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setProjectsLoading(false)
+                setUsageLoading(false)
             }
-            setProjectsLoading(false)
         }
-        async function fetchUsage() {
-            const res = await fetch("/api/usage")
-            if (res.ok) {
-                const data = await res.json()
-                setUsage(data)
-            }
-            setUsageLoading(false)
-        }
-        fetchProjects()
-        fetchUsage()
+
+        fetchUrls()
     }, [session])
 
     const totalPages = Math.ceil(projects.length / 5)
@@ -72,12 +100,8 @@ export default function Page() {
         currentPage * 5
     )
 
-    if (sessionPending || projectsLoading || usageLoading) {
-        return (
-            <div className="flex min-h-svh items-center justify-center py-6">
-                <div className="text-sm text-muted-foreground">Loading...</div>
-            </div>
-        )
+    if (isPending || projectsLoading || usageLoading) {
+        return null
     }
 
     return (
@@ -95,10 +119,10 @@ export default function Page() {
                             Your Projects
                         </p>
                         <p className="text-xl font-bold text-foreground">
-                            {(usage?.projects.current ?? 0).toLocaleString()}{" "}
+                            {usage.projects.current}{" "}
                             <span className="text-sm font-normal text-muted-foreground">
                                 /{" "}
-                                {(usage?.projects.limit ?? 1).toLocaleString()}
+                                {usage.projects.limit}
                             </span>
                         </p>
                     </div>
@@ -133,7 +157,7 @@ export default function Page() {
                         Your Projects
                     </h2>
                     <Button variant="primary">
-                        <Link href="/new-project">Create Project</Link>
+                        <Link href="/project/new">Create Project</Link>
                     </Button>
                 </div>
 
@@ -170,10 +194,10 @@ export default function Page() {
                                 <TableHeader>
                                     <TableRow className="border-border/40 hover:bg-transparent">
                                         <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                                            Project Name
+                                            Project
                                         </TableHead>
                                         <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                                            Created by
+                                            Owner
                                         </TableHead>
                                         <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
                                             Actions
