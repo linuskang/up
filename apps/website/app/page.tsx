@@ -74,7 +74,9 @@ export default function Home() {
                             size="lg"
                             className="w-full gap-2 text-sm font-semibold sm:w-auto"
                         >
-                            <Link href="/register">Create a free account</Link>
+                            <Link href="https://up.linus.my/register" target="_blank">
+                                Create a free account
+                            </Link>
                         </Button>
                         <Button
                             variant="ghost"
@@ -332,7 +334,9 @@ export default function Home() {
                     </p>
 
                     <Button size="lg" className="w-full gap-2 text-sm font-semibold sm:w-auto">
-                        <Link href="https://up.linus.my/register">Create a free account</Link>
+                        <Link href="https://up.linus.my/register" target="_blank">
+                            Create a free account
+                        </Link>
                     </Button>
                 </div>
             </section>

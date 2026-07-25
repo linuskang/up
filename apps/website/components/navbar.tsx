@@ -8,7 +8,7 @@ export function Navbar() {
         <nav className="fixed top-0 right-0 left-0 z-50 border-b border-transparent bg-background">
             <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-3">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Link href="/home">
+                    <Link href="/">
                         <Image
                             src="/logo.png"
                             width={40}
@@ -40,7 +40,7 @@ export function Navbar() {
                     >
                         <Link
                             target="_blank"
-                            href="https://github.com/linusdotmy/upstream"
+                            href="https://github.com/linuskang/up"
                         >
                             Github
                         </Link>
@@ -49,7 +49,9 @@ export function Navbar() {
                         size="sm"
                         className="px-1.5 text-[11px] font-medium sm:px-2 sm:text-xs"
                     >
-                        <Link href="/login">Sign in</Link>
+                        <Link href="https://up.linus.my" target="_blank">
+                            Log in
+                        </Link>
                     </Button>
                 </div>
             </div>
