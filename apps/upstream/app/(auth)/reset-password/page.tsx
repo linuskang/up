@@ -166,8 +166,8 @@ function ResetPasswordContent() {
                                 {isSubmitting
                                     ? "Resetting..."
                                     : success
-                                        ? "Password reset"
-                                        : "Reset password"}
+                                      ? "Password reset"
+                                      : "Reset password"}
                             </Button>
                         )}
                     </Form.Submit>

@@ -24,7 +24,7 @@ export default function Page() {
     const [authError, setAuthError] = useState<string | null>(null)
 
     return (
-        <div className="relative isolate flex min-h-svh items-center justify-center overflow-hidden ">
+        <div className="relative isolate flex min-h-svh items-center justify-center overflow-hidden">
             <div className={styles.background} aria-hidden="true" />
             <Card className="relative z-10 w-full max-w-sm gap-5 bg-card-2 p-5 ring-0 backdrop-blur-xl">
                 <CardHeader className="flex flex-col items-center gap-3 p-0 text-center">
@@ -65,9 +65,13 @@ export default function Page() {
 
                             if (error) {
                                 if (error.code === "EMAIL_NOT_VERIFIED") {
-                                    setAuthError("Your email is not verified. We have resent the verification link to your inbox.")
+                                    setAuthError(
+                                        "Your email is not verified. We have resent the verification link to your inbox."
+                                    )
                                 } else {
-                                    setAuthError(error.message || "Something went wrong")
+                                    setAuthError(
+                                        error.message || "Something went wrong"
+                                    )
                                 }
                             }
                         }}
@@ -87,17 +91,19 @@ export default function Page() {
                                 </Link>
                             </div>
                             <Form.Field<LoginForm> name="email" required>
-                                <Input
-                                    placeholder="email"
-                                    className="h-8"
-                                />
+                                <Input placeholder="email" className="h-8" />
                             </Form.Field>
 
-                            <Form.Error name="email" className="mt-1 text-sm text-destructive" />
+                            <Form.Error
+                                name="email"
+                                className="mt-1 text-sm text-destructive"
+                            />
                         </div>
 
                         <div className="mb-2">
-                            <Form.Label<LoginForm> name="password">Your password</Form.Label>
+                            <Form.Label<LoginForm> name="password">
+                                Your password
+                            </Form.Label>
                             <Form.Field<LoginForm> name="password" required>
                                 <Input
                                     placeholder="password"
@@ -106,10 +112,13 @@ export default function Page() {
                                 />
                             </Form.Field>
 
-                            <Form.Error name="password" className="mt-1 text-sm text-destructive" />
+                            <Form.Error
+                                name="password"
+                                className="mt-1 text-sm text-destructive"
+                            />
 
                             {authError && (
-                                <p className="text-sm text-destructive text-center mt-2">
+                                <p className="mt-2 text-center text-sm text-destructive">
                                     {authError}
                                 </p>
                             )}
@@ -117,7 +126,10 @@ export default function Page() {
 
                         <div className="flex flex-col gap-2">
                             <Form.Submit>
-                                <Button variant="primary" className="mt-2 h-8 w-full">
+                                <Button
+                                    variant="primary"
+                                    className="mt-2 h-8 w-full"
+                                >
                                     Log in
                                 </Button>
                             </Form.Submit>

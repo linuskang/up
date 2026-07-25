@@ -13,7 +13,12 @@ import { authClient } from "@/client/auth"
 import { Github } from "@/components/icons"
 import { Form } from "@/components/ui/form"
 import { Button } from "@uplabs/ui/components/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@uplabs/ui/components/card"
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@uplabs/ui/components/card"
 import { Checkbox } from "@uplabs/ui/components/checkbox"
 import { Input } from "@uplabs/ui/components/input"
 import styles from "../login/page.module.css"

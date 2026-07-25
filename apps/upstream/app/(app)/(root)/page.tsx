@@ -76,11 +76,11 @@ export default function Page() {
             setUsageLoading(true)
 
             try {
-                await axios.get('/api/project').then((res) => {
+                await axios.get("/api/project").then((res) => {
                     setProjects(res.data.projects)
                 })
 
-                await axios.get('/api/usage').then((res) => {
+                await axios.get("/api/usage").then((res) => {
                     setUsage(res.data)
                 })
             } catch (error) {
@@ -114,33 +114,31 @@ export default function Page() {
 
             <div className="flex flex-col gap-3">
                 <div className="grid grid-cols-3 gap-2">
-                    <Card className="p-3 gap-0">
+                    <Card className="gap-0 p-3">
                         <p className="text-sm font-semibold text-muted-foreground">
                             Your Projects
                         </p>
                         <p className="text-xl font-bold text-foreground">
                             {usage.projects.current}{" "}
                             <span className="text-sm font-normal text-muted-foreground">
-                                /{" "}
-                                {usage.projects.limit}
+                                / {usage.projects.limit}
                             </span>
                         </p>
                     </Card>
 
-                    <Card className="p-3 gap-0">
+                    <Card className="gap-0 p-3">
                         <p className="text-sm font-semibold text-muted-foreground">
                             Events Quota
                         </p>
                         <p className="text-xl font-bold text-foreground">
                             {usage.eventsMonth.current.toLocaleString()}{" "}
                             <span className="text-sm font-normal text-muted-foreground">
-                                /{" "}
-                                {usage.eventsMonth.limit.toLocaleString()}
+                                / {usage.eventsMonth.limit.toLocaleString()}
                             </span>
                         </p>
                     </Card>
 
-                    <Card className="p-3 gap-0">
+                    <Card className="gap-0 p-3">
                         <p className="text-sm font-semibold text-muted-foreground">
                             Account Plan
                         </p>

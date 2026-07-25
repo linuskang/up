@@ -47,13 +47,14 @@ export default function Page() {
         isCreating(true)
 
         try {
-            await axios.post("/api/project", {
-                name
-            }).then(async (res) => {
-                toast.success("Your new project has been created.")
-                await router.push(`/project/${res.data.projectId}`)
-            })
-
+            await axios
+                .post("/api/project", {
+                    name,
+                })
+                .then(async (res) => {
+                    toast.success("Your new project has been created.")
+                    await router.push(`/project/${res.data.projectId}`)
+                })
         } catch (error) {
             console.error(error)
         } finally {
@@ -96,9 +97,7 @@ export default function Page() {
 
                     <CardContent>
                         <Form.Label name="projectName">
-                            <Label className="mb-2">
-                                Project Name
-                            </Label>
+                            <Label className="mb-2">Project Name</Label>
                         </Form.Label>
 
                         <Form.Field name="projectName" required>
@@ -109,7 +108,10 @@ export default function Page() {
                             />
                         </Form.Field>
 
-                        <Form.Error className="text-sm text-destructive mt-2" name="projectName" />
+                        <Form.Error
+                            className="mt-2 text-sm text-destructive"
+                            name="projectName"
+                        />
                     </CardContent>
 
                     <CardFooter className="justify-end gap-2">
