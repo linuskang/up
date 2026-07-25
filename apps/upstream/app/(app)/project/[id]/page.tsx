@@ -117,8 +117,7 @@ export default function Page() {
         setLoadingMore(true)
 
         const res = await fetch(
-            `/api/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}${
-                !isAll ? `&category=${category}` : ""
+            `/api/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}${!isAll ? `&category=${category}` : ""
             }`
         )
         if (res.ok) {
@@ -152,9 +151,8 @@ export default function Page() {
 
             setLoadingMore(true)
             const nextPage = isAll ? allPage + 1 : catPage + 1
-            const url = `/api/project/${params.id}/events?page=${nextPage}&limit=${EVENTS_PER_PAGE}${
-                !isAll ? `&category=${selectedCategory}` : ""
-            }`
+            const url = `/api/project/${params.id}/events?page=${nextPage}&limit=${EVENTS_PER_PAGE}${!isAll ? `&category=${selectedCategory}` : ""
+                }`
             const res = await fetch(url)
             if (res.ok) {
                 const data = await res.json()
@@ -266,7 +264,7 @@ export default function Page() {
                                 placeholder="Search events..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="!text-md font-base h-10 border-0 bg-card pr-[8.5rem] pl-9"
+                                className="!text-md font-base h-10 border-0 !bg-card pr-[8.5rem] pl-9"
                             />
                             <div className="absolute top-1/2 right-0 -translate-y-1/2">
                                 <Select
