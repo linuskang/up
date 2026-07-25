@@ -1,9 +1,35 @@
 import { Button } from "@uplabs/ui/components/button"
+import { Separator } from "@uplabs/ui/components/separator"
 import { GeistMono } from "geist/font/mono"
 import Image from "next/image"
 import Link from "next/link"
 
-export function Navbar() {
+import { Github } from "@/components/icons"
+
+async function getGithubStars() {
+    try {
+        const response = await fetch(
+            "https://api.github.com/repos/linuskang/up",
+            {
+                headers: { Accept: "application/vnd.github+json" },
+                next: { revalidate: 3600 },
+            }
+        )
+
+        if (!response.ok) return null
+
+        const repository = (await response.json()) as {
+            stargazers_count: number
+        }
+        return repository.stargazers_count
+    } catch {
+        return null
+    }
+}
+
+export async function Navbar() {
+    const stars = await getGithubStars()
+
     return (
         <nav className="fixed top-0 right-0 left-0 z-50 border-b border-transparent bg-background">
             <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-3">
@@ -33,26 +59,43 @@ export function Navbar() {
                     >
                         <Link href="/docs">Docs</Link>
                     </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="px-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground sm:px-2 sm:text-xs"
-                    >
-                        <Link
-                            target="_blank"
-                            href="https://github.com/linuskang/up"
+                    <div className="flex items-center gap-2">
+                        <Button
+                            size="sm"
+                            className="px-1.5 text-[11px] font-medium sm:px-2 sm:text-xs"
                         >
-                            Github
-                        </Link>
-                    </Button>
-                    <Button
-                        size="sm"
-                        className="px-1.5 text-[11px] font-medium sm:px-2 sm:text-xs"
-                    >
-                        <Link href="https://up.linus.my" target="_blank">
-                            Log in
-                        </Link>
-                    </Button>
+                            <Link href="https://up.linus.my" target="_blank">
+                                Log in
+                            </Link>
+                        </Button>
+                        <Separator
+                            orientation="vertical"
+                            className="h-4 self-center!"
+                        />
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-[11px] font-medium text-muted-foreground hover:bg-transparent hover:text-white -ml-2 sm:px-2 sm:text-xs dark:hover:bg-transparent"
+                            asChild
+                        >
+                            <Link
+                                target="_blank"
+                                href="https://github.com/linuskang/up"
+                                aria-label={
+                                    stars === null
+                                        ? "Upstream on GitHub"
+                                        : `Upstream on GitHub, ${stars.toLocaleString()} stars`
+                                }
+                            >
+                                <Github />
+                                {stars !== null && (
+                                    <span className="flex h-4 items-center leading-none tabular-nums">
+                                        {stars.toLocaleString()}
+                                    </span>
+                                )}
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
             </div>
         </nav>
