@@ -47,6 +47,7 @@
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
     --radius: 0.6rem;
+    --color-card-2: var(--card-2);
 }
 
 :root {
@@ -81,9 +82,11 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+    --card-2: oklch(22.1% 0.009 255.6 / 0.702);
 }
 
 @layer base {
+
     /* * {
     @apply border-border outline-ring/50;
     } */
@@ -102,6 +105,7 @@
 }
 
 @keyframes shake {
+
     0%,
     100% {
         transform: rotate(0deg) translateX(0);

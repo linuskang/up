@@ -6,232 +6,130 @@ import Link from "next/link"
 import { authClient } from "@/client/auth"
 
 // Components
-import { Button } from "@/components/ui/button"
+import { Button } from "@uplabs/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-    FieldSeparator,
-} from "@/components/ui/field"
-import { Github, Google } from "@/components/icons"
+import { Input } from "@uplabs/ui/components/input"
+import { CircleQuestionMark } from "lucide-react"
+import { Github } from "@/components/icons"
+import styles from "./page.module.css"
+import { Form } from "@/components/ui/form"
+import Image from "next/image"
+
+type LoginForm = {
+    email: string
+    password: string
+}
 
 export default function Page() {
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [error, setError] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
-    const [needsVerification, setNeedsVerification] = useState(false)
-    const [resendLoading, setResendLoading] = useState(false)
-    const [resendSent, setResendSent] = useState(false)
-
-    const login = async (form: React.FormEvent<HTMLFormElement>) => {
-        form.preventDefault()
-        setError(null)
-        setNeedsVerification(false)
-        setResendSent(false)
-        setLoading(true)
-
-        const { error } = await authClient.signIn.email({
-            email,
-            password,
-            callbackURL: "/",
-        })
-
-        if (error) {
-            if (error.code === "EMAIL_NOT_VERIFIED") {
-                setNeedsVerification(true)
-            } else {
-                setError(error.message || "An error occurred")
-            }
-            setLoading(false)
-            return
-        }
-
-        setLoading(false)
-    }
-
-    const resendVerification = async () => {
-        setResendLoading(true)
-        setResendSent(false)
-        setError(null)
-
-        const { error } = await authClient.sendVerificationEmail({
-            email,
-            callbackURL: "/",
-        })
-
-        if (error) {
-            setError(error.message || "An error occurred")
-            setResendLoading(false)
-            return
-        }
-
-        setResendSent(true)
-        setResendLoading(false)
-    }
-
-    const github = async () => {
-        setError(null)
-        setLoading(true)
-
-        await authClient.signIn.social({
-            provider: "github",
-        })
-    }
-
-    const google = async () => {
-        setError(null)
-        setLoading(true)
-
-        await authClient.signIn.social({
-            provider: "google",
-        })
-    }
+    const [authError, setAuthError] = useState<string | null>(null)
 
     return (
-        <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-10 sm:px-6">
-            <Card className="w-full bg-background ring-0 sm:w-auto">
-                <CardHeader className="gap-2 pb-2 text-center">
-                    <CardTitle className="text-5xl font-bold">
-                        Upstream
+        <div className="relative isolate flex min-h-svh items-center justify-center overflow-hidden ">
+            <div className={styles.background} aria-hidden="true" />
+            <Card className="relative z-10 w-full max-w-sm gap-5 bg-card-2 p-5 ring-0 backdrop-blur-xl">
+                <CardHeader className="flex flex-col items-center gap-3 p-0 text-center">
+                    <Image
+                        src="/icon-nobg.svg"
+                        alt="Upstream logo"
+                        width={100}
+                        height={100}
+                        priority
+                        className="scale-120"
+                    />
+
+                    <CardTitle className="-mt-3 text-3xl font-medium text-white/80">
+                        Welcome to Upstream
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <form
-                        className="flex flex-col gap-5 sm:min-w-90"
-                        onSubmit={login}
+
+                <CardContent className="space-y-5 p-3">
+                    <Button
+                        variant="primary"
+                        className="flex w-full items-center justify-center gap-2"
+                        onClick={async () => {
+                            await authClient.signIn.social({
+                                provider: "github",
+                            })
+                        }}
                     >
-                        <Field>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                onClick={github}
-                                disabled={loading}
-                                className="h-10 w-full cursor-pointer justify-center gap-2 border-none text-sm"
-                            >
-                                <Github />
-                                Continue with GitHub
-                            </Button>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                onClick={google}
-                                disabled={loading}
-                                className="h-10 w-full cursor-pointer justify-center gap-2 border-none text-sm"
-                            >
-                                <Google />
-                                Continue with Google
-                            </Button>
-                        </Field>
-                        <FieldSeparator className="text-sm">
-                            Or continue with
-                        </FieldSeparator>
-                        <Field className="-mt-2">
-                            <FieldGroup>
-                                <FieldLabel className="text-sm">
-                                    Account Email
-                                </FieldLabel>
-                                <Input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    autoComplete="email"
-                                    required
-                                    placeholder="your@email.com"
-                                    className="-mt-3 h-10 border-0 !text-sm text-xl"
-                                />
-                            </FieldGroup>
-                        </Field>
-                        <Field className="-mt-2">
-                            <FieldGroup>
-                                <FieldLabel className="text-sm">
-                                    Your Password
-                                </FieldLabel>
-                                <Input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
-                                    autoComplete="current-password"
-                                    required
-                                    placeholder="Enter your password"
-                                    className="-mt-3 h-10 border-0 !text-sm text-base"
-                                />
-                            </FieldGroup>
-                            <FieldDescription className="flex text-sm">
-                                Forgot your password?{" "}
+                        <Github />
+                        Continue with GitHub
+                    </Button>
+                    <Form<LoginForm>
+                        onSubmit={async (data) => {
+                            const { error } = await authClient.signIn.email({
+                                email: data.email,
+                                password: data.password,
+                                callbackURL: "/",
+                            })
+
+                            if (error) {
+                                if (error.code === "EMAIL_NOT_VERIFIED") {
+                                    setAuthError("Your email is not verified. We have resent the verification link to your inbox.")
+                                } else {
+                                    setAuthError(error.message || "Something went wrong")
+                                }
+                            }
+                        }}
+                    >
+                        <div className="mb-2">
+                            <div className="flex items-center justify-between">
+                                <Form.Label<LoginForm> name="email">
+                                    Your email
+                                </Form.Label>
+
                                 <Link
-                                    href="/forgot-password"
-                                    className="underline-none ml-1 font-bold !no-underline transition hover:text-white"
+                                    href="/register"
+                                    className="flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:underline"
                                 >
-                                    Reset password
+                                    <CircleQuestionMark className="size-3.5" />
+                                    Don&apos;t have an account?
                                 </Link>
-                            </FieldDescription>
-                        </Field>
-                        <Field>
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="h-10 w-full cursor-pointer text-sm font-bold"
-                            >
-                                {loading ? "Logging in..." : "Login"}
-                            </Button>
-
-                            {error && (
-                                <div className="flex justify-center rounded-lg text-sm text-destructive">
-                                    {error}
-                                </div>
-                            )}
-                        </Field>
-
-                        {needsVerification && (
-                            <div className="flex max-w-sm flex-col gap-3 rounded-lg bg-card p-4">
-                                <div className="flex flex-col gap-1">
-                                    <p className="text-sm font-medium">
-                                        Email not verified
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Please check your inbox for a
-                                        verification link. If you need a new
-                                        one, click the button below.
-                                    </p>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    disabled={resendLoading || resendSent}
-                                    onClick={resendVerification}
-                                    className="h-9 w-full cursor-pointer border-none text-sm font-bold"
-                                >
-                                    {resendSent
-                                        ? "Email sent!"
-                                        : resendLoading
-                                          ? "Sending..."
-                                          : "Resend verification email"}
-                                </Button>
-                                {resendSent && (
-                                    <p className="text-center text-xs text-green-600">
-                                        Check your inbox for the verification
-                                        link.
-                                    </p>
-                                )}
                             </div>
-                        )}
+                            <Form.Field<LoginForm> name="email" required>
+                                <Input
+                                    placeholder="email"
+                                    className="h-8"
+                                />
+                            </Form.Field>
 
-                        <FieldDescription className="flex justify-center text-sm">
-                            Don&apos;t have an account?{" "}
+                            <Form.Error name="email" className="mt-1 text-sm text-destructive" />
+                        </div>
+
+                        <div className="mb-2">
+                            <Form.Label<LoginForm> name="password">Your password</Form.Label>
+                            <Form.Field<LoginForm> name="password" required>
+                                <Input
+                                    placeholder="password"
+                                    className="h-8"
+                                    type="password"
+                                />
+                            </Form.Field>
+
+                            <Form.Error name="password" className="mt-1 text-sm text-destructive" />
+
+                            {authError && (
+                                <p className="text-sm text-destructive text-center mt-2">
+                                    {authError}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <Form.Submit>
+                                <Button variant="primary" className="mt-2 h-8 w-full">
+                                    Log in
+                                </Button>
+                            </Form.Submit>
+
                             <Link
-                                href="/register"
-                                className="underline-none ml-1 font-bold !no-underline transition hover:text-white"
+                                href="/forgot-password"
+                                className="self-end text-sm text-muted-foreground hover:underline"
                             >
-                                Create an account
+                                Forgot your password?
                             </Link>
-                        </FieldDescription>
-                    </form>
+                        </div>
+                    </Form>
                 </CardContent>
             </Card>
         </div>
