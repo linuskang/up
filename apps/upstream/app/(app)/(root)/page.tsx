@@ -107,14 +107,14 @@ export default function Page() {
     return (
         <div className="flex min-h-svh flex-col gap-3 py-6">
             <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-bold">
+                <h1 className="text-2xl font-semibold">
                     Welcome, {session?.user.name}!
                 </h1>
             </div>
 
             <div className="flex flex-col gap-3">
                 <div className="grid grid-cols-3 gap-2">
-                    <div className="rounded-lg bg-muted/40 p-3">
+                    <Card className="p-3 gap-0">
                         <p className="text-sm font-semibold text-muted-foreground">
                             Your Projects
                         </p>
@@ -125,29 +125,29 @@ export default function Page() {
                                 {usage.projects.limit}
                             </span>
                         </p>
-                    </div>
-                    <div className="rounded-lg bg-card p-3">
+                    </Card>
+
+                    <Card className="p-3 gap-0">
                         <p className="text-sm font-semibold text-muted-foreground">
                             Events Quota
                         </p>
                         <p className="text-xl font-bold text-foreground">
-                            {(usage?.eventsMonth.current ?? 0).toLocaleString()}{" "}
+                            {usage.eventsMonth.current.toLocaleString()}{" "}
                             <span className="text-sm font-normal text-muted-foreground">
                                 /{" "}
-                                {(
-                                    usage?.eventsMonth.limit ?? 100
-                                ).toLocaleString()}
+                                {usage.eventsMonth.limit.toLocaleString()}
                             </span>
                         </p>
-                    </div>
-                    <div className="rounded-lg bg-muted/40 p-3">
+                    </Card>
+
+                    <Card className="p-3 gap-0">
                         <p className="text-sm font-semibold text-muted-foreground">
                             Account Plan
                         </p>
                         <p className="text-xl font-bold text-foreground">
-                            {usage?.plan}
+                            {usage.plan}
                         </p>
-                    </div>
+                    </Card>
                 </div>
             </div>
 

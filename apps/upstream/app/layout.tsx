@@ -33,9 +33,6 @@ export default function RootLayout({
                         <Toaster position="top-center" />
                     </TooltipProvider>
                 </main>
-                <footer className="w-full py-4 text-center text-xs text-muted-foreground">
-                    (c) 2026 Linus Kang. All Rights Reserved.
-                </footer>
             </body>
         </html>
     )
