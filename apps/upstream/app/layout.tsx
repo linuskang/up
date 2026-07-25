@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { ThemeProvider } from "@/components/theme-provider"
 import { GeistSans } from "geist/font/sans"
 import { RegisterServiceWorker } from "@/components/register-sw"
 import "./globals.css"
@@ -23,18 +22,16 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="en">
             <body
-                className={`dark flex min-h-screen flex-col bg-background ${GeistSans.className}`}
+                className={`flex min-h-screen flex-col bg-background ${GeistSans.className}`}
             >
                 <RegisterServiceWorker />
                 <main className="flex-1">
-                    <ThemeProvider attribute="class" defaultTheme="dark">
-                        <TooltipProvider>
-                            {children}
-                            <Toaster position="top-center" />
-                        </TooltipProvider>
-                    </ThemeProvider>
+                    <TooltipProvider>
+                        {children}
+                        <Toaster position="top-center" />
+                    </TooltipProvider>
                 </main>
                 <footer className="w-full py-4 text-center text-xs text-muted-foreground">
                     (c) 2026 Linus Kang. All Rights Reserved.

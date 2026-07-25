@@ -126,7 +126,7 @@ export default function Page() {
                             </span>
                         </p>
                     </div>
-                    <div className="rounded-lg bg-muted/40 p-3">
+                    <div className="rounded-lg bg-card p-3">
                         <p className="text-sm font-semibold text-muted-foreground">
                             Events Quota
                         </p>
