@@ -9,8 +9,9 @@ import Link from "next/link"
 import Image from "next/image"
 
 // Components
-import { Folder, ArrowUpRight } from "lucide-react"
+import { Folder, ArrowUpRight, Search } from "lucide-react"
 import { Button } from "@uplabs/ui/components/button"
+import { Input } from "@uplabs/ui/components/input"
 import {
     Table,
     TableBody,
@@ -35,6 +36,27 @@ interface Project {
     name: string
 }
 
+interface Activity {
+    id: string
+    message: string
+    createdAt: string
+    project: Project
+    user: {
+        name: string
+        image: string | null
+    }
+}
+
+function formatActivityDate(value: string) {
+    const date = new Date(value)
+
+    return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    })
+}
+
 interface Usage {
     plan: string
     projects: {
@@ -52,9 +74,13 @@ export default function Page() {
     const { data: session, isPending } = authClient.useSession()
 
     const [currentPage, setCurrentPage] = useState(1)
+    const [activityPage, setActivityPage] = useState(1)
+    const [searchQuery, setSearchQuery] = useState("")
 
+    const [activityLoading, setActivityLoading] = useState(true)
     const [usageLoading, setUsageLoading] = useState(true)
     const [projectsLoading, setProjectsLoading] = useState(true)
+    const [activities, setActivities] = useState<Activity[]>([])
     const [projects, setProjects] = useState<Project[]>([])
     const [usage, setUsage] = useState<Usage>({
         plan: "Free",
@@ -74,6 +100,7 @@ export default function Page() {
         async function fetchUrls() {
             setProjectsLoading(true)
             setUsageLoading(true)
+            setActivityLoading(true)
 
             try {
                 await axios.get("/api/project").then((res) => {
@@ -83,24 +110,37 @@ export default function Page() {
                 await axios.get("/api/usage").then((res) => {
                     setUsage(res.data)
                 })
+
+                await axios.get("/api/recent-activity").then((res) => {
+                    setActivities(res.data.activities)
+                })
             } catch (error) {
                 console.error(error)
             } finally {
                 setProjectsLoading(false)
                 setUsageLoading(false)
+                setActivityLoading(false)
             }
         }
 
         fetchUrls()
     }, [session])
 
-    const totalPages = Math.ceil(projects.length / 5)
-    const paginatedProjects = projects.slice(
+    const filteredProjects = projects.filter((project) =>
+        project.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+    )
+    const totalPages = Math.ceil(filteredProjects.length / 5)
+    const paginatedProjects = filteredProjects.slice(
         (currentPage - 1) * 5,
         currentPage * 5
     )
+    const activityTotalPages = Math.ceil(activities.length / 5)
+    const paginatedActivities = activities.slice(
+        (activityPage - 1) * 5,
+        activityPage * 5
+    )
 
-    if (isPending || projectsLoading || usageLoading) {
+    if (isPending || projectsLoading || usageLoading || activityLoading) {
         return null
     }
 
@@ -186,8 +226,23 @@ export default function Page() {
                         </a>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-4">
-                        <div className="overflow-hidden rounded-xl bg-card">
+                    <div className="flex flex-col gap-2">
+                        <div className="relative">
+                            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                type="search"
+                                aria-label="Search projects"
+                                placeholder="Search projects..."
+                                value={searchQuery}
+                                onChange={(event) => {
+                                    setSearchQuery(event.target.value)
+                                    setCurrentPage(1)
+                                }}
+                                className="h-8 border-0 !bg-card pl-9"
+                            />
+                        </div>
+
+                        <div className="overflow-hidden rounded-lg bg-card">
                             <Table>
                                 <TableHeader>
                                     <TableRow className="border-border/40 hover:bg-transparent">
@@ -203,58 +258,72 @@ export default function Page() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {paginatedProjects.map((project) => (
-                                        <TableRow
-                                            key={project.id}
-                                            className="cursor-pointer border-border/40 transition-colors hover:bg-accent/50"
-                                            onClick={() =>
-                                                router.push(
-                                                    `/project/${project.id}`
-                                                )
-                                            }
-                                        >
-                                            <TableCell className="w-fit pl-4 font-medium whitespace-nowrap text-foreground">
-                                                {project.name}
-                                            </TableCell>
-                                            <TableCell className="w-fit pl-4 whitespace-nowrap">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="relative size-6 overflow-hidden rounded-sm border border-border/60 bg-secondary">
-                                                        <Image
-                                                            src={
-                                                                session?.user
-                                                                    .image || ""
-                                                            }
-                                                            alt={
-                                                                session?.user
-                                                                    .name ||
-                                                                "Avatar"
-                                                            }
-                                                            width={24}
-                                                            height={24}
-                                                            unoptimized
-                                                            className="object-cover"
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm text-muted-foreground">
-                                                        {session?.user.name}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
-                                                <Button
-                                                    variant="secondary"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        router.push(
-                                                            `/project/${project.id}/settings`
-                                                        )
-                                                    }}
-                                                >
-                                                    Manage
-                                                </Button>
+                                    {paginatedProjects.length === 0 ? (
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableCell
+                                                colSpan={3}
+                                                className="h-28 text-center text-muted-foreground"
+                                            >
+                                                No projects match your search.
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                    ) : (
+                                        paginatedProjects.map((project) => (
+                                            <TableRow
+                                                key={project.id}
+                                                className="cursor-pointer border-border/40 transition-colors hover:bg-accent/50"
+                                                onClick={() =>
+                                                    router.push(
+                                                        `/project/${project.id}`
+                                                    )
+                                                }
+                                            >
+                                                <TableCell className="w-fit pl-4 font-medium whitespace-nowrap text-foreground">
+                                                    {project.name}
+                                                </TableCell>
+                                                <TableCell className="w-fit pl-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="relative size-6 overflow-hidden rounded-sm border border-border/60 bg-secondary">
+                                                            <Image
+                                                                src={
+                                                                    session
+                                                                        ?.user
+                                                                        .image ||
+                                                                    ""
+                                                                }
+                                                                alt={
+                                                                    session
+                                                                        ?.user
+                                                                        .name ||
+                                                                    "Avatar"
+                                                                }
+                                                                width={24}
+                                                                height={24}
+                                                                unoptimized
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {session?.user.name}
+                                                        </span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
+                                                    <Button
+                                                        variant="secondary"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            router.push(
+                                                                `/project/${project.id}/settings`
+                                                            )
+                                                        }}
+                                                    >
+                                                        Manage
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
                                 </TableBody>
                             </Table>
                         </div>
@@ -310,6 +379,143 @@ export default function Page() {
                             </Pagination>
                         )}
                     </div>
+                )}
+            </div>
+
+            <div className="flex flex-col gap-3">
+                <h2 className="text-sm font-semibold text-foreground">
+                    Recent Activity
+                </h2>
+
+                <div className="overflow-hidden rounded-lg bg-card">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="border-border/40 hover:bg-transparent">
+                                <TableHead className="pl-4 text-muted-foreground">
+                                    Activity
+                                </TableHead>
+                                <TableHead className="text-muted-foreground">
+                                    Project
+                                </TableHead>
+                                <TableHead className="text-muted-foreground">
+                                    User
+                                </TableHead>
+                                <TableHead className="pr-4 text-right text-muted-foreground">
+                                    Date
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedActivities.length === 0 ? (
+                                <TableRow className="hover:bg-transparent">
+                                    <TableCell
+                                        colSpan={4}
+                                        className="h-28 text-center text-muted-foreground"
+                                    >
+                                        No recent activity yet.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                paginatedActivities.map((activity) => (
+                                    <TableRow
+                                        key={activity.id}
+                                        className="cursor-pointer border-border/40 transition-colors hover:bg-accent/50"
+                                        onClick={() =>
+                                            router.push(
+                                                `/project/${activity.project.id}/settings`
+                                            )
+                                        }
+                                    >
+                                        <TableCell className="max-w-80 pl-4">
+                                            <span className="font-medium text-foreground">
+                                                {activity.message}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {activity.project.name}
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            <div className="flex items-center gap-2">
+                                                <div className="relative size-6 overflow-hidden rounded-sm border border-border/60 bg-secondary">
+                                                    <Image
+                                                        src={
+                                                            activity.user
+                                                                .image || ""
+                                                        }
+                                                        alt={activity.user.name}
+                                                        width={24}
+                                                        height={24}
+                                                        unoptimized
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                                <span className="text-sm text-muted-foreground">
+                                                    {activity.user.name}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="pr-4 text-right whitespace-nowrap text-muted-foreground">
+                                            {formatActivityDate(
+                                                activity.createdAt
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+
+                {activityTotalPages > 1 && (
+                    <Pagination>
+                        <PaginationContent className="justify-center">
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    onClick={() =>
+                                        setActivityPage((page) =>
+                                            Math.max(1, page - 1)
+                                        )
+                                    }
+                                    className={
+                                        activityPage === 1
+                                            ? "pointer-events-none opacity-50"
+                                            : "cursor-pointer"
+                                    }
+                                />
+                            </PaginationItem>
+                            {Array.from(
+                                { length: activityTotalPages },
+                                (_, index) => index + 1
+                            ).map((page) => (
+                                <PaginationItem key={page}>
+                                    <PaginationLink
+                                        isActive={page === activityPage}
+                                        onClick={() => setActivityPage(page)}
+                                        className="cursor-pointer border-0"
+                                    >
+                                        {page}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+                            <PaginationItem>
+                                <PaginationNext
+                                    onClick={() =>
+                                        setActivityPage((page) =>
+                                            Math.min(
+                                                activityTotalPages,
+                                                page + 1
+                                            )
+                                        )
+                                    }
+                                    className={
+                                        activityPage === activityTotalPages
+                                            ? "pointer-events-none opacity-50"
+                                            : "cursor-pointer"
+                                    }
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
                 )}
             </div>
         </div>

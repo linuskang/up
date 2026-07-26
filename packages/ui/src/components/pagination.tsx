@@ -51,14 +51,19 @@ function PaginationLink({
     return (
         <Button
             asChild
-            variant={isActive ? "outline" : "ghost"}
+            variant={isActive ? "secondary" : "ghost"}
             size={size}
-            className={cn(className)}
+            className={cn(
+                className,
+                isActive && "pointer-events-none cursor-default opacity-60"
+            )}
         >
             <a
                 aria-current={isActive ? "page" : undefined}
+                aria-disabled={isActive || undefined}
                 data-slot="pagination-link"
                 data-active={isActive}
+                tabIndex={isActive ? -1 : undefined}
                 {...props}
             />
         </Button>
