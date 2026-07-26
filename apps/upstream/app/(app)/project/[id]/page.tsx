@@ -6,8 +6,8 @@ import { useParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 
-import type { EventProps } from "@/components/event"
-import { EventsList } from "@/components/event"
+import type { EventProps } from "@uplabs/ui/components/event"
+import { EventsList } from "@uplabs/ui/components/event"
 import {
     Breadcrumb,
     BreadcrumbList,

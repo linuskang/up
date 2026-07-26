@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { EventsList } from "@/components/event"
-import { CategorySelector } from "@/components/category-selector"
+import { EventsList } from "@uplabs/ui/components/event"
+import { CategorySelector } from "@uplabs/ui/components/category-selector"
 import {
     Breadcrumb,
     BreadcrumbList,
