@@ -27,7 +27,7 @@ Basically, Upstream is a easy way to integrate logging into your own application
 1. Go to https://up.linus.my and register an API key for your project.
 2. Install ``upstream-sdk``
 ```bash
-npm i upstream-sdk
+npm i @uplabs/sdk
 ```
 3. Start ingesting events, below is an example.
 
@@ -58,20 +58,6 @@ That's just scratching the surface. You can log complex events with json, events
 Additionally, you can install Upstream on your phone or device as a PWA app at https://up.linus.my/install.
 
 If you need help getting started with ``upstream-sdk``, check out [linusdotmy/upstream-playground](https://github.com/linusdotmy/upstream-playground)
-
-## What's so different about Upstream compared to other platforms like Seq?
-
-Seq and Datadog are designed for the product analytics space. They ingest large volumes of events and provide powerful querying capabilities & statistics for your application.
-
-Upstream is designed for the critical logs/events space with a beautiful, intuitive experience for viewing and querying your most important events on the fly. You can use Upstream for your product's audit logs, triggering workflows, and logging complex events.
-
-To sum up, Upstream has:
-
-- Arguably the better UI for querying events on the go, especially for mobile.
-- Full API, easily ingest and query logs from your apps.
-- Action buttons and contextIds are our main differentiators.
-- Built for easy integration with your apps, no complex setup required.
-- Upstream was built to easily view your most critical logs on the fly, with a expressive interface. If you don't need easy access to important logs, Upstream isn't for you.
 
 ## Some notes
 
