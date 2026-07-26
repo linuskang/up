@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth"
+import { APIError, createAuthMiddleware } from "better-auth/api"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./prisma"
 import { env } from "@/env"
@@ -30,14 +31,47 @@ export const auth = betterAuth({
 
     baseURL: env.BETTER_AUTH_URL,
 
+    hooks: {
+        before: createAuthMiddleware(async (ctx) => {
+            if (ctx.path !== "/sign-up/email") return
+
+            if (!env.ALLOW_SIGNUP) {
+                throw new APIError("FORBIDDEN", {
+                    message:
+                        "Signups are currently disabled. Please contact the administrator.",
+                })
+            }
+
+            const email = ctx.body?.email
+            if (typeof email !== "string") return
+
+            const existing = await prisma.user.findUnique({
+                where: {
+                    email: email.toLowerCase(),
+                },
+                select: {
+                    id: true,
+                },
+            })
+
+            if (existing) {
+                throw new APIError("UNPROCESSABLE_ENTITY", {
+                    message:
+                        "A user with this email already exists. Please log in instead.",
+                })
+            }
+        }),
+    },
+
     databaseHooks: {
         user: {
             create: {
                 before: async (user) => {
                     if (!env.ALLOW_SIGNUP) {
-                        throw new Error(
-                            "Signups are currently disabled. Please contact the administrator."
-                        )
+                        throw new APIError("FORBIDDEN", {
+                            message:
+                                "Signups are currently disabled. Please contact the administrator.",
+                        })
                     }
 
                     if (!user.image && user.name) {
@@ -45,7 +79,7 @@ export const auth = betterAuth({
                         return {
                             data: {
                                 ...user,
-                                image: `https://avatars.linus.my/10.x/glass/svg?seed=${seed}`,
+                                image: `https://avatars.lkang.au/10.x/glass/svg?seed=${seed}`,
                             },
                         }
                     }
