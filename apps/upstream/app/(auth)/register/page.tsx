@@ -5,7 +5,6 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { CircleQuestionMark } from "lucide-react"
 import { toast } from "sonner"
 import { authClient } from "@/client/auth"
 
@@ -22,6 +21,7 @@ import {
 import { Checkbox } from "@uplabs/ui/components/checkbox"
 import { Input } from "@uplabs/ui/components/input"
 import styles from "../login/page.module.css"
+import { Links } from "../navbar"
 
 type RegisterForm = {
     name: string
@@ -211,6 +211,8 @@ export default function Page() {
                     </Form>
                 </CardContent>
             </Card>
+
+            <Links />
         </div>
     )
 }

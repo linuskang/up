@@ -14,6 +14,7 @@ import { Github } from "@/components/icons"
 import styles from "./page.module.css"
 import { Form } from "@/components/ui/form"
 import Image from "next/image"
+import { Links } from "../navbar"
 
 type LoginForm = {
     email: string
@@ -24,7 +25,7 @@ export default function Page() {
     const [authError, setAuthError] = useState<string | null>(null)
 
     return (
-        <div className="relative isolate flex min-h-svh items-center justify-center overflow-hidden">
+        <div className="relative isolate flex min-h-svh items-center justify-center overflow-hidden px-4 py-20">
             <div className={styles.background} aria-hidden="true" />
             <Card className="relative z-10 w-full max-w-sm gap-5 bg-card-2 p-5 ring-0 backdrop-blur-xl">
                 <CardHeader className="flex flex-col items-center gap-3 p-0 text-center">
@@ -144,6 +145,8 @@ export default function Page() {
                     </Form>
                 </CardContent>
             </Card>
+
+            <Links />
         </div>
     )
 }

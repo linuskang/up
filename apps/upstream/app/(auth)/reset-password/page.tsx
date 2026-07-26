@@ -3,10 +3,10 @@
 // Libraries
 import { Suspense, useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
 import { authClient } from "@/client/auth"
+
+import { Links } from "../navbar"
 
 // Components
 import { Form } from "@/components/ui/form"
@@ -166,8 +166,8 @@ function ResetPasswordContent() {
                                 {isSubmitting
                                     ? "Resetting..."
                                     : success
-                                      ? "Password reset"
-                                      : "Reset password"}
+                                        ? "Password reset"
+                                        : "Reset password"}
                             </Button>
                         )}
                     </Form.Submit>
@@ -190,16 +190,20 @@ function AuthShell({ children }: { children: React.ReactNode }) {
 
 export default function Page() {
     return (
-        <Suspense
-            fallback={
-                <AuthShell>
-                    <div className="p-8 text-center text-sm text-muted-foreground">
-                        Loading reset link...
-                    </div>
-                </AuthShell>
-            }
-        >
-            <ResetPasswordContent />
-        </Suspense>
+        <>
+            <Suspense
+                fallback={
+                    <AuthShell>
+                        <div className="p-8 text-center text-sm text-muted-foreground">
+                            Loading reset link...
+                        </div>
+                    </AuthShell>
+                }
+            >
+                <ResetPasswordContent />
+            </Suspense>
+
+            <Links />
+        </>
     )
 }

@@ -12,10 +12,10 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
                 "transition-[box-shadow,border-color,background-color] duration-100 ease-out",
                 "placeholder:font-semibold placeholder:text-muted-foreground",
                 "focus-visible:ring-2 focus-visible:ring-ring/80 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                "aria-invalid:focus-visible:ring-destructive/40",
+                "aria-invalid:border-destructive",
                 "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
                 "file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-xs/relaxed file:font-medium file:text-foreground",
-                "dark:bg-input dark:aria-invalid:focus-visible:ring-destructive/60",
+                "dark:bg-input",
                 className
             )}
             {...props}

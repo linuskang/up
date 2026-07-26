@@ -17,7 +17,7 @@ import {
 } from "@uplabs/ui/components/card"
 import { Input } from "@uplabs/ui/components/input"
 import styles from "../login/page.module.css"
-
+import { Links } from "../navbar"
 type ForgotPasswordForm = {
     email: string
 }
@@ -128,6 +128,8 @@ export default function Page() {
                     </Form>
                 </CardContent>
             </Card>
+
+            <Links />
         </div>
     )
 }
