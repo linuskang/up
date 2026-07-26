@@ -32,7 +32,7 @@ npm i upstream-sdk
 3. Start ingesting events, below is an example.
 
 ```ts
-import { Upstream } from 'upstream-sdk'
+import { Upstream } from '@uplabs/sdk'
 
 const up = new Upstream("YOUR_API_KEY")
 
