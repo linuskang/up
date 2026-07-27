@@ -16,7 +16,7 @@
     },
     "devDependencies": {
         "@types/web-push": "^3.6.4",
-        "turbo": "^2.10.5"
+        "turbo": "^2.10.7"
     },
     "packageManager": "npm@10.8.0",
     "dependencies": {
