@@ -1,41 +1,51 @@
 'use server'
 
-import webpush, { PushSubscription } from 'web-push'
-
-webpush.setVapidDetails(
-    'mailto:m@linus.id.au',
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
-)
+import { PushSubscription } from 'web-push'
+import { getSession } from '@/server/auth'
+import { prisma } from '@/server/prisma'
+import { sendPushNotification } from './push-notify'
 
 export async function subscribeUser(sub: PushSubscription) {
-    // In a production environment, store the subscription in a database
-    // For example: await db.subscriptions.create({ data: sub })
-    return { success: true }
-}
-
-export async function unsubscribeUser() {
-    // In a production environment, remove the subscription from the database
-    // For example: await db.subscriptions.delete({ where: { ... } })
-    return { success: true }
-}
-
-export async function sendNotification(
-    subscription: PushSubscription,
-    message: string
-) {
-    try {
-        await webpush.sendNotification(
-            subscription,
-            JSON.stringify({
-                title: 'Test Notification',
-                body: message,
-                icon: '/logo.png',
-            })
-        )
-        return { success: true }
-    } catch (error) {
-        console.error('Error sending push notification:', error)
-        return { success: false, error: 'Failed to send notification' }
+    const session = await getSession()
+    if (!session?.user?.id) {
+        throw new Error('Not authenticated')
     }
+
+    await prisma.pushSubscription.upsert({
+        where: { endpoint: sub.endpoint },
+        update: { userId: session.user.id },
+        create: {
+            userId: session.user.id,
+            endpoint: sub.endpoint,
+            auth: sub.keys.auth,
+            p256dh: sub.keys.p256dh,
+        },
+    })
+
+    return { success: true }
+}
+
+export async function unsubscribeUser(endpoint: string) {
+    const session = await getSession()
+    if (!session?.user?.id) {
+        throw new Error('Not authenticated')
+    }
+
+    await prisma.pushSubscription.deleteMany({
+        where: {
+            endpoint,
+            userId: session.user.id,
+        },
+    })
+
+    return { success: true }
+}
+
+export async function sendNotificationToMe(message: string) {
+    const session = await getSession()
+    if (!session?.user?.id) {
+        throw new Error('Not authenticated')
+    }
+
+    return sendPushNotification(session.user.id, { body: message })
 }

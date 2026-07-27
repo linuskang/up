@@ -1,7 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { subscribeUser, unsubscribeUser, sendNotification } from './actions'
+import { subscribeUser, unsubscribeUser, sendNotificationToMe } from './actions'
+
+interface BeforeInstallPromptEvent extends Event {
+    prompt: () => void
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
 
 function urlBase64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -17,27 +22,37 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 function PushNotificationManager() {
-    const [isSupported, setIsSupported] = useState(false)
+    const [isSupported] = useState(() =>
+        typeof window !== 'undefined' &&
+        'serviceWorker' in navigator &&
+        'PushManager' in window
+    )
     const [subscription, setSubscription] = useState<PushSubscription | null>(
         null
     )
     const [message, setMessage] = useState('')
 
     useEffect(() => {
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
-            setIsSupported(true)
-            registerServiceWorker()
-        }
-    }, [])
+        if (!isSupported) return
 
-    async function registerServiceWorker() {
-        const registration = await navigator.serviceWorker.register('/sw.js', {
-            scope: '/',
-            updateViaCache: 'none',
-        })
-        const sub = await registration.pushManager.getSubscription()
-        setSubscription(sub)
-    }
+        let cancelled = false
+
+        navigator.serviceWorker
+            .register('/sw.js', {
+                scope: '/',
+                updateViaCache: 'none',
+            })
+            .then((registration) => registration.pushManager.getSubscription())
+            .then((sub) => {
+                if (!cancelled) {
+                    setSubscription(sub)
+                }
+            })
+
+        return () => {
+            cancelled = true
+        }
+    }, [isSupported])
 
     async function subscribeToPush() {
         const registration = await navigator.serviceWorker.ready
@@ -53,15 +68,16 @@ function PushNotificationManager() {
     }
 
     async function unsubscribeFromPush() {
-        await subscription?.unsubscribe()
-        setSubscription(null)
-        await unsubscribeUser()
+        if (subscription) {
+            await subscription.unsubscribe()
+            await unsubscribeUser(subscription.endpoint)
+            setSubscription(null)
+        }
     }
 
     async function sendTestNotification() {
         if (subscription) {
-            const serializedSub = JSON.parse(JSON.stringify(subscription))
-            await sendNotification(serializedSub, message)
+            await sendNotificationToMe(message)
             setMessage('')
         }
     }
@@ -96,23 +112,23 @@ function PushNotificationManager() {
 }
 
 function InstallPrompt() {
-    const [installPrompt, setInstallPrompt] = useState<any>(null)
+    const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
 
     useEffect(() => {
-        const handler = (event: Event) => {
+        const handler = (event: BeforeInstallPromptEvent) => {
             event.preventDefault()
             setInstallPrompt(event)
         }
 
         window.addEventListener(
-            "beforeinstallprompt",
-            handler
+            'beforeinstallprompt',
+            handler as EventListener
         )
 
         return () => {
             window.removeEventListener(
-                "beforeinstallprompt",
-                handler
+                'beforeinstallprompt',
+                handler as EventListener
             )
         }
     }, [])
