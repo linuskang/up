@@ -29,6 +29,7 @@ export async function sendPushNotification(
         title: payload.title ?? 'Notification',
         body: payload.body,
         icon: payload.icon ?? '/icon.png',
+        badge: '/badge.png',
     })
 
     const results = await Promise.allSettled(
