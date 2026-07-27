@@ -8,6 +8,12 @@ import { Toaster } from "@/components/ui/sonner"
 export const metadata: Metadata = {
     title: "Upstream",
     description: "A simple logging platform built for developers.",
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "Upstream"
+    }
 }
 
 export const viewport = {
