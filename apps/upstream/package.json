@@ -45,7 +45,7 @@
         "react-markdown": "^10.1.0",
         "react-resizable-panels": "^4.12.2",
         "react-syntax-highlighter": "^16.1.1",
-        "recharts": "^3.9.2",
+        "recharts": "^3.10.1",
         "remark-gfm": "^4.0.1",
         "resend": "^6.17.2",
         "shadcn": "^4.13.1",
