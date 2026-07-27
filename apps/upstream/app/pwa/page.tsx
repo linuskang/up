@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import { subscribeUser, unsubscribeUser, sendNotificationToMe } from './actions'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -21,12 +21,19 @@ function urlBase64ToUint8Array(base64String: string) {
     return outputArray
 }
 
-function PushNotificationManager() {
-    const [isSupported] = useState(() =>
-        typeof window !== 'undefined' &&
-        'serviceWorker' in navigator &&
-        'PushManager' in window
+function useIsPushSupported() {
+    return useSyncExternalStore(
+        () => () => {},
+        () =>
+            typeof window !== 'undefined' &&
+            'serviceWorker' in navigator &&
+            'PushManager' in window,
+        () => false
     )
+}
+
+function PushNotificationManager() {
+    const isSupported = useIsPushSupported()
     const [subscription, setSubscription] = useState<PushSubscription | null>(
         null
     )
