@@ -70,11 +70,11 @@ export function User() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                     <Link
-                        href="/install"
+                        href="/pwa"
                         className="flex cursor-pointer items-center gap-2"
                     >
                         <Download className="size-3.5 text-muted-foreground" />
-                        Install App
+                        PWA App
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuContent>
