@@ -127,7 +127,7 @@ export const auth = betterAuth({
         additionalFields: {
             pushNotificationsEnabled: {
                 type: "boolean",
-                default: true,
+                defaultValue: true,
             },
         }
     }

@@ -325,4 +325,26 @@ export class Project {
             })
         }
     }
+
+    static async get(projectId: string) {
+        const project = await prisma.project.findUnique({
+            where: {
+                id: projectId,
+            },
+        })
+
+        return project
+    }
+}
+
+export class User {
+    static async get(id: string) {
+        const user = await prisma.user.findUnique({
+            where: {
+                id,
+            },
+        })
+
+        return user
+    }
 }
