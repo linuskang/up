@@ -16,14 +16,12 @@ import {
     BreadcrumbSeparator,
 } from "@uplabs/ui/components/breadcrumb"
 import { Input } from "@uplabs/ui/components/input"
-import { Label } from "@uplabs/ui/components/label"
 import { Button } from "@uplabs/ui/components/button"
 import {
     Card,
     CardHeader,
     CardTitle,
     CardContent,
-    CardFooter,
 } from "@uplabs/ui/components/card"
 import { Form } from "@uplabs/ui/components/form"
 
@@ -33,49 +31,14 @@ type FormData = {
 }
 
 export default function Page() {
-    const { data: session, isPending, refetch } = authClient.useSession()
-
-    if (isPending) {
-        return (
-            <div className="flex min-h-svh flex-col gap-8 py-6">
-                <div className="flex flex-col gap-1">
-                    <Breadcrumb>
-                        <BreadcrumbList className="text-sm">
-                            <BreadcrumbItem>
-                                <BreadcrumbLink asChild>
-                                    <Link href="/settings">Settings</Link>
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>Profile</BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
-                </div>
-                <Card className="bg-card ring-0">
-                    <CardHeader>
-                        <div className="h-8 w-48 animate-pulse rounded bg-muted" />
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                        <div className="h-10 w-full animate-pulse rounded bg-muted" />
-                        <div className="h-10 w-full animate-pulse rounded bg-muted" />
-                        <div className="h-10 w-full animate-pulse rounded bg-muted" />
-                    </CardContent>
-                    <CardFooter className="justify-end">
-                        <div className="h-9 w-28 animate-pulse rounded bg-muted" />
-                    </CardFooter>
-                </Card>
-            </div>
-        )
-    }
+    const { data: session, refetch } = authClient.useSession()
 
     if (!session) {
         return null
     }
 
     return (
-        <div className="flex min-h-svh flex-col gap-8 py-6">
+        <div className="flex min-h-svh flex-col gap-4">
             <div className="flex flex-col gap-1">
                 <Breadcrumb>
                     <BreadcrumbList className="text-sm">
@@ -117,50 +80,52 @@ export default function Page() {
                             toast.success("Profile updated successfully!")
                         }}
                     >
-                        <div className="space-y-1.5">
-                            <Form.Label name="name">Display Name</Form.Label>
-                            <Form.Field name="name">
-                                <Input placeholder="Your display name" />
-                            </Form.Field>
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <Form.Label name="image">Profile Image URL</Form.Label>
-                            <Form.Field name="image">
-                                <Input placeholder="https://example.com/avatar.png" />
-                            </Form.Field>
-                        </div>
-
-                        {session.user.image && (
-                            <div className="flex items-center gap-2">
-                                <div className="relative size-12 overflow-hidden rounded-md border border-border/60 bg-secondary">
-                                    <Image
-                                        key={session.user.image}
-                                        src={session.user.image}
-                                        alt="Avatar preview"
-                                        fill
-                                        unoptimized
-                                        className="object-cover"
-                                    />
-                                </div>
+                        <div className="space-y-3">
+                            <div className="space-y-1.5">
+                                <Form.Label name="name" className="font-semibold">Display Name</Form.Label>
+                                <Form.Field name="name">
+                                    <Input placeholder="Your display name" />
+                                </Form.Field>
                             </div>
-                        )}
 
-                        <div className="space-y-1.5">
-                            <Label>Email</Label>
-                            <Input
-                                value={session.user.email}
-                                disabled
-                            />
+                            <div className="space-y-1.5">
+                                <Form.Label name="image" className="font-semibold">Profile Image URL</Form.Label>
+                                <Form.Field name="image">
+                                    <Input placeholder="https://example.com/avatar.png" />
+                                </Form.Field>
+                            </div>
+
+                            {session.user.image && (
+                                <div className="flex items-center gap-2">
+                                    <div className="relative size-12 overflow-hidden rounded-md border border-border/60 bg-secondary">
+                                        <Image
+                                            key={session.user.image}
+                                            src={session.user.image}
+                                            alt="Avatar preview"
+                                            fill
+                                            unoptimized
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="space-y-1.5">
+                                <Form.Label name="email" className="font-semibold">Email</Form.Label>
+                                <Input
+                                    value={session.user.email}
+                                    disabled
+                                />
+                            </div>
+
+                            <Form.Submit>
+                                <Button
+                                    size="sm"
+                                >
+                                    Save Changes
+                                </Button>
+                            </Form.Submit>
                         </div>
-
-                        <Form.Submit>
-                            <Button
-                                size="sm"
-                            >
-                                Save Changes
-                            </Button>
-                        </Form.Submit>
                     </Form>
                 </CardContent>
             </Card>

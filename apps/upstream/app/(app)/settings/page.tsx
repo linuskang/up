@@ -46,9 +46,9 @@ export default function Page() {
     }
 
     return (
-        <div className="flex min-h-svh flex-col gap-3 py-6">
+        <div className="flex min-h-svh flex-col gap-3">
             <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-semibold">Settings</h1>
+                <h1 className="text-2xl font-semibold">Account Settings</h1>
             </div>
 
             <section className="rounded-xl bg-card p-4 ring-0">

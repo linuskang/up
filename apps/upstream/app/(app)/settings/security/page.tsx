@@ -3,8 +3,8 @@
 // Libraries
 import { authClient } from "@/client/auth"
 import Link from "next/link"
-import { useState } from "react"
 import { toast } from "sonner"
+import { useEffect, useState } from "react"
 
 // Components
 import {
@@ -14,56 +14,84 @@ import {
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+} from "@uplabs/ui/components/breadcrumb"
+import { Input } from "@uplabs/ui/components/input"
+import { Button } from "@uplabs/ui/components/button"
 import {
     Card,
     CardHeader,
     CardTitle,
     CardContent,
-    CardFooter,
-} from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@uplabs/ui/components/card"
+import { Checkbox } from "@uplabs/ui/components/checkbox"
+import { Form } from "@uplabs/ui/components/form"
+import { Skeleton } from "@uplabs/ui/components/skeleton"
+
+type SecurityFormData = {
+    currentPassword: string
+    newPassword: string
+    revokeSessions: boolean
+}
+
+type ActiveSession = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    userId: string
+    expiresAt: Date
+    token: string
+    ipAddress?: string | null
+    userAgent?: string | null
+}
+
+function formatSessionDate(date: Date) {
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    }).format(new Date(date))
+}
 
 export default function Page() {
     const { data: session } = authClient.useSession()
+    const [sessions, setSessions] = useState<ActiveSession[] | null>(null)
+    const [isLoadingSessions, setIsLoadingSessions] = useState(true)
 
-    // Fields
-    const [newPassword, setNewPassword] = useState("")
-    const [currentPassword, setCurrentPassword] = useState("")
-    const [revokeSessions, setRevokeSessions] = useState(false)
+    useEffect(() => {
+        async function fetchSessions() {
+            const { data, error } = await authClient.listSessions()
 
-    // State
-    const [isSaving, setIsSaving] = useState(false)
+            if (error) {
+                toast.error("Failed to load active sessions.")
+                setIsLoadingSessions(false)
+                return
+            }
+
+            setSessions(data as ActiveSession[])
+            setIsLoadingSessions(false)
+        }
+
+        fetchSessions()
+    }, [])
+
+    async function revokeSession(token: string) {
+        const { error } = await authClient.revokeSession({ token })
+
+        if (error) {
+            toast.error("Failed to revoke session.")
+            return
+        }
+
+        setSessions((prev) => prev?.filter((s) => s.token !== token) ?? null)
+        toast.success("Session revoked.")
+    }
 
     if (!session) {
         return null
     }
 
-    const update = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsSaving(true)
-
-        const { error } = await authClient.changePassword({
-            currentPassword: currentPassword,
-            newPassword: newPassword,
-            revokeOtherSessions: revokeSessions,
-        })
-
-        if (error) {
-            toast.error("Failed to update password.")
-            setIsSaving(false)
-            return
-        }
-
-        toast.success("Password updated successfully.")
-        setIsSaving(false)
-    }
-
     return (
-        <div className="flex min-h-svh flex-col gap-3 py-6">
+        <div className="flex min-h-svh flex-col gap-4">
             <div className="flex flex-col gap-1">
                 <Breadcrumb>
                     <BreadcrumbList className="text-sm">
@@ -86,73 +114,138 @@ export default function Page() {
                         Security
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <form
-                        id="profile-form"
-                        onSubmit={update}
-                        className="space-y-3"
-                    >
-                        <div>
-                            <Label htmlFor="current-password" className="mb-2">
-                                Current Password
-                            </Label>
-                            <Input
-                                id="current-password"
-                                value={currentPassword}
-                                placeholder="Enter current password"
-                                onChange={(e) =>
-                                    setCurrentPassword(e.target.value)
-                                }
-                                className="border-0 bg-input text-white"
-                                type="password"
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="new-password" className="mb-2">
-                                New Password
-                            </Label>
-                            <Input
-                                id="new-password"
-                                value={newPassword}
-                                placeholder="Enter new password"
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="border-0 bg-input text-white"
-                                type="password"
-                            />
-                        </div>
+                <CardContent className="space-y-3">
+                    <Form<SecurityFormData>
+                        id="security"
+                        formOptions={{
+                            defaultValues: {
+                                currentPassword: "",
+                                newPassword: "",
+                                revokeSessions: false,
+                            },
+                        }}
+                        onSubmit={async (data) => {
+                            const { error } = await authClient.changePassword({
+                                currentPassword: data.currentPassword,
+                                newPassword: data.newPassword,
+                                revokeOtherSessions: data.revokeSessions,
+                            })
 
-                        <div>
-                            <Label
-                                htmlFor="revoke-sessions"
-                                className="mb-2 block"
-                            >
-                                Revoke Other Sessions
-                            </Label>
-                            <div className="flex items-center gap-2">
-                                <Checkbox
-                                    id="revoke-sessions"
-                                    checked={revokeSessions}
-                                    onCheckedChange={(checked) =>
-                                        setRevokeSessions(checked === true)
-                                    }
-                                />
-                                <span className="text-sm text-muted-foreground">
-                                    Sign out of other sessions
-                                </span>
-                            </div>
-                        </div>
-                    </form>
-                </CardContent>
-                <CardFooter className="justify-end">
-                    <Button
-                        size="sm"
-                        type="submit"
-                        form="profile-form"
-                        disabled={isSaving}
+                            if (error) {
+                                toast.error("Failed to update password.")
+                                return
+                            }
+
+                            toast.success("Password updated successfully.")
+                        }}
                     >
-                        {isSaving ? "Saving..." : "Save Changes"}
-                    </Button>
-                </CardFooter>
+                        <div className="space-y-3">
+                            <div className="space-y-1.5">
+                                <Form.Label name="currentPassword" className="font-semibold">
+                                    Current Password
+                                </Form.Label>
+                                <Form.Field name="currentPassword">
+                                    <Input
+                                        type="password"
+                                        placeholder="Enter current password"
+                                    />
+                                </Form.Field>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Form.Label name="newPassword" className="font-semibold">
+                                    New Password
+                                </Form.Label>
+                                <Form.Field name="newPassword">
+                                    <Input
+                                        type="password"
+                                        placeholder="Enter new password"
+                                    />
+                                </Form.Field>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Form.Label name="revokeSessions" className="font-semibold">
+                                    Revoke Other Sessions
+                                </Form.Label>
+                                <Form.Field
+                                    name="revokeSessions"
+                                    override={({ field }) => ({
+                                        checked: field.value,
+                                        onCheckedChange: field.onChange,
+                                    })}
+                                >
+                                    <Checkbox aria-label="Sign out of other sessions" />
+                                </Form.Field>
+                            </div>
+
+                            <Form.Submit>
+                                <Button size="sm">
+                                    Save Changes
+                                </Button>
+                            </Form.Submit>
+                        </div>
+                    </Form>
+                </CardContent>
+            </Card>
+
+            <Card className="bg-card ring-0">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-semibold text-white">
+                        Active Sessions
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    {isLoadingSessions ? (
+                        <div className="space-y-3">
+                            <Skeleton className="h-16 w-full" />
+                            <Skeleton className="h-16 w-full" />
+                        </div>
+                    ) : sessions?.length ? (
+                        <div className="space-y-2">
+                            {sessions.map((s) => {
+                                const isCurrent = s.id === session.session.id
+
+                                return (
+                                    <div
+                                        key={s.id}
+                                        className="flex items-center justify-between gap-4 rounded-lg border border-border/40 p-3"
+                                    >
+                                        <div className="flex min-w-0 flex-col gap-0.5">
+                                            <div className="flex items-center gap-2">
+                                                <p className="truncate text-sm font-medium text-foreground">
+                                                    {s.userAgent || "Unknown device"}
+                                                </p>
+                                                {isCurrent && (
+                                                    <span className="shrink-0 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                                                        Current
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {s.ipAddress ? `${s.ipAddress} · ` : ""}
+                                                {formatSessionDate(s.createdAt)}
+                                            </p>
+                                        </div>
+                                        {!isCurrent && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => revokeSession(s.token)}
+                                            >
+                                                Revoke
+                                            </Button>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-muted-foreground">
+                            No active sessions found.
+                        </p>
+                    )}
+                </CardContent>
             </Card>
         </div>
     )

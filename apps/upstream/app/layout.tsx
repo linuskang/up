@@ -29,6 +29,18 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+            <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            window.addEventListener('beforeinstallprompt', (e) => {
+                                e.preventDefault();
+                                window.deferredInstallPrompt = e;
+                            });
+                        `,
+                    }}
+                />
+            </head>
             <body
                 className={`flex min-h-screen flex-col bg-background ${GeistSans.className}`}
             >

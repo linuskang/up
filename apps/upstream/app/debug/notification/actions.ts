@@ -1,7 +1,7 @@
 'use server'
 
 import { requireSession } from '@/server/auth'
-import { sendPushNotification } from '@/app/pwa/push-notify'
+import { sendPushNotification } from '@/server/push-notify'
 
 export async function sendNotificationToYourself() {
     const session = await requireSession()

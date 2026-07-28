@@ -3,7 +3,7 @@
 import { PushSubscription } from 'web-push'
 import { getSession } from '@/server/auth'
 import { prisma } from '@/server/prisma'
-import { sendPushNotification } from './push-notify'
+import { sendPushNotification } from '@/server/push-notify'
 
 export async function subscribeUser(sub: PushSubscription) {
     const session = await getSession()

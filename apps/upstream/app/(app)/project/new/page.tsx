@@ -26,7 +26,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@uplabs/ui/components/breadcrumb"
-import { Form } from "@/components/ui/form"
+import { Form } from "@uplabs/ui/components/form"
 
 import { PageLayout } from "@/components/layout"
 
@@ -74,7 +74,7 @@ export default function Page() {
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
-                            <BreadcrumbPage>Create Project</BreadcrumbPage>
+                            <BreadcrumbPage>Create a Project</BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
@@ -88,7 +88,7 @@ export default function Page() {
                 <Card>
                     <CardHeader>
                         <Form.Title className="text-2xl font-semibold text-white">
-                            Create Project
+                            Create a Project
                         </Form.Title>
                         <Form.Description className="text-sm text-muted-foreground">
                             Create a new project and start logging your events.

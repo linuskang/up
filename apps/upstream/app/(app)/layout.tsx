@@ -124,7 +124,7 @@ export default function RootLayout({
     return (
         <>
             {isProjectRoute ? <ProjectNavbar /> : <Navbar />}
-            <div className="mx-auto w-full max-w-lg px-4">{children}</div>
+            <div className="mx-auto w-full max-w-2xl px-4">{children}</div>
         </>
     )
 }

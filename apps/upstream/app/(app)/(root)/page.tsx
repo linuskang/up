@@ -238,7 +238,7 @@ export default function Page() {
                                     setSearchQuery(event.target.value)
                                     setCurrentPage(1)
                                 }}
-                                className="h-8 border-0 !bg-card pl-9"
+                                className="h-8 !border-0 !bg-card pl-9"
                             />
                         </div>
 
