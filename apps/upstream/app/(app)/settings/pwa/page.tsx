@@ -4,6 +4,7 @@
 import Link from "next/link"
 import { useState, useEffect, useSyncExternalStore } from 'react'
 import { toast } from "sonner"
+import { authClient } from "@/client/auth"
 import { subscribeUser, unsubscribeUser, sendNotificationToMe } from './actions'
 
 // Components
@@ -24,6 +25,7 @@ import {
     CardTitle,
     CardContent,
 } from "@uplabs/ui/components/card"
+import { Switch } from "@/components/ui/switch"
 interface BeforeInstallPromptEvent extends Event {
     prompt: () => void
     userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
@@ -61,6 +63,7 @@ function useIsPushSupported() {
 
 export default function Page() {
     const isSupported = useIsPushSupported()
+    const { data: session } = authClient.useSession()
     const [subscription, setSubscription] = useState<PushSubscription | null>(
         null
     )
@@ -114,6 +117,10 @@ export default function Page() {
             )
         }
     }, [])
+
+    if (!session) {
+        return null
+    }
 
     async function installApp() {
         if (!installPrompt) return
@@ -255,6 +262,39 @@ export default function Page() {
                         </div>
                     </CardContent>
                 </CardHeader>
+            </Card>
+            <Card className="p-4">
+                <CardHeader className="p-0">
+                    <CardTitle className="text-lg font-semibold text-white">
+                        {session.user.pushNotificationsEnabled
+                            ? <CircleCheck className="mr-2 inline-block h-5 w-5 text-success" />
+                            : <CircleX className="mr-2 inline-block h-5 w-5 text-destructive" />}
+                        Account-level Push Notifications
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0 -mt-3">
+                    <div className="space-y-3">
+                        {session.user.pushNotificationsEnabled
+                            ? <p className="text-sm text-muted-foreground font-medium">Push notifications are enabled for your account. We recommend keeping them on.</p>
+                            : <p className="text-sm text-muted-foreground font-medium">Push notifications are disabled for your account. We recommend keeping them on.</p>
+                        }
+                        <Switch
+                            checked={session.user.pushNotificationsEnabled}
+                            onCheckedChange={async (checked) => {
+                                try {
+                                    await authClient.updateUser({
+                                        pushNotificationsEnabled: checked,
+                                    })
+                                    toast.success(`Push notifications ${checked ? 'enabled' : 'disabled'} for your account.`)
+                                }
+                                catch (error) {
+                                    console.error(error)
+                                    toast.error('Failed to update push notification settings.')
+                                }
+                            }}
+                        />
+                    </div>
+                </CardContent>
             </Card>
         </div>
     )

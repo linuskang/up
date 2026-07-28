@@ -17,6 +17,20 @@ export async function sendPushNotification(
     userId: string,
     payload: PushNotificationPayload
 ) {
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        }
+    })
+
+    if (!user) {
+        return { success: false, error: 'User not found' }
+    }
+
+    if (!user.pushNotificationsEnabled) {
+        return { success: false, error: 'Push notifications are disabled for this user' }
+    }
+
     const subscriptions = await prisma.pushSubscription.findMany({
         where: { userId },
     })

@@ -122,4 +122,13 @@ export const auth = betterAuth({
             clientSecret: env.GOOGLE_CLIENT_SECRET,
         },
     },
+
+    user: {
+        additionalFields: {
+            pushNotificationsEnabled: {
+                type: "boolean",
+                default: true,
+            },
+        }
+    }
 })

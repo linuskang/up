@@ -81,7 +81,7 @@ export default function Page() {
                     <div className="flex items-center gap-3">
                         <UserRound className="size-5 text-muted-foreground" />
                         <span className="text-lg font-medium text-foreground">
-                            Profile
+                            Your Profile
                         </span>
                     </div>
                     <ChevronRight className="size-4 text-muted-foreground" />
@@ -93,7 +93,7 @@ export default function Page() {
                     <div className="flex items-center gap-3">
                         <BriefcaseBusiness className="size-5 text-muted-foreground" />
                         <span className="text-lg font-medium text-foreground">
-                            Security
+                            Account Security
                         </span>
                     </div>
                     <ChevronRight className="size-4 text-muted-foreground" />
@@ -105,7 +105,7 @@ export default function Page() {
                     <div className="flex items-center gap-3">
                         <CreditCard className="size-5 text-muted-foreground" />
                         <span className="text-lg font-medium text-foreground">
-                            Billing
+                            Billing / Plan
                         </span>
                     </div>
                     <ChevronRight className="size-4 text-muted-foreground" />
@@ -117,7 +117,7 @@ export default function Page() {
                     <div className="flex items-center gap-3">
                         <AppWindow className="size-5 text-muted-foreground" />
                         <span className="text-lg font-medium text-foreground">
-                            PWA
+                            PWA / Notifications
                         </span>
                     </div>
                     <ChevronRight className="size-4 text-muted-foreground" />
