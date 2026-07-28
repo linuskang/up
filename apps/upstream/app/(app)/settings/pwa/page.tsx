@@ -199,7 +199,7 @@ export default function Page() {
                         </Button>
 
                         {!installPrompt && (
-                            <p className="text-sm text-muted-foreground font-medium mt-2">This device doesn&apos; t support automatic installation.To install, open this page in your mobile browser and look for the &apos;Add to Home Screen&apos; option in the browser menu.</p>
+                            <p className="text-sm text-muted-foreground font-medium mt-2">This device doesn&apos; t support automatic installation. To install, open this page in your mobile browser and look for the &apos;Add to Home Screen&apos; option in the browser menu.</p>
                         )}
                     </CardContent>
                 </CardHeader>
