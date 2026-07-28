@@ -12,7 +12,7 @@ import { Input } from "@uplabs/ui/components/input"
 import { CircleQuestionMark } from "lucide-react"
 import { Github } from "@/components/icons"
 import styles from "./page.module.css"
-import { Form } from "@/components/ui/form"
+import { Form } from "@uplabs/ui/components/form"
 import Image from "next/image"
 import { Links } from "../navbar"
 

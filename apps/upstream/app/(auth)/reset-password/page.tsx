@@ -9,7 +9,7 @@ import { authClient } from "@/client/auth"
 import { Links } from "../navbar"
 
 // Components
-import { Form } from "@/components/ui/form"
+import { Form } from "@uplabs/ui/components/form"
 import { Button } from "@uplabs/ui/components/button"
 import {
     Card,

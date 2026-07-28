@@ -3,7 +3,6 @@
 // Libraries
 import { authClient } from "@/client/auth"
 import Link from "next/link"
-import { useState } from "react"
 import { toast } from "sonner"
 import Image from "next/image"
 
@@ -15,137 +14,26 @@ import {
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+} from "@uplabs/ui/components/breadcrumb"
+import { Input } from "@uplabs/ui/components/input"
+import { Label } from "@uplabs/ui/components/label"
+import { Button } from "@uplabs/ui/components/button"
 import {
     Card,
     CardHeader,
     CardTitle,
     CardContent,
     CardFooter,
-} from "@/components/ui/card"
+} from "@uplabs/ui/components/card"
+import { Form } from "@uplabs/ui/components/form"
 
-interface ProfileFormProps {
-    user: {
-        name: string
-        email: string
-        image?: string | null | undefined
-    }
-}
-
-function ProfileForm({ user }: ProfileFormProps) {
-    const [name, setName] = useState(user.name || "")
-    const [image, setImage] = useState(user.image || "")
-    const [email] = useState(user.email || "")
-    const [isSaving, setIsSaving] = useState(false)
-
-    const update = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsSaving(true)
-
-        const { error } = await authClient.updateUser({
-            name,
-            image,
-        })
-
-        if (error) {
-            toast.error("Failed to update profile.")
-            setIsSaving(false)
-            return
-        }
-
-        toast.success("Profile updated successfully.")
-        setIsSaving(false)
-    }
-
-    return (
-        <Card className="bg-card ring-0">
-            <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-white">
-                    Your Profile
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <form id="profile-form" onSubmit={update} className="space-y-3">
-                    <div>
-                        <Label htmlFor="display-name" className="mb-2">
-                            Display Name
-                        </Label>
-                        <Input
-                            id="display-name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="border-0 bg-input text-white"
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="image" className="mb-2">
-                            Profile Image
-                        </Label>
-
-                        {image && (
-                            <div className="mt-2 mb-2 flex items-center gap-2">
-                                <div className="relative size-12 overflow-hidden rounded-md border border-border/60 bg-secondary">
-                                    <Image
-                                        key={image}
-                                        src={image}
-                                        alt="Avatar preview"
-                                        fill
-                                        unoptimized
-                                        className="object-cover"
-                                        onError={(e) => {
-                                            ;(
-                                                e.target as HTMLImageElement
-                                            ).style.display = "none"
-                                        }}
-                                    />
-                                </div>
-                                <span className="text-xs text-muted-foreground">
-                                    Preview
-                                </span>
-                            </div>
-                        )}
-
-                        <Input
-                            id="image"
-                            value={image}
-                            onChange={(e) => setImage(e.target.value)}
-                            className="border-0 bg-input text-white"
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="email" className="mb-2">
-                            Email
-                        </Label>
-                        <Input
-                            id="email"
-                            value={email}
-                            className="border-0 bg-input text-white"
-                            disabled
-                        />
-                    </div>
-                </form>
-            </CardContent>
-            <CardFooter className="justify-end">
-                <Button
-                    size="sm"
-                    type="submit"
-                    form="profile-form"
-                    disabled={isSaving}
-                >
-                    {isSaving ? "Saving..." : "Save Changes"}
-                </Button>
-            </CardFooter>
-        </Card>
-    )
+type FormData = {
+    name: string
+    image: string
 }
 
 export default function Page() {
-    const { data: session, isPending } = authClient.useSession()
+    const { data: session, isPending, refetch } = authClient.useSession()
 
     if (isPending) {
         return (
@@ -204,7 +92,78 @@ export default function Page() {
                 </Breadcrumb>
             </div>
 
-            <ProfileForm user={session.user} />
+            <Card className="bg-card ring-0">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-semibold text-white">
+                        Your Profile
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <Form<FormData>
+                        key={session.user.id}
+                        id="profile"
+                        formOptions={{
+                            defaultValues: {
+                                name: session.user.name,
+                                image: session.user.image || "",
+                            },
+                        }}
+                        onSubmit={async (data) => {
+                            await authClient.updateUser({
+                                name: data.name,
+                                image: data.image,
+                            })
+                            await refetch()
+                            toast.success("Profile updated successfully!")
+                        }}
+                    >
+                        <div className="space-y-1.5">
+                            <Form.Label name="name">Display Name</Form.Label>
+                            <Form.Field name="name">
+                                <Input placeholder="Your display name" />
+                            </Form.Field>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Form.Label name="image">Profile Image URL</Form.Label>
+                            <Form.Field name="image">
+                                <Input placeholder="https://example.com/avatar.png" />
+                            </Form.Field>
+                        </div>
+
+                        {session.user.image && (
+                            <div className="flex items-center gap-2">
+                                <div className="relative size-12 overflow-hidden rounded-md border border-border/60 bg-secondary">
+                                    <Image
+                                        key={session.user.image}
+                                        src={session.user.image}
+                                        alt="Avatar preview"
+                                        fill
+                                        unoptimized
+                                        className="object-cover"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="space-y-1.5">
+                            <Label>Email</Label>
+                            <Input
+                                value={session.user.email}
+                                disabled
+                            />
+                        </div>
+
+                        <Form.Submit>
+                            <Button
+                                size="sm"
+                            >
+                                Save Changes
+                            </Button>
+                        </Form.Submit>
+                    </Form>
+                </CardContent>
+            </Card>
         </div>
     )
 }

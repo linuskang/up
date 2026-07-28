@@ -67,14 +67,14 @@
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 10%);
-    --input: oklch(18.3% 0.01 276.4);
+    --input: oklch(26% 0.005 247.94);
     --ring: oklch(56.9% 0.169 262.4);
     --chart-1: var(--color-blue-300);
     --chart-2: var(--color-blue-500);
     --chart-3: var(--color-blue-600);
     --chart-4: var(--color-blue-700);
     --chart-5: var(--color-blue-800);
-    --sidebar: oklch(0.205 0 0);
+    --sidebar: oklch(0.2215 0.0025 247.94);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.623 0.214 259.815);
     --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
@@ -102,28 +102,4 @@
     html {
         @apply font-sans;
     }
-}
-
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: rotate(0deg) translateX(0);
-    }
-
-    25% {
-        transform: rotate(-2deg) translateX(-1px);
-    }
-
-    50% {
-        transform: rotate(2deg) translateX(1px);
-    }
-
-    75% {
-        transform: rotate(-2deg) translateX(-1px);
-    }
-}
-
-.animate-shake {
-    animation: shake 0.3s ease-in-out infinite;
 }

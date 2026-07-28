@@ -7,7 +7,7 @@ import Link from "next/link"
 import { authClient } from "@/client/auth"
 
 // Components
-import { Form } from "@/components/ui/form"
+import { Form } from "@uplabs/ui/components/form"
 import { Button } from "@uplabs/ui/components/button"
 import {
     Card,

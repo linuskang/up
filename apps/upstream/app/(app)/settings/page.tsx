@@ -6,7 +6,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
     ChevronRight,
     UserRound,
+    FingerprintPattern,
     BriefcaseBusiness,
+    AppWindow,
     CreditCard,
 } from "lucide-react"
 import Link from "next/link"
@@ -77,7 +79,7 @@ export default function Page() {
                     className="flex items-center justify-between rounded-t-xl border-b border-border/40 px-4 py-4 transition-colors hover:bg-accent/50"
                 >
                     <div className="flex items-center gap-3">
-                        <UserRound className="size-4 text-muted-foreground" />
+                        <UserRound className="size-5 text-muted-foreground" />
                         <span className="text-lg font-medium text-foreground">
                             Profile
                         </span>
@@ -89,7 +91,7 @@ export default function Page() {
                     className="flex items-center justify-between border-b border-border/40 px-4 py-4 transition-colors hover:bg-accent/50"
                 >
                     <div className="flex items-center gap-3">
-                        <BriefcaseBusiness className="size-4 text-muted-foreground" />
+                        <BriefcaseBusiness className="size-5 text-muted-foreground" />
                         <span className="text-lg font-medium text-foreground">
                             Security
                         </span>
@@ -98,12 +100,24 @@ export default function Page() {
                 </Link>
                 <Link
                     href="/settings/billing"
-                    className="flex items-center justify-between rounded-b-lg px-4 py-4 transition-colors hover:bg-accent/50"
+                    className="flex items-center justify-between border-b border-border/40 px-4 py-4 transition-colors hover:bg-accent/50"
                 >
                     <div className="flex items-center gap-3">
-                        <CreditCard className="size-4 text-muted-foreground" />
+                        <CreditCard className="size-5 text-muted-foreground" />
                         <span className="text-lg font-medium text-foreground">
                             Billing
+                        </span>
+                    </div>
+                    <ChevronRight className="size-4 text-muted-foreground" />
+                </Link>
+                <Link
+                    href="/settings/pwa"
+                    className="flex items-center justify-between rounded-b-xl border-b border-border/40 px-4 py-4 transition-colors hover:bg-accent/50"
+                >
+                    <div className="flex items-center gap-3">
+                        <AppWindow className="size-5 text-muted-foreground" />
+                        <span className="text-lg font-medium text-foreground">
+                            PWA
                         </span>
                     </div>
                     <ChevronRight className="size-4 text-muted-foreground" />
