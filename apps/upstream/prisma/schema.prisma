@@ -130,7 +130,7 @@ model ApiKey {
 model Event {
   id        String   @id @default(uuid())
   title     String
-  icon      String
+  icon      String @default("~")
   content   String?
   category  String?
   fields    Json?
@@ -138,6 +138,7 @@ model Event {
   data      Json?
   actions   Json?
   createdAt DateTime @default(now())
+  pushNotify Boolean @default(false)
   projectId String
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
