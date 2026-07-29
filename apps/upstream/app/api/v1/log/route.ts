@@ -1,19 +1,42 @@
+
+// curl -X POST https://up.linus.my/api/v1/log \
+// -H "x-api-key: YOUR_API_KEY" \
+// -H "Content-Type: application/json" \
+// -d '{
+//     "title": "Test Event",
+//     "icon": "~"
+//   }'
+
+// Libraries
 import { NextRequest } from "next/server"
-import { Api, Usage, Project, User } from "@/server/utils"
-import { BadRequest, Unauthorized, NotFound, Success } from "@/app/api/responses"
-import { plans } from "@/server/vars"
 import { z } from "zod"
+
+// Utilities
 import { prisma } from "@/server/prisma"
 
-const EventPayload = z.object({
+import {
+    Api,
+    Usage,
+    Project,
+    User
+} from "@/server/utils"
+import { sendPushNotification } from "@/server/push-notify"
+
+import { ApiResponse } from "@/app/api/responses"
+import { plans } from "@/server/vars"
+
+// Types
+const Payload = z.object({
     title: z.string().min(1),
-    icon: z.string().min(1),
-    content: z.string().optional().nullable(),
+    icon: z.string().min(1).max(1).optional(),
+
+    description: z.string().optional().nullable(),
     category: z.string().optional().nullable(),
+
     fields: z
         .array(
             z.object({
-                name: z.string(),
+                title: z.string(),
                 value: z.string(),
             })
         )
@@ -22,51 +45,58 @@ const EventPayload = z.object({
     events: z
         .array(
             z.object({
+                title: z.string(),
                 icon: z.string(),
-                time: z.string(),
-                content: z.string(),
+                createdAt: z.string(),
             })
         )
         .optional()
         .nullable(),
-    data: z.any().optional().nullable(),
     actions: z
         .array(
             z.object({
                 title: z.string(),
-                type: z.enum(["default", "secondary", "ghost"]),
-                url: z.string().url(),
+                variant: z.enum(["primary", "secondary", "ghost"]),
+                url: z.url(),
             })
         )
         .optional()
         .nullable(),
+    data: z.json().optional().nullable(),
+
+    pushNotify: z.boolean().default(false),
 })
 
 export async function POST(req: NextRequest) {
+    // Pre-flight checks
     const apiKey = req.headers.get("x-api-key")
 
     if (!apiKey) {
-        return BadRequest("API key is required")
+        return ApiResponse.BadRequest("API key is required")
     }
 
-    const validate: { valid: boolean; projectId?: string } = await Api.validateKey(apiKey)
+    const validate: {
+        valid: boolean;
+        projectId?: string
+    } = await Api.validateKey(apiKey)
 
     if (!validate.valid) {
-        return Unauthorized("Invalid API key")
+        return ApiResponse.Unauthorized("Invalid API key")
     }
 
     const project = await Project.get(validate.projectId!)
 
     if (!project) {
-        return NotFound("Project not found")
+        return ApiResponse.NotFound("Project not found")
     }
 
     const user = await User.get(project.ownerId)
 
     if (!user) {
-        return NotFound("User not found")
+        return ApiResponse.NotFound("User not found")
     }
 
+    // Logging
     const usage = await Usage.increment(user.id)
     const limit = user.plan
 
@@ -86,10 +116,10 @@ export async function POST(req: NextRequest) {
                 error: "Monthly event quota exceeded. Upgrade your plan to ingest more events.",
             })
         )
-        return BadRequest("Monthly event quota exceeded. Upgrade your plan to ingest more events.")
+        return ApiResponse.BadRequest("Monthly event quota exceeded. Upgrade your plan to ingest more events.")
     }
 
-    const parsed = EventPayload.safeParse(body)
+    const parsed = Payload.safeParse(body)
 
     if (!parsed.success) {
         await Api.log(
@@ -103,7 +133,8 @@ export async function POST(req: NextRequest) {
                 error: "Invalid request body",
             })
         )
-        return BadRequest("Invalid request body")
+        await Usage.decrement(user.id) // Undos usage if errored, v0.2.4 improvement
+        return ApiResponse.BadRequest("Invalid request body")
     }
 
     const event = parsed.data
@@ -113,12 +144,13 @@ export async function POST(req: NextRequest) {
             projectId: project.id,
             title: event.title,
             icon: event.icon,
-            content: event.content,
+            content: event.description,
             category: event.category,
             fields: event.fields ?? undefined,
             events: event.events ?? undefined,
             data: event.data ?? undefined,
             actions: event.actions ?? undefined,
+            pushNotify: event.pushNotify,
         },
     })
 
@@ -126,7 +158,7 @@ export async function POST(req: NextRequest) {
         project.id,
         "/api/v1/log",
         "POST",
-        200,
+        201,
         req.headers.get("user-agent"),
         JSON.stringify(body),
         JSON.stringify(res)
@@ -136,5 +168,12 @@ export async function POST(req: NextRequest) {
         await Project.triggerWebhooks(project.id, res.category, res)
     }
 
-    return Success("Event created successfully", res)
+    if (res.pushNotify) {
+        await sendPushNotification(user.id, {
+            title: res.title,
+            body: res.content ?? "triggered a notification",
+        })
+    }
+
+    return ApiResponse.Success(undefined, { event: res })
 }
