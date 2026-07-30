@@ -103,16 +103,16 @@ export default function Page() {
       setActivityLoading(true)
 
       try {
-        await axios.get("/api/project").then((res) => {
-          setProjects(res.data.projects)
+        await axios.get("/api/v1/project").then((res) => {
+          setProjects(res.data.data)
         })
 
-        await axios.get("/api/usage").then((res) => {
-          setUsage(res.data)
+        await axios.get("/api/v1/account/usage").then((res) => {
+          setUsage(res.data.data)
         })
 
-        await axios.get("/api/recent-activity").then((res) => {
-          setActivities(res.data.activities)
+        await axios.get("/api/v1/account/activity").then((res) => {
+          setActivities(res.data.data)
         })
       } catch (error) {
         console.error(error)

@@ -104,8 +104,30 @@ export class Usage {
       },
     })
 
-    const plan = (user?.plan ?? "FREE").toLowerCase() as keyof typeof plans
+    if (!user) return {
+      plan: "Free",
+      projects: {
+        current: projectCount,
+        limit: plans["FREE"].maxProjects,
+      },
+      eventsToday: {
+        current: eventsToday,
+      },
+      eventsMonth: {
+        current: monthlyUsage?.eventCount ?? 0,
+        limit: plans["FREE"].maxEventsPerMonth,
+      },
+    }
+
+    const plan = user.plan as keyof typeof plans
     const planConfig = plans[plan]
+
+
+    console.log({
+      userPlan: user.plan,
+      plan,
+      availablePlans: Object.keys(plans),
+    })
 
     const planDisplay = (user?.plan ?? "FREE")
       .toLowerCase()

@@ -48,7 +48,7 @@ export default function Page() {
 
     try {
       await axios
-        .post("/api/project", {
+        .post("/api/v1/project", {
           name,
         })
         .then(async (res) => {
@@ -68,9 +68,9 @@ export default function Page() {
         <Breadcrumb>
           <BreadcrumbList className="text-sm">
             <BreadcrumbItem>
-<BreadcrumbLink render={<Link href="/" />}>
-                    Dashboard
-                  </BreadcrumbLink>
+              <BreadcrumbLink render={<Link href="/" />}>
+                Dashboard
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
