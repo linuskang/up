@@ -5,11 +5,20 @@ if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY)
   throw new Error("Missing VAPID keys")
 }
 
-webpush.setVapidDetails(
-  'mailto:m@linus.id.au',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-)
+function setupWebPush() {
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+  const privateKey = process.env.VAPID_PRIVATE_KEY
+
+  if (!publicKey || !privateKey) {
+    throw new Error("Missing VAPID keys")
+  }
+
+  webpush.setVapidDetails(
+    "mailto:m@linus.id.au",
+    publicKey,
+    privateKey
+  )
+}
 
 export interface PushNotificationPayload {
   title?: string
@@ -21,6 +30,7 @@ export async function sendPushNotification(
   userId: string,
   payload: PushNotificationPayload
 ) {
+  setupWebPush()
   const user = await prisma.user.findUnique({
     where: {
       id: userId,
