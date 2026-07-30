@@ -1,5 +1,5 @@
 {
-    "name": "@uplabs/contracts",
+    "name": "@workspace/contracts",
     "version": "0.0.0",
     "private": true,
     "type": "module",

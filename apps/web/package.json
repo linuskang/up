@@ -1,6 +1,6 @@
 {
-  "name": "web",
-  "version": "0.0.1",
+  "name": "@uplabs/app",
+  "version": "0.3.0",
   "type": "module",
   "private": true,
   "scripts": {
@@ -15,6 +15,7 @@
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "@t3-oss/env-core": "^0.13.11",
+    "@workspace/contracts": "*",
     "@workspace/ui": "*",
     "axios": "^1.19.0",
     "better-auth": "^1.6.25",
