@@ -1,10 +1,11 @@
 import webpush, { WebPushError } from 'web-push'
 import { prisma } from '@/server/db'
+import { env } from '@/env'
 
 webpush.setVapidDetails(
   'mailto:m@linus.id.au',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  env.VAPID_PRIVATE_KEY
 )
 
 export interface PushNotificationPayload {
@@ -64,11 +65,14 @@ export async function sendPushNotification(
   let removed = 0
   for (let i = 0; i < results.length; i++) {
     const result = results[i]
+    if (!result) continue
     if (result.status === 'rejected') {
       const error = result.reason
       if (error instanceof WebPushError && (error.statusCode === 404 || error.statusCode === 410)) {
+        const subscription = subscriptions[i]
+        if (!subscription) continue
         await prisma.pushSubscription.delete({
-          where: { endpoint: subscriptions[i].endpoint },
+          where: { endpoint: subscription.endpoint },
         })
         removed++
       }
