@@ -1,0 +1,39 @@
+import type { MetadataRoute } from "next"
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "Upstream",
+    short_name: "Upstream",
+    description: "A simple and open logging platform for your next project",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#131415",
+    theme_color: "#131415",
+    orientation: "any",
+    scope: "/",
+    icons: [
+      {
+        src: "/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        src: "/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+      {
+        src: "/icon-192x192-maskable.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icon-512x512-maskable.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+  }
+}

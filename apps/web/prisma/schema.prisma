@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model UserUsage {
+  id         String @id @default(uuid())
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month      String
+  eventCount Int    @default(0)
+
+  @@unique([userId, month])
+  @@index([userId])
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+model User {
+  id            String      @id
+  name          String
+  email         String
+  emailVerified Boolean     @default(false)
+  image         String?
+  pushNotificationsEnabled Boolean @default(true)
+  plan          Plan        @default(FREE)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  projects      Project[]
+  apiKeys       ApiKey[]
+  userUsages         UserUsage[]
+  auditLogs          AuditLog[]
+  pushSubscriptions  PushSubscription[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Project {
+  id          String       @id @default(uuid())
+  name        String
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id])
+  apiKeys     ApiKey[]
+  events      Event[]
+  auditLogs   AuditLog[]
+  requestLogs RequestLog[]
+  webhooks    Webhook[]
+}
+
+model Webhook {
+  id        String  @id @default(uuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  name         String
+  subscription String
+  url          String
+  enabled      Boolean @default(true)
+
+  lastTriggered DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([projectId, subscription])
+}
+
+model AuditLog {
+  id        String  @id @default(uuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  message String
+
+  createdAt DateTime @default(now())
+}
+
+model RequestLog {
+  id        String  @id @default(uuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  endpoint String
+  method   String
+  status   Int
+
+  userAgent    String?
+  requestBody  Json?
+  responseBody Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId, createdAt])
+  @@index([projectId, status])
+}
+
+model ApiKey {
+  id        String    @id @default(uuid())
+  key       String    @unique
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastUsed  DateTime?
+  addedById String
+  addedBy   User      @relation(fields: [addedById], references: [id])
+  active    Boolean   @default(true)
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  title     String
+  icon      String @default("~")
+  description   String?
+  category  String?
+  fields    Json?
+  data      Json?
+  actions   Json?
+  contextStart Boolean @default(false)
+  contextId String?
+  createdAt DateTime @default(now())
+  pushNotify Boolean @default(false)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, contextId])
+  @@index([projectId, createdAt])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  auth      String
+  p256dh    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("push_subscription")
+}
