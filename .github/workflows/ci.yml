@@ -91,4 +91,15 @@ jobs:
         run: cd apps/web && npx prisma generate
 
       - name: Run build
+        env:
+          DATABASE_URL: "postgresql://placeholder:placeholder@localhost:5432/placeholder"
+          BASE_URL: "http://localhost:3000"
+          BETTER_AUTH_SECRET: "ci-build-placeholder-secret-not-for-production"
+          BETTER_AUTH_URL: "http://localhost:3000"
+          VAPID_PRIVATE_KEY: "7zYzdJCckMSeVEh31wkuF5yZZY_zu1Y16G7eLbtuEm4"
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: "BCPa_p_M-CkigwhRXiJnRAVpbKlfayVU6X_O71kkgUG84gCcP4f5xtp-e_74M1p-ftrkkn03Ot4tnblnthC01vk"
+          GITHUB_CLIENT_ID: "ci-placeholder"
+          GITHUB_CLIENT_SECRET: "ci-placeholder"
+          RESEND_API_KEY: "ci-placeholder"
+          RESEND_EMAIL_FROM: "noreply@localhost"
         run: npm run build
