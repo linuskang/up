@@ -214,8 +214,8 @@ export default function Page() {
         const matchesSearch =
             e.title.toLowerCase().includes(query) ||
             (e.category?.toLowerCase() || "").includes(query) ||
-            (typeof e.content === "string" &&
-                e.content.toLowerCase().includes(query))
+            (typeof e.description === "string" &&
+                e.description.toLowerCase().includes(query))
         return matchesCategory && matchesSearch
     })
 

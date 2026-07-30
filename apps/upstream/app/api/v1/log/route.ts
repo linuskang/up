@@ -46,8 +46,8 @@ const Payload = z.object({
         .array(
             z.object({
                 title: z.string(),
-                icon: z.string(),
-                createdAt: z.string(),
+                icon: z.string().default("~"),
+                createdAt: z.iso.datetime().default(new Date().toISOString()),
             })
         )
         .optional()
@@ -56,13 +56,15 @@ const Payload = z.object({
         .array(
             z.object({
                 title: z.string(),
-                variant: z.enum(["primary", "secondary", "ghost"]),
+                variant: z.enum(["primary", "secondary", "ghost"]).default("primary"),
                 url: z.url(),
             })
         )
         .optional()
         .nullable(),
     data: z.json().optional().nullable(),
+
+    contextId: z.string().optional().nullable(),
 
     pushNotify: z.boolean().default(false),
 })
@@ -139,20 +141,53 @@ export async function POST(req: NextRequest) {
 
     const event = parsed.data
 
-    const res = await prisma.event.create({
-        data: {
-            projectId: project.id,
-            title: event.title,
-            icon: event.icon,
-            content: event.description,
-            category: event.category,
-            fields: event.fields ?? undefined,
-            events: event.events ?? undefined,
-            data: event.data ?? undefined,
-            actions: event.actions ?? undefined,
-            pushNotify: event.pushNotify,
-        },
-    })
+    const contextId =
+        event.contextId ??
+        (event.events && event.events.length > 0
+            ? crypto.randomUUID()
+            : undefined)
+
+    if (contextId) {
+        await prisma.eventContext.upsert({
+            where: {
+                id: contextId,
+            },
+            update: {},
+            create: {
+                id: contextId,
+            },
+        })
+    }
+
+    const [res] = await prisma.$transaction([
+        prisma.event.create({
+            data: {
+                projectId: project.id,
+                title: event.title,
+                icon: event.icon,
+                description: event.description,
+                category: event.category,
+                fields: event.fields ?? undefined,
+                data: event.data ?? undefined,
+                actions: event.actions ?? undefined,
+                contextId: contextId ?? undefined,
+                pushNotify: event.pushNotify,
+            },
+        }),
+        ...(contextId && event.events
+            ? event.events.map((linkedEvent) =>
+                  prisma.event.create({
+                      data: {
+                          projectId: project.id,
+                          title: linkedEvent.title,
+                          icon: linkedEvent.icon,
+                          contextId,
+                          createdAt: new Date(linkedEvent.createdAt),
+                      },
+                  })
+              )
+            : []),
+    ])
 
     await Api.log(
         project.id,
@@ -171,7 +206,7 @@ export async function POST(req: NextRequest) {
     if (res.pushNotify) {
         await sendPushNotification(user.id, {
             title: res.title,
-            body: res.content ?? "triggered a notification",
+            body: res.description ?? "triggered a notification",
         })
     }
 

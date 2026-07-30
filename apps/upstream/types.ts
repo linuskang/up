@@ -1,5 +1,7 @@
 // i hate typescript >:(
 
+import { Event } from "@uplabs/contracts"
+
 export interface UsageStats {
     plan: string
     projects: {
@@ -40,24 +42,6 @@ export interface ApiKey {
         image: string
     }
     active: boolean
-    projectId: string
-    project: {
-        id: string
-        name: string
-    }
-}
-
-export interface Event {
-    id: string
-    title: string
-    icon: string
-    content?: string
-    category?: string
-    fields?: JSON
-    events?: JSON
-    data?: JSON
-    actions?: JSON
-    createdAt: string
     projectId: string
     project: {
         id: string
@@ -113,7 +97,7 @@ export interface WebhookEventPayload {
     id: string
     title: string
     icon: string
-    content: string | null
+    description: string | null
     category: string | null
     fields: unknown
     events: unknown

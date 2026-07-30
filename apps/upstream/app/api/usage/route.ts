@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getSession } from "@/server/auth"
 import { Usage } from "@/server/utils"
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
     const session = await getSession()
 
     if (!session) {

@@ -31,6 +31,7 @@ export async function GET(
         },
         select: {
             id: true,
+            name: true,
         },
     })
 
@@ -61,7 +62,49 @@ export async function GET(
         take: limit,
     })
 
-    return NextResponse.json(events, {
+    const contextIds = events
+        .map((event) => event.contextId)
+        .filter((contextId): contextId is string => Boolean(contextId))
+
+    let linkedEvents: typeof events = []
+    if (contextIds.length > 0) {
+        linkedEvents = await prisma.event.findMany({
+            where: {
+                projectId: id,
+                contextId: {
+                    in: contextIds,
+                },
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        })
+    }
+
+    const eventsWithLinked = events.map((event) => {
+        const related = event.contextId
+            ? linkedEvents.filter(
+                  (linked) =>
+                      linked.contextId === event.contextId &&
+                      linked.id !== event.id
+              )
+            : []
+
+        return {
+            ...event,
+            events:
+                related.length > 0
+                    ? related.map((linked) => ({
+                          title: linked.title,
+                          icon: linked.icon,
+                          createdAt: linked.createdAt.toISOString(),
+                      }))
+                    : event.events,
+            project,
+        }
+    })
+
+    return NextResponse.json(eventsWithLinked, {
         status: 200,
     })
 }

@@ -127,16 +127,25 @@ model ApiKey {
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
+model EventContext {
+    id String @id
+    events Event[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt @default(now())
+}
+
 model Event {
   id        String   @id @default(uuid())
   title     String
   icon      String @default("~")
-  content   String?
+  description   String?
   category  String?
   fields    Json?
   events    Json?
   data      Json?
   actions   Json?
+  contextId String?
+  eventContext EventContext? @relation(fields: [contextId], references: [id])
   createdAt DateTime @default(now())
   pushNotify Boolean @default(false)
   projectId String

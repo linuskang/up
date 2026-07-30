@@ -1,3 +1,5 @@
+export type JSON = any
+
 export interface Event {
     id: string
 
@@ -22,6 +24,8 @@ export interface Event {
         url: string
     }[]
     data?: JSON
+
+    contextId?: string
 
     pushNotify: boolean
 

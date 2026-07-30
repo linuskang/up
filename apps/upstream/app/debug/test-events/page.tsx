@@ -21,23 +21,23 @@ export default function Page() {
             createdAt: new Date(now).toISOString(),
             icon: "😁",
             category: "billing",
-            content:
+            description:
                 "Your monthly subscription for the Pro tier has been successfully renewed.",
             fields: [
-                { name: "Amount", value: "$49.99" },
-                { name: "Card Ending In", value: "4242" },
-                { name: "Invoice ID", value: "INV-10924" },
+                { title: "Amount", value: "$49.99" },
+                { title: "Card Ending In", value: "4242" },
+                { title: "Invoice ID", value: "INV-10924" },
             ],
             events: [
                 {
+                    title: "Receipt emailed",
                     icon: "1",
-                    time: "10:35 pm",
-                    content: "Receipt emailed",
+                    createdAt: new Date(now).toISOString(),
                 },
                 {
+                    title: "Payment settled",
                     icon: "2",
-                    time: "10:45 pm",
-                    content: "Payment settled",
+                    createdAt: new Date(now).toISOString(),
                 },
             ],
             data: {
@@ -57,17 +57,17 @@ export default function Page() {
                 {
                     title: "View Invoice",
                     url: "/invoices/INV-10924",
-                    type: "default" as const,
+                    variant: "primary" as const,
                 },
                 {
                     title: "Refund",
                     url: "/refund",
-                    type: "secondary" as const,
+                    variant: "secondary" as const,
                 },
                 {
                     title: "Contact Support",
                     url: "/support",
-                    type: "ghost" as const,
+                    variant: "ghost" as const,
                 },
             ],
         },
@@ -76,11 +76,11 @@ export default function Page() {
             createdAt: new Date(now - 3600000).toISOString(),
             icon: "✈️",
             category: "authentication",
-            content: "User linus logged in from a new device.",
+            description: "User linus logged in from a new device.",
             fields: [
-                { name: "IP Address", value: "192.168.1.1" },
-                { name: "Device", value: "Chrome on Windows 10" },
-                { name: "Location", value: "New York, USA" },
+                { title: "IP Address", value: "192.168.1.1" },
+                { title: "Device", value: "Chrome on Windows 10" },
+                { title: "Location", value: "New York, USA" },
             ],
         },
         {

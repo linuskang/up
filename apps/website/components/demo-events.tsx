@@ -10,15 +10,15 @@ export const DemoEvents: EventProps[] = [
         title: "webhook delivered",
         icon: "🔗",
         fields: [
-            { name: "Endpoint", value: "/api/webhooks/stripe" },
-            { name: "Status", value: "200 OK" },
+            { title: "Endpoint", value: "/api/webhooks/stripe" },
+            { title: "Status", value: "200 OK" },
         ],
         createdAt: new Date().toISOString(),
     },
     {
         title: "stripe: early fraud warning",
         icon: "🚨",
-        content: "Stripe has detected a potential fraud on your account.",
+        description: "Stripe has detected a potential fraud on your account.",
         data: {
             id: "pi_3O1234567890abcdef",
             object: "payment_intent",
@@ -34,12 +34,12 @@ export const DemoEvents: EventProps[] = [
             {
                 title: "View in Stripe",
                 url: "#",
-                type: "default",
+                variant: "primary",
             },
             {
                 title: "Mark as safe",
                 url: "#",
-                type: "secondary",
+                variant: "secondary",
             },
         ],
         createdAt: new Date().toISOString(),
@@ -48,12 +48,12 @@ export const DemoEvents: EventProps[] = [
         title: "user signed up",
         icon: "🙅",
         category: "auth",
-        content: "A new user has signed up for your service.",
+        description: "A new user has signed up for your service.",
         fields: [
-            { name: "User ID", value: "1234567890abcdef" },
-            { name: "Email", value: "user@example.com" },
-            { name: "IP Address", value: "192.168.1.1" },
-            { name: "User Agent", value: "Chrome/58.0.3029.110 Safari/537.3" },
+            { title: "User ID", value: "1234567890abcdef" },
+            { title: "Email", value: "user@example.com" },
+            { title: "IP Address", value: "192.168.1.1" },
+            { title: "User Agent", value: "Chrome/58.0.3029.110 Safari/537.3" },
         ],
         data: {
             id: "1234567890abcdef",
@@ -62,31 +62,31 @@ export const DemoEvents: EventProps[] = [
         },
         events: [
             {
-                content: "user: account created",
+                title: "user: account created",
                 icon: "🆕",
-                time: "10:00 am",
+                createdAt: new Date().toISOString(),
             },
             {
-                content: "user: email sent",
+                title: "user: email sent",
                 icon: "📧",
-                time: "10:05 am",
+                createdAt: new Date().toISOString(),
             },
             {
-                content: "user: email verified",
+                title: "user: email verified",
                 icon: "✅",
-                time: "10:10 am",
+                createdAt: new Date().toISOString(),
             },
         ],
         actions: [
             {
                 title: "View user profile",
                 url: "#",
-                type: "default",
+                variant: "primary",
             },
             {
                 title: "Send welcome email",
                 url: "#",
-                type: "secondary",
+                variant: "secondary",
             },
         ],
         createdAt: new Date().toISOString(),

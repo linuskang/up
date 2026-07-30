@@ -4,7 +4,7 @@ import { Project } from "@/server/utils"
 import { plans } from "@/lib/plans"
 import { prisma } from "@/server/prisma"
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
     const session = await getSession()
 
     if (!session) {

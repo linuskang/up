@@ -6,7 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
     ChevronRight,
     UserRound,
-    FingerprintPattern,
     BriefcaseBusiness,
     AppWindow,
     CreditCard,

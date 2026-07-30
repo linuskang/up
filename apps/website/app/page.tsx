@@ -27,24 +27,24 @@ const moreDetailedCode = `up.events.log({
     description: "this is a more detailed event",
     fields: [
         {
-            name: "this is a field",
+            title: "this is a field",
             value: "you can add some info here",
         },
         {
-            name: "this is another field",
+            title: "this is another field",
             value: "you can add some more info here",
         },
     ],
     events: [
         {
-            content: "you can add some content here",
+            title: "you can add some content here",
             icon: "📝",
-            time: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
         },
         {
-            content: "another event",
+            title: "another event",
             icon: "📄",
-            time: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
         },
     ],
 })
@@ -142,27 +142,27 @@ export default function Home() {
                     <Event
                         title="hello, world!"
                         icon="👋"
-                        content="this is a more detailed event"
+                        description="this is a more detailed event"
                         fields={[
                             {
-                                name: "this is a field",
+                                title: "this is a field",
                                 value: "you can add some info here",
                             },
                             {
-                                name: "this is another field",
+                                title: "this is another field",
                                 value: "you can add some more info here",
                             },
                         ]}
                         events={[
                             {
-                                content: "you can add some content here",
+                                title: "you can add some content here",
                                 icon: "📝",
-                                time: "10:00",
+                                createdAt: new Date().toISOString(),
                             },
                             {
-                                content: "another event",
+                                title: "another event",
                                 icon: "📄",
-                                time: "10:05",
+                                createdAt: new Date().toISOString(),
                             }
                         ]}
                         createdAt={new Date().toISOString()}
@@ -183,17 +183,17 @@ export default function Home() {
                         actions={[
                             {
                                 title: "View Google.com",
-                                type: "default",
+                                variant: "primary",
                                 url: "https://google.com"
                             },
                             {
                                 title: "Go to Github.com",
-                                type: "secondary",
+                                variant: "secondary",
                                 url: "https://github.com",
                             },
                             {
                                 title: "Do nothing",
-                                type: "ghost",
+                                variant: "ghost",
                                 url: "#",
                             }
 

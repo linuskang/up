@@ -20,35 +20,37 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "./card"
 import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react"
-import { useState, type ReactNode } from "react"
+import { useState } from "react"
 import { Button } from "./button"
 
-// Types
-export type Events = {
-    events: EventProps[]
-}
-
 export type EventProps = {
+    id?: string
     title: string
     icon: string
     createdAt: string
-    content?: ReactNode
+    description?: string
     category?: string
     fields?: {
-        name: string
+        title: string
         value: string
     }[]
     events?: {
+        title: string
         icon: string
-        time: string
-        content: ReactNode
+        createdAt: string
     }[]
-    data?: unknown
     actions?: {
         title: string
-        type: "default" | "secondary" | "ghost"
+        variant: "primary" | "secondary" | "ghost"
         url: string
     }[]
+    data?: unknown
+    contextId?: string
+    pushNotify?: boolean
+}
+
+export type Events = {
+    events: EventProps[]
 }
 
 function formatDate(dateStr: string) {
@@ -92,18 +94,7 @@ export function EventsList({ events }: Events) {
                         </p>
                     )}
                     {group.events.map((event, index) => (
-                        <Event
-                            key={index}
-                            title={event.title}
-                            icon={event.icon}
-                            createdAt={event.createdAt}
-                            content={event.content}
-                            category={event.category}
-                            fields={event.fields}
-                            events={event.events}
-                            data={event.data}
-                            actions={event.actions}
-                        />
+                        <Event key={index} {...event} />
                     ))}
                 </div>
             ))}
@@ -114,17 +105,25 @@ export function EventsList({ events }: Events) {
 export function Event({
     title,
     icon,
-    createdAt,
-    content,
+
+    description,
     category,
+
     fields,
     events,
-    data,
     actions,
+    data,
+
+    pushNotify,
+    createdAt,
 }: EventProps) {
     const [open, setOpen] = useState(false)
     const extras = Boolean(
-        content || actions?.length || data || fields?.length || events?.length
+        description ||
+            actions?.length ||
+            data ||
+            fields?.length ||
+            events?.length
     )
     const [copied, setCopied] = useState(false)
 
@@ -143,8 +142,13 @@ export function Event({
                 className={`group flex flex-row items-center space-y-0 p-0 transition-opacity ${extras ? "cursor-pointer select-none hover:opacity-80" : ""}`}
                 onClick={() => extras && setOpen(!open)}
             >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-background text-2xl">
+                <div className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-background text-2xl">
                     {icon}
+                    {pushNotify && (
+                        <div className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                            !
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 pl-3">
@@ -171,7 +175,6 @@ export function Event({
                             </span>
                         )}
 
-                        {/* 2. Swapped <Button> for a simple <div> */}
                         {extras && (
                             <div className="ml-auto flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors group-hover:bg-muted group-hover:text-foreground">
                                 {open ? (
@@ -189,9 +192,9 @@ export function Event({
                 className={`grid p-0 pl-[3.25rem] transition-all duration-300 ease-out ${open ? "mt-3 grid-rows-[1fr] opacity-100" : "mt-0 grid-rows-[0fr] opacity-0"}`}
             >
                 <div className="min-h-0 overflow-hidden">
-                    {content && (
-                        <div className="text-sm leading-relaxed break-words whitespace-pre-wrap text-muted-foreground">
-                            {content}
+                    {description && (
+                        <div className="text-sm leading-relaxed break-words font-medium whitespace-pre-wrap text-muted-foreground">
+                            {description}
                         </div>
                     )}
                     {fields && (
@@ -204,11 +207,11 @@ export function Event({
                                         key={index}
                                         className="flex min-w-0 flex-col"
                                     >
-                                        <span className="text-sm text-muted-foreground">
-                                            {field.name}
+                                        <span className="text-sm font-semibold">
+                                            {field.title}
                                         </span>
                                         <span
-                                            className={`min-w-0 text-sm font-medium break-words ${isEmpty ? "text-muted-foreground/60 italic" : "text-foreground"}`}
+                                            className={`min-w-0 text-sm text-muted-foreground font-medium break-words ${isEmpty ? "text-muted-foreground/60 italic" : "text-foreground"}`}
                                         >
                                             {isEmpty
                                                 ? "Empty Content"
@@ -219,7 +222,8 @@ export function Event({
                             })}
                         </div>
                     )}
-                    {events && (
+
+                    {events && events.length > 0 && (
                         <div className="mt-3 space-y-3">
                             {events.map((event, index) => (
                                 <div
@@ -229,18 +233,25 @@ export function Event({
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted/20 text-xs">
                                         {event.icon}
                                     </div>
-                                    <div className="flex min-w-0 flex-1 flex-row items-center gap-2">
-                                        <p className="shrink-0 text-sm leading-none font-medium text-foreground">
-                                            {event.time}
+                                    <div className="flex min-w-0 flex-1 flex-col">
+                                        <p className="text-sm font-medium text-foreground">
+                                            {event.title}
                                         </p>
-                                        <p className="truncate text-sm leading-none text-muted-foreground">
-                                            {event.content}
+                                        <p className="text-xs text-muted-foreground">
+                                            {new Date(event.createdAt)
+                                                .toLocaleTimeString("en-US", {
+                                                    hour: "numeric",
+                                                    minute: "2-digit",
+                                                    hour12: true,
+                                                })
+                                                .toLowerCase()}
                                         </p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
+
                     {!!data && (
                         <div className="group relative mt-4">
                             <Button
@@ -277,7 +288,7 @@ export function Event({
                             {actions.map((action, index) => (
                                 <Button
                                     key={index}
-                                    variant={action.type}
+                                    variant={action.variant}
                                     size="sm"
                                     onClick={() =>
                                         window.open(action.url, "_blank")

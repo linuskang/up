@@ -1,6 +1,6 @@
 {
     "name": "@uplabs/app",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "author": "linuskang",
     "type": "module",
     "private": true,
@@ -19,7 +19,7 @@
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
         "@prisma/adapter-pg": "^7.8.0",
-        "@prisma/client": "^7.9.0",
+        "@prisma/client": "^7.9.1",
         "@react-email/components": "^1.0.12",
         "@react-email/render": "^2.1.0",
         "@t3-oss/env-nextjs": "^0.13.11",
@@ -71,7 +71,7 @@
         "eslint-config-next": "16.2.10",
         "prettier": "^3.9.5",
         "prettier-plugin-tailwindcss": "^0.8.1",
-        "prisma": "^7.8.0",
+        "prisma": "^7.9.1",
         "tailwindcss": "^4.3.3",
         "tsx": "^4.23.1",
         "typescript": "^6.0.3"

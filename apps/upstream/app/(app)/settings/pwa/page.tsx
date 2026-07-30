@@ -16,7 +16,6 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@uplabs/ui/components/breadcrumb"
-import { Input } from "@uplabs/ui/components/input"
 import { CircleCheck, CircleX } from "lucide-react"
 import { Button } from "@uplabs/ui/components/button"
 import {

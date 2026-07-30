@@ -21,8 +21,8 @@ export class Upstream {
     }
 
     public events = {
-        ingest: async (payload: EventProps) => {
-            const url = `${this.host}/api/events/ingest`;
+        log: async (payload: EventProps) => {
+            const url = `${this.host}/api/v1/log`;
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -39,6 +39,9 @@ export class Upstream {
             }
 
             return response.json();
-        }
+        },
+        ingest: async (payload: EventProps) => {
+            return this.events.log(payload);
+        },
     }
 }
