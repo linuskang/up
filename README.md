@@ -1,21 +1,101 @@
-# shadcn/ui monorepo template
+<p align="center">
+  <img width="192" height="192" alt="192x192" src="https://github.com/user-attachments/assets/4c97f877-4fba-4146-885c-26f945bb6682" />
+</p>
 
-This is a Next.js monorepo template with shadcn/ui.
+<h1 align="center">Upstream: Simple and open logging</h1>
 
-## Adding components
+<p align="center">
+  <img src="https://img.shields.io/npm/v/@uplabs/sdk" alt="npm version" />
+  <img src="https://img.shields.io/npm/dm/@uplabs/sdk" alt="npm downloads" />
+  <img src="https://img.shields.io/badge/license-CC_BY_NC_4.0-red" alt="License" />
+  <a href="https://github.com/linuskang/up/actions/workflows/ci.yml">
+    <img src="https://github.com/linuskang/up/actions/workflows/ci.yml/badge.svg" alt="Build" />
+  </a>
+</p>
 
-To add components to your app, run the following command at the root of your `web` app:
+This is a passion project I've been developing for the past few months, and using it internally across my apps. I needed a simple logging platform that was quick to setup for new projects, had awesome logging capabilities, and beautiful UI, hence, this is what I came up with.
+
+Basically, Upstream is a easy way to integrate logging into your own applications. It takes minutes to setup - you create a account, project, API key, and integrate it with your project using my SDK.
+
+<img width="1058" height="1161" alt="image" src="https://github.com/user-attachments/assets/dca4b617-ec34-46d1-a48a-5c33305d4536" />
+
+### Check out the homepage at https://ups.linuskang.au
+
+## I want to try Upstream!
+
+1. Go to https://up.linus.my and register an API key for your project.
+2. Install the sdk
+```bash
+npm i @uplabs/sdk
+```
+3. Start ingesting events, below is an example.
+
+```ts
+import { Upstream } from '@uplabs/sdk'
+
+const up = new Upstream("YOUR_API_KEY")
+
+up.events.ingest({
+    title: "Project Deployed",
+    icon: "😁",
+});
+```
+
+That's just scratching the surface. You can log complex events with json, events, descriptions, fields, and even add action buttons.
+
+| Field      | Type              | Required | Example |
+|------------|-------------------|----------|---------|
+| `title`    | `string`          | Yes      | `"Payment Processed"` |
+| `icon`     | `string`          | Yes      | `"💰"` |
+| `category` | `string`          | No       | `"billing"` |
+| `content`  | `string`          | No       | `"Your subscription was renewed successfully."` |
+| `fields`   | `Field[]`         | No       | `[{"name":"Plan","value":"Pro"}]` |
+| `events`   | `TimelineEvent[]` | No       | `[{"icon":"✅","time":"12:00 PM","content":"Subscription renewed."}]` |
+| `data`     | `unknown`         | No       | `{"subscriptionId":"sub_abc123"}` |
+| `actions`  | `Action[]`        | No       | `[{"title":"View Invoice","type":"default","url":"https://example.com"}]` |
+
+
+If you need help getting started, check out [linusdotmy/upstream-playground](https://github.com/linusdotmy/upstream-playground) for example usage.
+
+## Self-host
+
+Lucky for you, I've made a convenient install script!
+
+Just ensure that you have docker installed on your system, and run
 
 ```bash
-pnpm dlx shadcn@latest add button -c apps/web
+curl -fsSL https://get.lkang.au/upstream | sh
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
+After, just run ``docker compose up -d`` and go to port 3000.
 
-## Using components
+## Some notes
 
-To use the components in your app, import them from the `ui` package.
+We are very very early in this project. Expect bugs.
 
-```tsx
-import { Button } from "@workspace/ui/components/button";
-```
+We are not accepting contributions yet.
+
+There's no public docs site yet, checkout the markdown files in [docs](/docs).
+
+### If you REALLY want to contibute still...
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or PR. We use vouch to organise trust levels in this repository.
+
+## License
+
+Upstream is licensed under **CC BY-NC 4.0**.
+
+**This means you can:**
+
+- ✅ Share — copy and redistribute the material in any medium or format
+- ✅ Adapt — remix, transform, and build upon the material
+
+**As long as you:**
+
+- ✅ Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+- ❌ NonCommercial — You may not use the material for commercial purposes.
+- ❌ No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+Please see the [license file](LICENSE) for more information.
+
+Built with ❤️ by [Linus Kang](https://github.com/linuskang)

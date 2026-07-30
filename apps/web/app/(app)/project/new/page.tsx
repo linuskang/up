@@ -68,9 +68,9 @@ export default function Page() {
         <Breadcrumb>
           <BreadcrumbList className="text-sm">
             <BreadcrumbItem>
-              <BreadcrumbLink>
-                <Link href="/">Dashboard</Link>
-              </BreadcrumbLink>
+<BreadcrumbLink render={<Link href="/" />}>
+                    Dashboard
+                  </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

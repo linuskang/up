@@ -125,10 +125,12 @@ export default function Page() {
 
       <AlertDialog open={open} onOpenChange={setOpen}>
         <div className="flex items-center justify-between rounded-xl bg-card px-4 py-4">
-          <AlertDialogTrigger>
-            <button className="text-sm font-medium text-destructive">
-              Sign out
-            </button>
+          <AlertDialogTrigger
+            render={
+              <button className="text-sm font-medium text-destructive" />
+            }
+          >
+            Sign out
           </AlertDialogTrigger>
         </div>
 

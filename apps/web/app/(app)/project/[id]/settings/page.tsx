@@ -389,8 +389,8 @@ export default function Page() {
           <Breadcrumb>
             <BreadcrumbList className="text-sm">
               <BreadcrumbItem>
-                <BreadcrumbLink>
-                  <Link href="/">Projects</Link>
+                <BreadcrumbLink render={<Link href="/" />}>
+                  Projects
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -419,16 +419,14 @@ export default function Page() {
         <Breadcrumb>
           <BreadcrumbList className="text-sm">
             <BreadcrumbItem>
-              <BreadcrumbLink>
-                <Link href="/">Projects</Link>
+              <BreadcrumbLink render={<Link href="/" />}>
+                Projects
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink>
-                <Link href={`/project/${params.id}`}>
-                  {project?.name}
-                </Link>
+              <BreadcrumbLink render={<Link href={`/project/${params.id}`} />}>
+                {project?.name}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -450,10 +448,10 @@ export default function Page() {
             open={createKeyOpen}
             onOpenChange={setCreateKeyOpen}
           >
-            <DialogTrigger>
-              <Button className="cursor-pointer" size="sm">
-                Create API Key
-              </Button>
+            <DialogTrigger
+              render={<Button className="cursor-pointer" size="sm" />}
+            >
+              Create API Key
             </DialogTrigger>
             <DialogContent className="bg-card ring-0 sm:max-w-lg">
               <DialogHeader>
@@ -583,14 +581,16 @@ export default function Page() {
                     </TableCell>
                     <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
                       <AlertDialog>
-                        <AlertDialogTrigger>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="h-7 text-xs"
-                          >
-                            Delete
-                          </Button>
+                        <AlertDialogTrigger
+                          render={
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="h-7 text-xs"
+                            />
+                          }
+                        >
+                          Delete
                         </AlertDialogTrigger>
                         <AlertDialogContent className="bg-card ring-0">
                           <AlertDialogHeader>
@@ -1103,10 +1103,10 @@ export default function Page() {
             open={createWebhookOpen}
             onOpenChange={setCreateWebhookOpen}
           >
-            <DialogTrigger>
-              <Button className="cursor-pointer" size="sm">
-                Create Webhook
-              </Button>
+            <DialogTrigger
+              render={<Button className="cursor-pointer" size="sm" />}
+            >
+              Create Webhook
             </DialogTrigger>
             <DialogContent className="bg-card ring-0 sm:max-w-lg">
               <DialogHeader>
@@ -1372,14 +1372,16 @@ export default function Page() {
                               Edit
                             </Button>
                             <AlertDialog>
-                              <AlertDialogTrigger>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  className="h-7 text-xs"
-                                >
-                                  Delete
-                                </Button>
+                              <AlertDialogTrigger
+                                render={
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="h-7 text-xs"
+                                  />
+                                }
+                              >
+                                Delete
                               </AlertDialogTrigger>
                               <AlertDialogContent className="bg-card ring-0">
                                 <AlertDialogHeader>
@@ -1532,13 +1534,15 @@ export default function Page() {
               </p>
             </div>
             <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
-              <DialogTrigger>
-                <Button
-                  variant="secondary"
-                  className="cursor-pointer"
-                >
-                  Rename Project
-                </Button>
+              <DialogTrigger
+                render={
+                  <Button
+                    variant="secondary"
+                    className="cursor-pointer"
+                  />
+                }
+              >
+                Rename Project
               </DialogTrigger>
               <DialogContent className="bg-card ring-0">
                 <DialogHeader>
@@ -1594,13 +1598,15 @@ export default function Page() {
               open={deleteOpen}
               onOpenChange={setDeleteOpen}
             >
-              <AlertDialogTrigger>
-                <Button
-                  variant="destructive"
-                  className="cursor-pointer"
-                >
-                  Delete Project
-                </Button>
+              <AlertDialogTrigger
+                render={
+                  <Button
+                    variant="destructive"
+                    className="cursor-pointer"
+                  />
+                }
+              >
+                Delete Project
               </AlertDialogTrigger>
               <AlertDialogContent className="bg-card ring-0">
                 <AlertDialogHeader>

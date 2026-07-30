@@ -20,22 +20,24 @@ export function User() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button
-          variant="ghost"
-          className="group h-11 cursor-pointer gap-2 px-1.5 text-left focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none aria-expanded:border-transparent aria-expanded:ring-0"
-        >
-          <div className="relative size-8 overflow-hidden rounded-md border border-border/60 bg-secondary">
-            <Image
-              src={session.user.image || ""}
-              alt={session.user.name || "Avatar"}
-              width={32}
-              height={32}
-              unoptimized
-              className="object-cover"
-            />
-          </div>
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            className="group h-11 cursor-pointer gap-2 px-1.5 text-left focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none aria-expanded:border-transparent aria-expanded:ring-0"
+          />
+        }
+      >
+        <div className="relative size-8 overflow-hidden rounded-md border border-border/60 bg-secondary">
+          <Image
+            src={session.user.image || ""}
+            alt={session.user.name || "Avatar"}
+            width={32}
+            height={32}
+            unoptimized
+            className="object-cover"
+          />
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem>

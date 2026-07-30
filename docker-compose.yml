@@ -1,0 +1,32 @@
+services:
+  app:
+    image: ghcr.io/linuskang/up:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - upstream_net
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: upstream
+      POSTGRES_PASSWORD: upstream
+      POSTGRES_DB: upstream
+    volumes:
+      - upstream_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - upstream_net
+volumes:
+  upstream_data:
+networks:
+  upstream_net:
+    driver: bridge

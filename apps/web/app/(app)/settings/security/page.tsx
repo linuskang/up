@@ -96,8 +96,8 @@ export default function Page() {
         <Breadcrumb>
           <BreadcrumbList className="text-sm">
             <BreadcrumbItem>
-              <BreadcrumbLink>
-                <Link href="/settings">Settings</Link>
+              <BreadcrumbLink render={<Link href="/settings" />}>
+                Settings
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
