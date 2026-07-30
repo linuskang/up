@@ -1,23 +1,18 @@
 import webpush, { WebPushError } from 'web-push'
 import { prisma } from '@/server/db'
 
-if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-  throw new Error("Missing VAPID keys")
-}
-
+let vapidConfigured = false
 function setupWebPush() {
+  if (vapidConfigured) return
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
   const privateKey = process.env.VAPID_PRIVATE_KEY
-
-  if (!publicKey || !privateKey) {
-    throw new Error("Missing VAPID keys")
-  }
-
+  if (!publicKey || !privateKey) return
   webpush.setVapidDetails(
     "mailto:m@linus.id.au",
     publicKey,
     privateKey
   )
+  vapidConfigured = true
 }
 
 export interface PushNotificationPayload {
