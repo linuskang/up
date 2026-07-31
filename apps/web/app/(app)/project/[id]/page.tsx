@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 
 import type { EventProps } from "@workspace/ui/components/event"
-import { EventsList } from "@workspace/ui/components/event"
+import { EventsList } from "@workspace/ui/components/event-list"
 import {
   Breadcrumb,
   BreadcrumbList,

@@ -1,34 +1,42 @@
+"use client"
+
+import { useState, useMemo } from "react"
+
 import { Event } from "@workspace/ui/components/event"
+import { EventSearch } from "@workspace/ui/components/event-search"
+
+import type { Event as EventType } from "@workspace/contracts"
 
 export default function Page() {
-  const now = new Date()
+  const [query, setQuery] = useState("")
 
-  return (
-    <div className="flex flex-col gap-4 max-w-md mx-auto py-6">
-      <Event
-        id="test-event"
-        title="daily billing sync started"
-        createdAt={now.toISOString()}
-        pushNotify={true}
-        icon="📄"
-        description="Automated billing sync initiated for the workspace."
-        category="billing"
-        fields={[
+  const events: EventType[] = useMemo(() => {
+    const now = new Date()
+    return [
+      {
+        id: "test-event",
+        title: "daily billing sync started",
+        createdAt: now.toISOString(),
+        pushNotify: true,
+        icon: "📄",
+        description: "Automated billing sync initiated for the workspace.",
+        category: "billing",
+        fields: [
           { title: "Workspace", value: "Acme Corp" },
           { title: "Invoices", value: "198" },
           { title: "Currency", value: "USD" },
           { title: "Run ID", value: "run_7f8a9b2c" },
-        ]}
-        actions={[
+        ],
+        actions: [
           { title: "View Run", variant: "primary", url: "#" },
           { title: "Logs", variant: "secondary", url: "#" },
-        ]}
-        data={{
+        ],
+        data: {
           source: "scheduler",
           environment: "production",
           retries: 0,
-        }}
-        events={[
+        },
+        events: [
           {
             id: "test-event-1",
             title: "processed invoices",
@@ -73,7 +81,7 @@ export default function Page() {
                 title: "retry queued",
                 createdAt: new Date(now.getTime() + 3600).toISOString(),
                 pushNotify: false,
-                icon: "🔄",
+                icon: "!",
                 description: "Failed invoices queued for retry.",
                 category: "billing",
                 fields: [
@@ -85,26 +93,57 @@ export default function Page() {
               },
             ],
           },
-        ]}
-      />
-
-      <Event
-        id="second-event"
-        title="user signed up"
-        createdAt={new Date(now.getTime() - 1000 * 60 * 5).toISOString()}
-        pushNotify={false}
-        icon="🚀"
-        description="A new user completed the onboarding flow."
-        category="auth"
-        fields={[
+        ],
+      },
+      {
+        id: "second-event",
+        title: "user signed up",
+        createdAt: new Date(now.getTime() - 1000 * 60 * 5).toISOString(),
+        pushNotify: false,
+        icon: "🚀",
+        description: "A new user completed the onboarding flow.",
+        category: "auth",
+        fields: [
           { title: "Email", value: "user@example.com" },
           { title: "Plan", value: "Pro" },
-        ]}
-        actions={[
+        ],
+        actions: [
           { title: "View Profile", variant: "secondary", url: "#" },
-        ]}
-        data={{ userId: "usr_123", referrer: "twitter" }}
-      />
+        ],
+        data: { userId: "usr_123", referrer: "twitter" },
+      },
+    ]
+  }, [])
+
+  const filteredEvents = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return events
+
+    return events.filter((event) => {
+      const match = (str?: string | null) =>
+        str?.toLowerCase().includes(q) ?? false
+
+      if (match(event.title)) return true
+      if (match(event.description)) return true
+      if (match(event.category)) return true
+      if (event.fields?.some((f) => match(f.title) || match(f.value))) return true
+      if (event.actions?.some((a) => match(a.title))) return true
+      if (match(JSON.stringify(event.data))) return true
+      return false
+    })
+  }, [events, query])
+
+  return (
+    <div className="flex flex-col gap-2 max-w-md mx-auto py-6">
+      <EventSearch value={query} onChange={setQuery} />
+
+      {filteredEvents.length === 0 ? (
+        <p className="text-center text-sm text-muted-foreground">
+          No events match &quot;{query}&quot;.
+        </p>
+      ) : (
+        filteredEvents.map((event) => <Event key={event.id} {...event} />)
+      )}
     </div>
   )
 }
