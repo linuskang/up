@@ -54,14 +54,14 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchData = async () => {
       const [projectRes, logsRes] = await Promise.all([
-        fetch(`/api/project/${params.id}`),
-        fetch(`/api/project/${params.id}/requestlogs`),
+        fetch(`/api/v1/project/${params.id}`),
+        fetch(`/api/v1/project/${params.id}/logs`),
       ])
       if (!projectRes.ok || !logsRes.ok) return
       const projectData = await projectRes.json()
       const logsData = await logsRes.json()
-      setProject(projectData.project)
-      setRequestLogs(logsData.requestLogs)
+      setProject(projectData.data)
+      setRequestLogs(logsData.data)
       setLoading(false)
     }
     fetchData()

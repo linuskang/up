@@ -64,11 +64,11 @@ export default function Page() {
   useEffect(() => {
     const fetchProject = async () => {
       const [projectRes, eventsRes, categoriesRes] = await Promise.all([
-        fetch(`/api/project/${params.id}`),
+        fetch(`/api/v1/project/${params.id}`),
         fetch(
-          `/api/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}`
+          `/api/v1/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}`
         ),
-        fetch(`/api/project/${params.id}/categories`),
+        fetch(`/api/v1/project/${params.id}/categories`),
       ])
 
       if (!projectRes.ok) {
@@ -92,7 +92,7 @@ export default function Page() {
         const categoriesData = await categoriesRes.json()
         setCategories([
           { name: "all", count: categoriesData.total },
-          ...categoriesData.categories,
+          ...(categoriesData.categories ?? []),
         ])
       }
 
@@ -119,7 +119,7 @@ export default function Page() {
     setLoadingMore(true)
 
     const res = await fetch(
-      `/api/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}${!isAll ? `&category=${category}` : ""
+      `/api/v1/project/${params.id}/events?page=1&limit=${EVENTS_PER_PAGE}${!isAll ? `&category=${category}` : ""
       }`
     )
     if (res.ok) {

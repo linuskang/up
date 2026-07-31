@@ -145,11 +145,11 @@ export default function Page() {
         requestLogsRes,
         webhooksRes,
       ] = await Promise.all([
-        fetch(`/api/project/${params.id}`),
-        fetch(`/api/project/${params.id}/keys`),
-        fetch(`/api/project/${params.id}/auditlogs`),
-        fetch(`/api/project/${params.id}/requestlogs`),
-        fetch(`/api/project/${params.id}/webhooks`),
+        fetch(`/api/v1/project/${params.id}`),
+        fetch(`/api/v1/project/${params.id}/keys`),
+        fetch(`/api/v1/project/${params.id}/logs`),
+        fetch(`/api/v1/project/${params.id}/requests`),
+        fetch(`/api/v1/project/${params.id}/webhooks`),
       ])
 
       if (!projectRes.ok) {
@@ -159,27 +159,27 @@ export default function Page() {
       }
 
       const projectData = await projectRes.json()
-      setProject(projectData.project)
-      setNewProjectName(projectData.project.name)
+      setProject(projectData.data)
+      setNewProjectName(projectData.data.name)
 
       if (keysRes.ok) {
         const keysData = await keysRes.json()
-        setKeys(keysData.keys || [])
+        setKeys(keysData.data || [])
       }
 
       if (auditLogsRes.ok) {
         const auditLogsData = await auditLogsRes.json()
-        setAuditLogs(auditLogsData.auditLogs || [])
+        setAuditLogs(auditLogsData.data || [])
       }
 
       if (requestLogsRes.ok) {
         const requestLogsData = await requestLogsRes.json()
-        setRequestLogs(requestLogsData.requestLogs || [])
+        setRequestLogs(requestLogsData.data || [])
       }
 
       if (webhooksRes.ok) {
         const webhooksData = await webhooksRes.json()
-        setWebhooks(webhooksData.webhooks || [])
+        setWebhooks(webhooksData.data || [])
       }
 
       setLoading(false)
@@ -191,7 +191,7 @@ export default function Page() {
     e.preventDefault()
     setIsSaving(true)
 
-    const res = await fetch(`/api/project/${params.id}`, {
+    const res = await fetch(`/api/v1/project/${params.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newProjectName }),
@@ -214,7 +214,7 @@ export default function Page() {
     e.preventDefault()
     setIsCreatingKey(true)
 
-    const res = await fetch(`/api/project/${params.id}/keys`, {
+    const res = await fetch(`/api/v1/project/${params.id}/keys`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newKeyName }),
@@ -228,10 +228,10 @@ export default function Page() {
       setShowKeyOpen(true)
 
       // Refresh keys list
-      const keysRes = await fetch(`/api/project/${params.id}/keys`)
+      const keysRes = await fetch(`/api/v1/project/${params.id}/keys`)
       if (keysRes.ok) {
         const keysData = await keysRes.json()
-        setKeys(keysData.keys || [])
+        setKeys(keysData.data || [])
       }
     } else {
       toast.error("Failed to create API key.")
@@ -241,7 +241,7 @@ export default function Page() {
   }
 
   const deleteKey = async (keyId: string) => {
-    const res = await fetch(`/api/project/${params.id}/keys`, {
+    const res = await fetch(`/api/v1/project/${params.id}/keys`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ keyId }),
@@ -259,7 +259,7 @@ export default function Page() {
     e.preventDefault()
     setIsCreatingWebhook(true)
 
-    const res = await fetch(`/api/project/${params.id}/webhooks`, {
+    const res = await fetch(`/api/v1/project/${params.id}/webhooks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -285,7 +285,7 @@ export default function Page() {
   }
 
   const deleteWebhook = async (webhookId: string) => {
-    const res = await fetch(`/api/project/${params.id}/webhooks`, {
+    const res = await fetch(`/api/v1/project/${params.id}/webhooks`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ webhookId }),
@@ -308,7 +308,7 @@ export default function Page() {
       enabled?: boolean
     }
   ) => {
-    const res = await fetch(`/api/project/${params.id}/webhooks`, {
+    const res = await fetch(`/api/v1/project/${params.id}/webhooks`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ webhookId, ...data }),
@@ -352,7 +352,7 @@ export default function Page() {
   const deleteProject = async () => {
     setIsDeleting(true)
 
-    const res = await fetch(`/api/project/${params.id}`, {
+    const res = await fetch(`/api/v1/project/${params.id}`, {
       method: "DELETE",
     })
 

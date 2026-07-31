@@ -1,114 +1,116 @@
 export interface Event {
-    id: string
+  id: string
 
+  title: string
+  icon?: string
+
+  description?: string
+  category?: string
+
+  fields?: {
     title: string
-    icon: string
+    value: string
+  }[]
+  actions?: {
+    title: string
+    variant: "primary" | "secondary" | "ghost"
+    url: string
+  }[]
+  data?: unknown
 
-    description?: string
-    category?: string
+  events?: Event[]
 
-    fields?: {
-        title: string
-        value: string
-    }[]
-    actions?: {
-        title: string
-        variant: "primary" | "secondary" | "ghost"
-        url: string
-    }[]
-    data?: unknown
+  contextId?: string
 
-    contextId?: string
+  pushNotify: boolean
 
-    pushNotify: boolean
+  projectId?: string
+  project?: {
+    id: string
+    name: string
+  }
 
-    projectId: string
-    project: {
-        id: string
-        name: string
-    }
-
-    createdAt: string
+  createdAt: string
 }
 
 export interface Project {
+  id: string
+  name: string
+  ownerId: string
+  owner: {
     id: string
     name: string
-    ownerId: string
-    owner: {
-        id: string
-        name: string
-        email: string
-        image: string
-    }
-    apiKeys: ApiKey[]
-    events: Event[]
-    auditLogs: AuditLog[]
-    requestLogs: RequestLog[]
+    email: string
+    image: string
+  }
+  apiKeys: ApiKey[]
+  events: Event[]
+  auditLogs: AuditLog[]
+  requestLogs: RequestLog[]
 }
 
 export interface RequestLog {
-    id: string
-    projectId: string
-    endpoint: string
-    method: string
-    status: number
-    userAgent: string
-    requestBody: string | null
-    responseBody: string | null
-    createdAt: string
+  id: string
+  projectId: string
+  endpoint: string
+  method: string
+  status: number
+  userAgent: string
+  requestBody: string | null
+  responseBody: string | null
+  createdAt: string
 }
 
 export interface ApiKey {
+  id: string
+  key: string
+  name: string
+  createdAt: string
+  updatedAt: string
+  lastUsed: string | null
+  addedbyId: string
+  addedBy: {
     id: string
-    key: string
     name: string
-    createdAt: string
-    updatedAt: string
-    lastUsed: string | null
-    addedbyId: string
-    addedBy: {
-        id: string
-        name: string
-        email: string
-        image: string
-    }
-    active: boolean
-    projectId: string
-    project: {
-        id: string
-        name: string
-    }
+    email: string
+    image: string
+  }
+  active: boolean
+  projectId: string
+  project: {
+    id: string
+    name: string
+  }
 }
 
 export interface AuditLog {
+  id: string
+  projectId: string
+  project: {
     id: string
-    projectId: string
-    project: {
-        id: string
-        name: string
-    }
-    userId: string
-    user: {
-        name: string
-        image: string
-    }
-    message: string
-    createdAt: string
+    name: string
+  }
+  userId: string
+  user: {
+    name: string
+    image: string
+  }
+  message: string
+  createdAt: string
 }
 
 export interface Webhook {
+  id: string
+  projectId: string
+  project: {
     id: string
-    projectId: string
-    project: {
-        id: string
-        name: string
-    }
     name: string
-    subscription: string
-    url: string
-    enabled: boolean
-    lastTriggered: string | null
-    createdAt: string
-    updatedAt: string
+  }
+  name: string
+  subscription: string
+  url: string
+  enabled: boolean
+  lastTriggered: string | null
+  createdAt: string
+  updatedAt: string
 }

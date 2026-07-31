@@ -20,37 +20,14 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react"
-import { useState } from "react"
+import { Fragment, useState } from "react"
 import { Button } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 
-export type EventProps = {
-  id?: string
-  title: string
-  icon: string
-  createdAt: string
-  description?: string
-  category?: string
-  fields?: {
-    title: string
-    value: string
-  }[]
-  events?: {
-    title: string
-    icon: string
-    createdAt: string
-  }[]
-  actions?: {
-    title: string
-    variant: "primary" | "secondary" | "ghost"
-    url: string
-  }[]
-  data?: unknown
-  contextId?: string
-  pushNotify?: boolean
-}
+import type { Event } from "@workspace/contracts"
 
 export type Events = {
-  events: EventProps[]
+  events: Event[]
 }
 
 function formatDate(dateStr: string) {
@@ -72,8 +49,145 @@ function getDayKey(date: Date) {
   return `${year}-${month}-${day}`
 }
 
+function formatTime(dateStr: string) {
+  return new Date(dateStr)
+    .toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+    .toLowerCase()
+}
+
+function formatDuration(ms: number): string {
+  const absMs = Math.max(0, ms)
+  const seconds = Math.floor(absMs / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (days > 0) return `${days} day${days === 1 ? "" : "s"} ${hours % 24} hr${hours % 24 === 1 ? "" : "s"}`
+  if (hours > 0) return `${hours} hr${hours === 1 ? "" : "s"} ${minutes % 60} min${minutes % 60 === 1 ? "" : "s"}`
+  if (minutes > 0) return `${minutes} min${minutes === 1 ? "" : "s"} ${seconds % 60} sec${seconds % 60 === 1 ? "" : "s"}`
+  return `${seconds} sec${seconds === 1 ? "" : "s"}`
+}
+
+function CompactEventItem({ event }: { event: Event }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium leading-none text-muted-foreground">
+          {formatTime(event.createdAt)}
+        </span>
+        <span className="text-sm leading-none font-medium text-foreground">
+          {event.title}
+        </span>
+      </div>
+      {event.description && (
+        <p className="text-xs text-muted-foreground">
+          {event.description}
+        </p>
+      )}
+      {event.fields && event.fields.length > 0 && (
+        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
+          {event.fields.map((field, index) => (
+            <div key={index} className="flex min-w-0 flex-col">
+              <span className="text-[11px] font-semibold text-foreground">
+                {field.title}
+              </span>
+              <span className="min-w-0 text-[11px] text-muted-foreground break-words">
+                {field.value || "Empty Content"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {!!event.data && (
+        <div className="mt-1 max-h-32 overflow-auto rounded bg-muted/60 text-[10px]">
+          <SyntaxHighlighter
+            language="json"
+            style={vscDarkPlus}
+            customStyle={{
+              margin: 0,
+              padding: "0.5rem",
+              background: "transparent",
+            }}
+          >
+            {JSON.stringify(event.data, null, 2)}
+          </SyntaxHighlighter>
+        </div>
+      )}
+      {event.actions && event.actions.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1.5">
+          {event.actions.map((action, index) => (
+            <Button
+              key={index}
+              variant={action.variant === "primary" ? "default" : action.variant}
+              size="sm"
+              className="h-6 text-xs"
+              onClick={() => window.open(action.url, "_blank")}
+            >
+              {action.title}
+            </Button>
+          ))}
+        </div>
+      )}
+      {event.events && event.events.length > 0 && (
+        <CompactEventTimeline events={event.events} />
+      )}
+    </div>
+  )
+}
+
+function CompactEventTimeline({ events }: { events: Event[] }) {
+  const sorted = [...events].sort(
+    (a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  )
+  const first = new Date(sorted[0]!.createdAt)
+  const last = new Date(sorted[sorted.length - 1]!.createdAt)
+  const duration = last.getTime() - first.getTime()
+
+  return (
+    <div className="mt-3 grid grid-cols-[1.5rem_1fr] gap-x-3">
+      {sorted.map((event, index) => {
+        const isFirst = index === 0
+        const isLast = index === sorted.length - 1
+        return (
+          <Fragment key={event.id ?? index}>
+            <div className="relative">
+              <div
+                className={cn(
+                  "absolute left-1/2 w-px -translate-x-1/2 border-l-2 border-dashed border-foreground/10",
+                  isFirst ? "top-3.5 bottom-0" : "top-0 bottom-0",
+                  isLast ? "bottom-3.5" : ""
+                )}
+              />
+              <div className="relative flex size-7 items-center justify-center rounded-full bg-background text-lg leading-none">
+                <span className="leading-none">{event.icon || "~"}</span>
+                {event.pushNotify && (
+                  <div className="absolute top-0 right-0 flex size-3.5 translate-x-1/4 -translate-y-1/4 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold leading-none text-white">
+                    !
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="pb-3 pt-1.5 pl-1">
+              <CompactEventItem event={event} />
+            </div>
+          </Fragment>
+        )
+      })}
+      <p className="col-span-2 pb-2 text-sm font-medium text-muted-foreground">
+        {sorted.length} event{sorted.length === 1 ? "" : "s"}.{" "}
+        {formatDuration(duration)}.
+      </p>
+    </div>
+  )
+}
+
 export function EventsList({ events }: Events) {
-  const groups: { date: string; events: EventProps[] }[] = []
+  const groups: { date: string; events: Event[] }[] = []
 
   for (const event of events) {
     const dayKey = getDayKey(new Date(event.createdAt))
@@ -113,20 +227,20 @@ export function Event({
   category,
 
   fields,
-  events,
   actions,
   data,
 
+  events,
+
   pushNotify,
   createdAt,
-}: EventProps) {
+}: Event) {
   const [open, setOpen] = useState(false)
   const extras = Boolean(
     description ||
     actions?.length ||
     data ||
-    fields?.length ||
-    events?.length
+    fields?.length
   )
   const [copied, setCopied] = useState(false)
 
@@ -146,7 +260,7 @@ export function Event({
         onClick={() => extras && setOpen(!open)}
       >
         <div className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-background text-2xl">
-          {icon}
+          {icon || "~"}
           {pushNotify && (
             <div className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
               !
@@ -227,32 +341,7 @@ export function Event({
           )}
 
           {events && events.length > 0 && (
-            <div className="mt-3 space-y-3">
-              {events.map((event, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-3"
-                >
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted/20 text-xs">
-                    {event.icon}
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <p className="text-sm font-medium text-foreground">
-                      {event.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(event.createdAt)
-                        .toLocaleTimeString("en-US", {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        })
-                        .toLowerCase()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <CompactEventTimeline events={events} />
           )}
 
           {!!data && (
