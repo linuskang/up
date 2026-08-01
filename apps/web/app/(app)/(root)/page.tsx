@@ -200,7 +200,7 @@ export default function Page() {
         </div>
 
         {projects.length === 0 ? (
-          <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 rounded-lg bg-muted/40 p-8 text-center">
+          <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 rounded-lg bg-card p-8 text-center">
             <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
               <Folder
                 className="size-5 text-muted-foreground"
