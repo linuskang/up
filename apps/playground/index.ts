@@ -5,7 +5,7 @@ dotenv.config()
 
 const ups = new Upstream({
   apiKey: process.env.UPSTREAM_API_KEY ?? "",
-  host: process.env.UPSTREAM_HOST ?? "",
+  host: process.env.UPSTREAM_HOST,
 })
 
 async function main() {
