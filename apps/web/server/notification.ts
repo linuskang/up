@@ -6,7 +6,12 @@ function setupWebPush() {
   if (vapidConfigured) return
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
   const privateKey = process.env.VAPID_PRIVATE_KEY
-  if (!publicKey || !privateKey) return
+  if (!publicKey || !privateKey) {
+    console.error(
+      "[push] VAPID keys missing (NEXT_PUBLIC_VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY); push notifications will fail"
+    )
+    return
+  }
   webpush.setVapidDetails(
     "mailto:m@linus.id.au",
     publicKey,
@@ -33,10 +38,12 @@ export async function sendPushNotification(
   })
 
   if (!user) {
+    console.error(`[push] User not found: ${userId}`)
     return { success: false, error: 'User not found' }
   }
 
   if (!user.pushNotificationsEnabled) {
+    console.error(`[push] Push notifications disabled for user: ${userId}`)
     return { success: false, error: 'Push notifications are disabled for this user' }
   }
 
@@ -45,6 +52,7 @@ export async function sendPushNotification(
   })
 
   if (subscriptions.length === 0) {
+    console.error(`[push] No push subscriptions for user: ${userId}`)
     return { success: false, error: 'No subscriptions found for user' }
   }
 
