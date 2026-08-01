@@ -2,7 +2,8 @@ import { NextRequest } from "next/server"
 import { prisma } from "@/server/db"
 import { ApiResponse } from "@/app/api/responses"
 import { Project } from "@/server/project"
-import { Api } from "@/server/api"
+import { getSession } from "@/server/auth"
+import type { Prisma } from "@/generated/prisma/client"
 
 export async function GET(
   req: NextRequest,
@@ -14,15 +15,9 @@ export async function GET(
 ) {
   const { id } = await params
 
-  const apiKey = req.headers.get("x-api-key")
+  const session = await getSession()
 
-  if (!apiKey) {
-    return ApiResponse.BadRequest("API key is required")
-  }
-
-  const validate = await Api.validateKey(apiKey)
-
-  if (!validate.valid || validate.projectId !== id) {
+  if (!session) {
     return ApiResponse.Unauthorized()
   }
 
@@ -46,10 +41,80 @@ export async function GET(
 
   const skip = (page - 1) * limit
 
-  const [events, total] = await Promise.all([
-    prisma.event.findMany({
-      where: {
-        projectId: id,
+  const eventId = search.searchParams.get("id")
+  const title = search.searchParams.get("title")
+  const description = search.searchParams.get("description")
+  const pushNotify = search.searchParams.get("pushNotify")
+  const category = search.searchParams.get("category")
+  const contextId = search.searchParams.get("contextId")
+  const createdAt = search.searchParams.get("createdAt")
+  const q = search.searchParams.get("q")
+
+  const fieldConditions: Prisma.EventWhereInput[] = []
+
+  if (eventId) {
+    fieldConditions.push({ id: { equals: eventId } })
+  }
+
+  if (title) {
+    fieldConditions.push({ title: { contains: title, mode: "insensitive" } })
+  }
+
+  if (description) {
+    fieldConditions.push({
+      description: { contains: description, mode: "insensitive" },
+    })
+  }
+
+  if (pushNotify !== null) {
+    fieldConditions.push({ pushNotify: pushNotify === "true" })
+  }
+
+  if (category) {
+    fieldConditions.push({
+      category: category === "none" ? null : { equals: category },
+    })
+  }
+
+  if (contextId) {
+    fieldConditions.push({
+      contextId: contextId === "none" ? null : { equals: contextId },
+    })
+  }
+
+  if (createdAt) {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+    if (dateRegex.test(createdAt)) {
+      const start = new Date(createdAt)
+      const end = new Date(start)
+      end.setDate(end.getDate() + 1)
+      fieldConditions.push({
+        createdAt: {
+          gte: start,
+          lt: end,
+        },
+      })
+    } else {
+      fieldConditions.push({
+        createdAt: { equals: new Date(createdAt) },
+      })
+    }
+  }
+
+  if (q) {
+    fieldConditions.push({
+      OR: [
+        { title: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+        { category: { contains: q, mode: "insensitive" } },
+      ],
+    })
+  }
+
+  const where: Prisma.EventWhereInput = {
+    projectId: id,
+    AND: [
+      {
         OR: [
           {
             contextStart: true,
@@ -59,6 +124,13 @@ export async function GET(
           },
         ],
       },
+      ...(fieldConditions.length > 0 ? fieldConditions : []),
+    ],
+  }
+
+  const [events, total] = await Promise.all([
+    prisma.event.findMany({
+      where,
       orderBy: {
         createdAt: "desc",
       },
@@ -67,17 +139,7 @@ export async function GET(
     }),
 
     prisma.event.count({
-      where: {
-        projectId: id,
-        OR: [
-          {
-            contextStart: true,
-          },
-          {
-            contextId: null,
-          },
-        ],
-      },
+      where,
     }),
   ])
 

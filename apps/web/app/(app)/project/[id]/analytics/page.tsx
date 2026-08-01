@@ -55,7 +55,7 @@ export default function AnalyticsPage() {
     const fetchData = async () => {
       const [projectRes, logsRes] = await Promise.all([
         fetch(`/api/v1/project/${params.id}`),
-        fetch(`/api/v1/project/${params.id}/logs`),
+        fetch(`/api/v1/project/${params.id}/requests`),
       ])
       if (!projectRes.ok || !logsRes.ok) return
       const projectData = await projectRes.json()
