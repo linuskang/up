@@ -4,11 +4,13 @@ import { useState, useMemo } from "react"
 
 import { Event } from "@workspace/ui/components/event"
 import { EventSearch } from "@workspace/ui/components/event-search"
+import { CategorySelector, CategoryProps } from "@workspace/ui/components/event-category"
 
 import type { Event as EventType } from "@workspace/contracts"
 
 export default function Page() {
   const [query, setQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>("all")
 
   const events: EventType[] = useMemo(() => {
     const now = new Date()
@@ -66,7 +68,7 @@ export default function Page() {
               { title: "Failed", value: "4" },
             ],
             actions: [
-              { title: "Retry Failed", variant: "primary", url: "#" },
+              { title: "Retry", variant: "primary", url: "#" },
             ],
             data: {
               summary: {
@@ -75,23 +77,6 @@ export default function Page() {
                 skipped: 0,
               },
             },
-            events: [
-              {
-                id: "test-event-2-1",
-                title: "retry queued",
-                createdAt: new Date(now.getTime() + 3600).toISOString(),
-                pushNotify: false,
-                icon: "!",
-                description: "Failed invoices queued for retry.",
-                category: "billing",
-                fields: [
-                  { title: "Retry Count", value: "1" },
-                ],
-                actions: [],
-                data: { failedIds: ["inv_001", "inv_002", "inv_003", "inv_004"] },
-                events: [],
-              },
-            ],
           },
         ],
       },
@@ -115,11 +100,41 @@ export default function Page() {
     ]
   }, [])
 
-  const filteredEvents = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return events
+  const categories: CategoryProps[] = useMemo(() => {
+    const counts = new Map<string, number>()
+    counts.set("all", events.length)
+    counts.set("none", 0)
+    for (const event of events) {
+      const key = event.category ?? "none"
+      counts.set(key, (counts.get(key) ?? 0) + 1)
+    }
+    return Array.from(counts.entries())
+      .filter(([name, count]) => name !== "none" || count > 0)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => {
+        if (a.name === "all") return -1
+        if (b.name === "all") return 1
+        if (a.name === "none") return -1
+        if (b.name === "none") return 1
+        return a.name.localeCompare(b.name)
+      })
+  }, [events])
 
-    return events.filter((event) => {
+  const filteredEvents = useMemo(() => {
+    let result = events
+
+    if (selectedCategory && selectedCategory !== "all") {
+      result = result.filter((event) =>
+        selectedCategory === "none"
+          ? !event.category
+          : event.category === selectedCategory
+      )
+    }
+
+    const q = query.trim().toLowerCase()
+    if (!q) return result
+
+    return result.filter((event) => {
       const match = (str?: string | null) =>
         str?.toLowerCase().includes(q) ?? false
 
@@ -131,19 +146,32 @@ export default function Page() {
       if (match(JSON.stringify(event.data))) return true
       return false
     })
-  }, [events, query])
+  }, [events, query, selectedCategory])
 
   return (
-    <div className="flex flex-col gap-2 max-w-md mx-auto py-6">
-      <EventSearch value={query} onChange={setQuery} />
+    <div className="mx-auto max-w-5xl">
+      <h1 className="text-3xl font-semibold -mb-3">Events</h1>
+      <div className="flex flex-col gap-2 py-6 sm:flex-row sm:items-start">
+        <div className="shrink-0">
+          <CategorySelector
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
+        </div>
 
-      {filteredEvents.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground">
-          No events match &quot;{query}&quot;.
-        </p>
-      ) : (
-        filteredEvents.map((event) => <Event key={event.id} {...event} />)
-      )}
+        <div className="flex flex-col gap-2 w-full min-w-0">
+          <EventSearch value={query} onChange={setQuery} />
+
+          {filteredEvents.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">
+              No events match &quot;{query}&quot;.
+            </p>
+          ) : (
+            filteredEvents.map((event) => <Event key={event.id} {...event} />)
+          )}
+        </div>
+      </div>
     </div>
   )
 }

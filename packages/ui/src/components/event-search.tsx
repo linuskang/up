@@ -18,7 +18,7 @@ export function EventSearch({
       <Search className="pointer-events-none absolute top-1/2 left-3 z-20 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="search"
-        className="relative z-10 w-full border-0 !bg-card h-9 pl-9 pr-8 font-medium [&::-webkit-search-cancel-button]:appearance-none"
+        className="relative z-10 rounded-xl w-full border-0 !bg-card h-9 pl-9 pr-8 font-medium [&::-webkit-search-cancel-button]:appearance-none"
         placeholder="Search events..."
         value={value}
         onChange={(e) => onChange(e.target.value)}

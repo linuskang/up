@@ -46,7 +46,7 @@ export function Event({
   }
 
   return (
-    <Card className="mx-auto w-full gap-0 bg-muted/40 p-3 text-left ring-0">
+    <Card className="mx-auto w-full gap-0 bg-card p-3 text-left ring-0">
       <CardHeader
         className={cn(
           "group flex flex-row items-center space-y-0 p-0 transition-opacity",
@@ -56,7 +56,7 @@ export function Event({
         role={hasExtras ? "button" : undefined}
         aria-expanded={hasExtras ? open : undefined}
       >
-        <div className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-background text-2xl">
+        <div className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-background text-lg">
           {icon || "~"}
           {pushNotify && (
             <div className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
@@ -65,7 +65,7 @@ export function Event({
           )}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 pl-3">
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 pl-1">
           <CardTitle className="flex w-full flex-1 items-center text-sm leading-none font-medium">
             <span className="shrink-0 text-base leading-none font-medium text-muted-foreground">
               {new Date(createdAt)

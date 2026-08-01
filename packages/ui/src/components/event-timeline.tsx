@@ -75,7 +75,7 @@ export function CompactEventTimeline({ events }: { events: Event[] }) {
                   isLast ? "bottom-3.5" : ""
                 )}
               />
-              <div className="relative flex size-7 items-center justify-center rounded-full bg-background text-lg leading-none">
+              <div className="relative flex size-7 items-center justify-center rounded-full bg-background text-sm leading-none">
                 <span className="leading-none">{event.icon || "~"}</span>
                 {event.pushNotify && (
                   <div className="absolute top-0 right-0 flex size-3.5 translate-x-1/4 -translate-y-1/4 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold leading-none text-white">

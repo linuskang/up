@@ -55,9 +55,9 @@
 :root {
   --background: oklch(19.06% 0.003 247.96);
   --foreground: oklch(1 0 0);
-  --card: oklch(0.2215 0.0025 247.94);
+  --card: oklch(23.5% 0.004 264.5);
   --card-foreground: oklch(100% 0.00011 271.152);
-  --popover: oklch(30.36% 0.003 228.9);
+  --popover: oklch(23.5% 0.004 264.5);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(56.9% 0.169 262.4);
   --primary-foreground: oklch(0.97 0.014 254.604);
@@ -70,7 +70,7 @@
   --destructive: oklch(0.6339 0.1497 34.2);
   --success: oklch(0.792 0.1995 149.49);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(26% 0.005 247.94);
+  --input: oklch(23.5% 0.004 264.5);
   --ring: oklch(56.9% 0.169 262.4);
   --chart-1: var(--color-blue-300);
   --chart-2: var(--color-blue-500);
