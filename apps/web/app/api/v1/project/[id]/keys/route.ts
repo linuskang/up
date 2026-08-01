@@ -115,6 +115,10 @@ export async function DELETE(
     return ApiResponse.BadRequest()
   }
 
+  if (!await Project.isAuthorized(id, session.user.id)) {
+    return ApiResponse.Forbidden("You do not have access to this project")
+  }
+
   const key = await prisma.apiKey.findUnique({
     where: {
       id: body.keyId,

@@ -27,6 +27,10 @@ export async function GET(
     return ApiResponse.NotFound("Project not found")
   }
 
+  if (!await Project.isAuthorized(id, session.user.id)) {
+    return ApiResponse.Forbidden("You do not have access to this project")
+  }
+
   const search = new URL(req.url)
 
   const page = Math.max(

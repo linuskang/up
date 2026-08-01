@@ -178,4 +178,21 @@ export class Project {
 
     return project
   }
+
+  static async isAuthorized(projectId: string, userId: string) {
+    const project = await prisma.project.findUnique({
+      where: {
+        id: projectId,
+      },
+      select: {
+        ownerId: true,
+      },
+    })
+
+    if (!project) {
+      return false
+    }
+
+    return project.ownerId === userId
+  }
 }
