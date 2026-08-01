@@ -195,7 +195,7 @@ export default function Page() {
             Your Projects
           </h2>
           <Button variant="primary">
-            <Link href="/project/new">Create Project</Link>
+            <Link href="/new">Create Project</Link>
           </Button>
         </div>
 

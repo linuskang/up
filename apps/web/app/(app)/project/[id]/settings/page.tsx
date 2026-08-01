@@ -1,23 +1,17 @@
 "use client"
 
+import axios from "axios"
 import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
-import { Label } from "@workspace/ui/components/label"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@workspace/ui/components/dialog"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@workspace/ui/components/empty"
+import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@workspace/ui/components/breadcrumb"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import type { Project, RequestLog, Webhook } from "@workspace/contracts"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table"
+import { Badge } from "@workspace/ui/components/badge"
+import { Switch } from "@workspace/ui/components/switch"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,67 +23,62 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog"
-import { Copy, Check } from "lucide-react"
-import { Badge } from "@workspace/ui/components/badge"
-import { Avatar, AvatarImage } from "@workspace/ui/components/avatar"
-import Link from "next/link"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@workspace/ui/components/table"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@workspace/ui/components/breadcrumb"
-import { useEffect, useState } from "react"
-import { notFound, useRouter } from "next/navigation"
-import { authClient } from "@/client/auth"
-import { useParams } from "next/navigation"
-import { toast } from "sonner"
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@workspace/ui/components/pagination"
-import { ApiKey } from "@workspace/contracts"
-import { RequestLog } from "@workspace/contracts"
-import { Webhook } from "@workspace/contracts"
-import { Switch } from "@workspace/ui/components/switch"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/ui/components/dialog"
+import { Input } from "@workspace/ui/components/input"
+import { Label } from "@workspace/ui/components/label"
+import { Form } from "@workspace/ui/components/form"
+import { SearchBar } from "@workspace/ui/components/search-bar"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { Copy, Check } from "lucide-react"
+import { Avatar, AvatarImage } from "@workspace/ui/components/avatar"
+
+type CreateApiKey = {
+  name: string
+
+}
+
+type RenameProject = {
+  name: string
+}
+
+type DeleteProject = {}
+
+type CreateWebhook = {
+  name: string
+  subscription: string
+  url: string
+}
 
 export default function Page() {
   const params = useParams()
   const router = useRouter()
-  const { data: session, isPending } = authClient.useSession()
-
-  const [project, setProject] = useState<{ name: string; id: string } | null>(
-    null
-  )
-  const [keys, setKeys] = useState<ApiKey[]>([])
   const [loading, setLoading] = useState(true)
-  const [notFoundState, setNotFoundState] = useState(false)
-  const [newProjectName, setNewProjectName] = useState("")
-  const [newKeyName, setNewKeyName] = useState("")
-  const [createdKey, setCreatedKey] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
-  const [renameOpen, setRenameOpen] = useState(false)
-  const [createKeyOpen, setCreateKeyOpen] = useState(false)
-  const [showKeyOpen, setShowKeyOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isCreatingKey, setIsCreatingKey] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [project, setProject] = useState<Project | null>(null)
+
+  const [createApiKey, setCreateApiKey] = useState(false)
+  const [creatingApiKey, setCreatingApiKey] = useState(false)
+  const [createdApiKey, setCreatedApiKey] = useState<string | null>(null)
+  const [copiedApiKey, setCopiedApiKey] = useState(false)
+  const [apiKeySearch, setApiKeySearch] = useState("")
+
+  const [createWebhook, setCreateWebhook] = useState(false)
+
+  const [renameProject, setRenameProject] = useState(false)
+  const [renamingProject, setRenamingProject] = useState(false)
+
+  const [deleteProject, setDeleteProject] = useState(false)
+  const [deletingProject, setDeletingProject] = useState(false)
+
+  const [deleteApiKey, setDeleteApiKey] = useState(false)
+
   const [auditLogs, setAuditLogs] = useState<
     {
       message: string
@@ -97,235 +86,129 @@ export default function Page() {
       user: { name: string; image: string | null } | null
     }[]
   >([])
-  const [auditLogPage, setAuditLogPage] = useState(1)
-  const AUDIT_LOGS_PER_PAGE = 5
-  const [requestLogPage, setRequestLogPage] = useState(1)
+  const [activitySearch, setActivitySearch] = useState("")
+  const [activityPage, setActivityPage] = useState(1)
+  const ACTIVITY_PER_PAGE = 8
+
   const [requestLogs, setRequestLogs] = useState<RequestLog[]>([])
-  const [selectedRequestLog, setSelectedRequestLog] =
-    useState<RequestLog | null>(null)
-  const [requestLogDetailOpen, setRequestLogDetailOpen] = useState(false)
+  const [requestLogPage, setRequestLogPage] = useState(1)
   const REQUEST_LOGS_PER_PAGE = 5
+  const [requestLogSearch, setRequestLogSearch] = useState("")
+  const [selectedRequestLog, setSelectedRequestLog] = useState<RequestLog | null>(null)
+  const [requestLogDetailOpen, setRequestLogDetailOpen] = useState(false)
+
   const [webhooks, setWebhooks] = useState<Webhook[]>([])
-  const [webhookPage, setWebhookPage] = useState(1)
-  const WEBHOOKS_PER_PAGE = 5
-  const [createWebhookOpen, setCreateWebhookOpen] = useState(false)
-  const [newWebhookName, setNewWebhookName] = useState("")
-  const [newWebhookSubscription, setNewWebhookSubscription] = useState("")
-  const [newWebhookUrl, setNewWebhookUrl] = useState("")
+  const [webhookSearch, setWebhookSearch] = useState("")
   const [isCreatingWebhook, setIsCreatingWebhook] = useState(false)
-  const [editingWebhook, setEditingWebhook] = useState<Webhook | null>(null)
   const [editWebhookOpen, setEditWebhookOpen] = useState(false)
+  const [isEditingWebhook, setIsEditingWebhook] = useState(false)
+  const [editingWebhook, setEditingWebhook] = useState<Webhook | null>(null)
   const [editWebhookName, setEditWebhookName] = useState("")
   const [editWebhookSubscription, setEditWebhookSubscription] = useState("")
   const [editWebhookUrl, setEditWebhookUrl] = useState("")
   const [editWebhookEnabled, setEditWebhookEnabled] = useState(true)
-  const [isEditingWebhook, setIsEditingWebhook] = useState(false)
 
-  function getPageNumbers(
-    current: number,
-    total: number
-  ): (number | "...")[] {
-    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-    const pages: (number | "...")[] = [1]
-    if (current > 3) pages.push("...")
-    const start = Math.max(2, current - 1)
-    const end = Math.min(total - 1, current + 1)
-    for (let i = start; i <= end; i++) pages.push(i)
-    if (current < total - 2) pages.push("...")
-    pages.push(total)
-    return pages
+  type CreateWebhookForm = {
+    name: string
+    subscription: string
+    url: string
   }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [
-        projectRes,
-        keysRes,
-        auditLogsRes,
-        requestLogsRes,
-        webhooksRes,
-      ] = await Promise.all([
-        fetch(`/api/v1/project/${params.id}`),
-        fetch(`/api/v1/project/${params.id}/keys`),
-        fetch(`/api/v1/project/${params.id}/logs`),
-        fetch(`/api/v1/project/${params.id}/requests`),
-        fetch(`/api/v1/project/${params.id}/webhooks`),
-      ])
+  type EditWebhookForm = {
+    name: string
+    subscription: string
+    url: string
+    enabled: boolean
+  }
 
-      if (!projectRes.ok) {
-        setNotFoundState(true)
-        setLoading(false)
-        return
-      }
+  async function getProject() {
 
-      const projectData = await projectRes.json()
-      setProject(projectData.data)
-      setNewProjectName(projectData.data.name)
-
-      if (keysRes.ok) {
-        const keysData = await keysRes.json()
-        setKeys(keysData.data || [])
-      }
-
-      if (auditLogsRes.ok) {
-        const auditLogsData = await auditLogsRes.json()
-        setAuditLogs(auditLogsData.data || [])
-      }
-
-      if (requestLogsRes.ok) {
-        const requestLogsData = await requestLogsRes.json()
-        setRequestLogs(requestLogsData.data || [])
-      }
-
-      if (webhooksRes.ok) {
-        const webhooksData = await webhooksRes.json()
-        setWebhooks(webhooksData.data || [])
-      }
-
+    try {
+      await axios.get('/api/v1/project/' + params.id).then((res) => {
+        setProject(res.data.data)
+      })
+    } catch {
+      toast.error("Something went wrong")
+    } finally {
       setLoading(false)
     }
-    fetchData()
-  }, [params.id])
-
-  const rename = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
-
-    const res = await fetch(`/api/v1/project/${params.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newProjectName }),
-    })
-
-    if (res.ok) {
-      setProject((prev) =>
-        prev ? { ...prev, name: newProjectName } : prev
-      )
-      toast.success("Project renamed successfully.")
-      setRenameOpen(false)
-    } else {
-      toast.error("Failed to rename project.")
-    }
-
-    setIsSaving(false)
   }
 
-  const createKey = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsCreatingKey(true)
-
-    const res = await fetch(`/api/v1/project/${params.id}/keys`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newKeyName }),
-    })
-
-    if (res.ok) {
-      const data = await res.json()
-      setCreatedKey(data.key)
-      setNewKeyName("")
-      setCreateKeyOpen(false)
-      setShowKeyOpen(true)
-
-      // Refresh keys list
-      const keysRes = await fetch(`/api/v1/project/${params.id}/keys`)
-      if (keysRes.ok) {
-        const keysData = await keysRes.json()
-        setKeys(keysData.data || [])
-      }
-    } else {
-      toast.error("Failed to create API key.")
-    }
-
-    setIsCreatingKey(false)
-  }
-
-  const deleteKey = async (keyId: string) => {
-    const res = await fetch(`/api/v1/project/${params.id}/keys`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ keyId }),
-    })
-
-    if (res.ok) {
-      setKeys((prev) => prev.filter((k) => k.id !== keyId))
-      toast.success("API key deleted.")
-    } else {
-      toast.error("Failed to delete API key.")
+  async function getAuditLogs() {
+    try {
+      const res = await axios.get(`/api/v1/project/${params.id}/logs`)
+      setAuditLogs(res.data.data || [])
+    } catch {
+      toast.error("Something went wrong")
     }
   }
 
-  const createWebhook = async (e: React.FormEvent) => {
-    e.preventDefault()
+  async function getRequestLogs() {
+    try {
+      const res = await axios.get(`/api/v1/project/${params.id}/requests`)
+      setRequestLogs(res.data.data || [])
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
+
+  async function getWebhooks() {
+    try {
+      const res = await axios.get(`/api/v1/project/${params.id}/webhooks`)
+      setWebhooks(res.data.data || [])
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
+
+  async function handleCreateWebhook(data: CreateWebhookForm) {
     setIsCreatingWebhook(true)
-
-    const res = await fetch(`/api/v1/project/${params.id}/webhooks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: newWebhookName,
-        subscription: newWebhookSubscription,
-        url: newWebhookUrl,
-      }),
-    })
-
-    if (res.ok) {
-      const data = await res.json()
-      setWebhooks((prev) => [...prev, data.webhook])
-      setNewWebhookName("")
-      setNewWebhookSubscription("")
-      setNewWebhookUrl("")
-      setCreateWebhookOpen(false)
-      toast.success("Webhook created.")
-    } else {
-      toast.error("Failed to create webhook.")
-    }
-
-    setIsCreatingWebhook(false)
-  }
-
-  const deleteWebhook = async (webhookId: string) => {
-    const res = await fetch(`/api/v1/project/${params.id}/webhooks`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ webhookId }),
-    })
-
-    if (res.ok) {
-      setWebhooks((prev) => prev.filter((w) => w.id !== webhookId))
-      toast.success("Webhook deleted.")
-    } else {
-      toast.error("Failed to delete webhook.")
+    try {
+      const res = await axios.post(`/api/v1/project/${params.id}/webhooks`, data)
+      setWebhooks((prev) => [...prev, res.data.data])
+      setCreateWebhook(false)
+      toast.success("Webhook created")
+    } catch {
+      toast.error("Something went wrong")
+    } finally {
+      setIsCreatingWebhook(false)
     }
   }
 
-  const updateWebhook = async (
-    webhookId: string,
-    data: {
-      name?: string
-      url?: string
-      subscription?: string
-      enabled?: boolean
-    }
-  ) => {
-    const res = await fetch(`/api/v1/project/${params.id}/webhooks`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ webhookId, ...data }),
-    })
-
-    if (res.ok) {
-      const resData = await res.json()
+  async function updateWebhook(data: EditWebhookForm) {
+    if (!editingWebhook) return
+    setIsEditingWebhook(true)
+    try {
+      const res = await axios.patch(`/api/v1/project/${params.id}/webhooks`, {
+        webhookId: editingWebhook.id,
+        ...data,
+      })
       setWebhooks((prev) =>
-        prev.map((w) => (w.id === webhookId ? resData.webhook : w))
+        prev.map((w) => (w.id === editingWebhook.id ? res.data.data : w))
       )
-      toast.success("Webhook updated.")
-    } else {
-      toast.error("Failed to update webhook.")
+      setEditWebhookOpen(false)
+      setEditingWebhook(null)
+      toast.success("Webhook updated")
+    } catch {
+      toast.error("Something went wrong")
+    } finally {
+      setIsEditingWebhook(false)
     }
   }
 
-  const openEditWebhook = (webhook: Webhook) => {
+  async function deleteWebhook(webhookId: string) {
+    try {
+      await axios.delete(`/api/v1/project/${params.id}/webhooks`, {
+        data: { webhookId },
+      })
+      setWebhooks((prev) => prev.filter((w) => w.id !== webhookId))
+      toast.success("Webhook deleted")
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
+
+  function openEditWebhook(webhook: Webhook) {
     setEditingWebhook(webhook)
     setEditWebhookName(webhook.name)
     setEditWebhookSubscription(webhook.subscription)
@@ -334,46 +217,7 @@ export default function Page() {
     setEditWebhookOpen(true)
   }
 
-  const saveEditWebhook = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editingWebhook) return
-    setIsEditingWebhook(true)
-    await updateWebhook(editingWebhook.id, {
-      name: editWebhookName,
-      url: editWebhookUrl,
-      subscription: editWebhookSubscription,
-      enabled: editWebhookEnabled,
-    })
-    setIsEditingWebhook(false)
-    setEditWebhookOpen(false)
-    setEditingWebhook(null)
-  }
-
-  const deleteProject = async () => {
-    setIsDeleting(true)
-
-    const res = await fetch(`/api/v1/project/${params.id}`, {
-      method: "DELETE",
-    })
-
-    if (res.ok) {
-      toast.success("Project deleted.")
-      router.push("/")
-    } else {
-      toast.error("Failed to delete project.")
-      setIsDeleting(false)
-    }
-  }
-
-  const copyKey = () => {
-    if (createdKey) {
-      navigator.clipboard.writeText(createdKey)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
-
-  const formatJson = (body: string | null) => {
+  function formatJson(body: string | null) {
     if (!body) return null
     try {
       return JSON.stringify(JSON.parse(body), null, 2)
@@ -382,35 +226,25 @@ export default function Page() {
     }
   }
 
-  if (isPending || loading) {
-    return (
-      <div className="flex min-h-svh flex-col gap-8 py-6">
-        <div className="flex flex-col gap-1">
-          <Breadcrumb>
-            <BreadcrumbList className="text-sm">
-              <BreadcrumbItem>
-                <BreadcrumbLink render={<Link href="/" />}>
-                  Projects
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Settings</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <div className="h-8 w-48 animate-pulse rounded bg-muted" />
-      </div>
-    )
+  useEffect(() => {
+    getProject()
+    getAuditLogs()
+    getRequestLogs()
+    getWebhooks()
+  }, [params.id])
+
+  function copyCreatedApiKey() {
+    if (createdApiKey) {
+      navigator.clipboard.writeText(createdApiKey)
+      setCopiedApiKey(true)
+      setTimeout(() => setCopiedApiKey(false), 2000)
+    }
   }
 
-  if (notFoundState) {
-    return notFound()
-  }
-
-  if (!session) {
-    return null
+  function closeCreateApiKeyDialog() {
+    setCreateApiKey(false)
+    setCreatedApiKey(null)
+    setCopiedApiKey(false)
   }
 
   return (
@@ -441,125 +275,157 @@ export default function Page() {
         <h1 className="truncate text-2xl font-bold">{project?.name}</h1>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">API Keys</h2>
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h2 className="text-lg font-semibold">API Keys</h2>
           <Dialog
-            open={createKeyOpen}
-            onOpenChange={setCreateKeyOpen}
+            open={createApiKey}
+            onOpenChange={(open) => {
+              setCreateApiKey(open)
+              if (!open) {
+                setCreatedApiKey(null)
+                setCopiedApiKey(false)
+              }
+            }}
           >
             <DialogTrigger
               render={<Button className="cursor-pointer" size="sm" />}
             >
               Create API Key
             </DialogTrigger>
-            <DialogContent className="bg-card ring-0 sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Create API Key</DialogTitle>
-                <DialogDescription>
-                  Create a key to send events to this project.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={createKey} className="space-y-3">
-                <div>
-                  <Label htmlFor="key-name">Name *</Label>
-                  <Input
-                    id="key-name"
-                    placeholder="Production"
-                    value={newKeyName}
-                    onChange={(e) =>
-                      setNewKeyName(e.target.value)
-                    }
-                    className="border-0 bg-input"
-                    required
-                  />
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="submit"
-                    className="cursor-pointer"
-                    disabled={isCreatingKey}
+            <DialogContent>
+              {createdApiKey ? (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Your API Key</DialogTitle>
+                    <DialogDescription>
+                      This is the only time we can show the secret for this API key.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex items-center gap-2 rounded-md bg-black/30 p-3 font-mono text-xs break-all">
+                    <span className="flex-1">{createdApiKey}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-6 shrink-0"
+                      onClick={copyCreatedApiKey}
+                    >
+                      {copiedApiKey ? (
+                        <Check className="size-3" />
+                      ) : (
+                        <Copy className="size-3" />
+                      )}
+                    </Button>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={closeCreateApiKeyDialog}>
+                      Got it
+                    </Button>
+                  </DialogFooter>
+                </>
+              ) : (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Create API Key</DialogTitle>
+                    <DialogDescription>
+                      Create a key to send events to this project.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form<CreateApiKey>
+                    onSubmit={async (data) => {
+                      setCreatingApiKey(true)
+                      try {
+                        const res = await axios.post(`/api/v1/project/${params.id}/keys`, data)
+                        setCreatedApiKey(res.data.data)
+                        toast.success("Created api key")
+                        getProject()
+                      } catch (error) {
+                        toast.error("Something went wrong")
+                      } finally {
+                        setCreatingApiKey(false)
+                      }
+                    }}
                   >
-                    {isCreatingKey
-                      ? "Creating..."
-                      : "Create API Key"}
-                  </Button>
-                </DialogFooter>
-              </form>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label>Name</Label>
+                        <Form.Field<CreateApiKey>
+                          name="name">
+                          <Input
+                            placeholder="Hello World"
+                            required
+                          />
+                        </Form.Field>
+                      </div>
+                      <DialogFooter>
+                        <Form.Submit>
+                          <Button
+                            disabled={creatingApiKey}
+                          >
+                            {creatingApiKey
+                              ? "Creating..."
+                              : "Create API Key"}
+                          </Button>
+                        </Form.Submit>
+                      </DialogFooter>
+                    </div>
+                  </Form>
+                </>
+              )}
             </DialogContent>
           </Dialog>
         </div>
 
-        <Dialog open={showKeyOpen} onOpenChange={setShowKeyOpen}>
-          <DialogContent className="bg-card ring-0 sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Your API Key</DialogTitle>
-              <DialogDescription>
-                This is the only time we can show the secret for
-                this API key.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex items-center gap-2 rounded-md bg-black/30 p-3 font-mono text-xs break-all">
-              <span className="flex-1">{createdKey}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-6 shrink-0"
-                onClick={copyKey}
-              >
-                {copied ? (
-                  <Check className="size-3" />
-                ) : (
-                  <Copy className="size-3" />
-                )}
-              </Button>
-            </div>
-            <DialogFooter>
-              <Button
-                className="cursor-pointer"
-                onClick={() => setShowKeyOpen(false)}
-              >
-                Done
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <SearchBar
+          value={apiKeySearch}
+          onChange={(value) => setApiKeySearch(value)}
+          className="mb-2"
+        />
 
-        {keys.length === 0 ? (
-          <div className="rounded-xl bg-card ring-0">
-            <div className="p-4 text-center">
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle>No API Keys Yet</EmptyTitle>
-                  <EmptyDescription>
-                    Create your first key to start tracking
-                    events from your project.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </div>
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-xl bg-card">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-border/40 hover:bg-transparent">
-                  <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                    Name
-                  </TableHead>
-                  <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                    Created
-                  </TableHead>
-                  <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                    Last used
-                  </TableHead>
-                  <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {keys.map((key) => (
+        <div className="overflow-hidden rounded-lg bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-border/40 hover:bg-transparent">
+                <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                  Name
+                </TableHead>
+                <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                  Created
+                </TableHead>
+                <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
+                  Last Used
+                </TableHead>
+                <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(() => {
+                const filteredApiKeys = project?.apiKeys.filter((key) =>
+                  key.name.toLowerCase().includes(apiKeySearch.toLowerCase())
+                ) ?? []
+
+                if (filteredApiKeys.length === 0) {
+                  return (
+                    <TableRow className="border-0 hover:bg-transparent">
+                      <TableCell
+                        colSpan={4}
+                        className="py-8 text-center text-sm text-muted-foreground"
+                      >
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <p>
+                            {apiKeySearch
+                              ? "No API keys match your search"
+                              : "No API keys configured"}
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+
+                return filteredApiKeys.map((key) => (
                   <TableRow
                     key={key.id}
                     className="border-border/40 transition-colors hover:bg-accent/50"
@@ -568,464 +434,691 @@ export default function Page() {
                       {key.name}
                     </TableCell>
                     <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      {new Date(
-                        key.createdAt
-                      ).toLocaleDateString()}
+                      {new Date(key.createdAt).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      {key.lastUsed
-                        ? new Date(
-                          key.lastUsed
-                        ).toLocaleDateString()
-                        : "Never"}
+                    <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
+                      {key.lastUsed ? new Date(key.lastUsed).toLocaleDateString() : "Never"}
                     </TableCell>
                     <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
-                      <AlertDialog>
-                        <AlertDialogTrigger
-                          render={
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="h-7 text-xs"
-                            />
-                          }
+                      <Dialog open={deleteApiKey} onOpenChange={setDeleteApiKey}>
+                        <DialogTrigger
+                          render={<Button variant="destructive" size="sm" />}
                         >
                           Delete
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-card ring-0">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Delete API Key?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will
-                              permanently delete
-                              the &quot;{key.name}
-                              &quot; API key. Any
-                              integrations using
-                              this key will stop
-                              working.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="border-0">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
-                              onClick={() =>
-                                deleteKey(
-                                  key.id
-                                )
-                              }
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Are you sure?</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to delete this API key? This action cannot be undone.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <Button
+                              variant="primary"
+                              onClick={async () => {
+                                try {
+                                  await axios.delete(`/api/v1/project/${params.id}/keys`, {
+                                    data: {
+                                      keyId: key.id,
+                                    }
+                                  })
+                                  toast.success("API Key deleted")
+                                  getProject()
+                                  setDeleteApiKey(false)
+                                }
+                                catch {
+                                  toast.error("Something went wrong")
+                                }
+                              }}
                             >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                              Confirm Action
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+                ))
+              })()}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Recent Activity</h2>
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h2 className="text-lg font-semibold">Recent Activity</h2>
         </div>
 
-        {auditLogs.length === 0 ? (
-          <div className="rounded-xl bg-card ring-0">
-            <div className="p-4 text-center">
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle>No Audit Logs Yet</EmptyTitle>
-                  <EmptyDescription>
-                    Activity on this project will appear
-                    here.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <div className="overflow-hidden rounded-xl bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border/40 hover:bg-transparent">
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      User
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Message
-                    </TableHead>
-                    <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
-                      Timestamp
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {auditLogs
-                    .slice(
-                      (auditLogPage - 1) *
-                      AUDIT_LOGS_PER_PAGE,
-                      auditLogPage * AUDIT_LOGS_PER_PAGE
-                    )
-                    .map((log, index) => (
-                      <TableRow
-                        key={index}
-                        className="border-border/40 transition-colors hover:bg-accent/50"
-                      >
-                        <TableCell className="w-fit pl-4 whitespace-nowrap">
-                          {log.user ? (
-                            <div className="flex items-center gap-2">
-                              <Avatar size="sm">
-                                <AvatarImage
-                                  src={
-                                    log.user
-                                      .image ??
-                                    undefined
-                                  }
-                                  alt={
-                                    log.user
-                                      .name
-                                  }
-                                />
-                              </Avatar>
-                              <span className="text-sm text-foreground">
-                                {log.user.name}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">
-                              System
-                            </span>
-                          )}
-                        </TableCell>
+        {(() => {
+          const filteredAuditLogs = auditLogs.filter((log) =>
+            log.message.toLowerCase().includes(activitySearch.toLowerCase())
+          )
+          const activityTotalPages = Math.ceil(filteredAuditLogs.length / ACTIVITY_PER_PAGE)
+          const paginatedAuditLogs = filteredAuditLogs.slice(
+            (activityPage - 1) * ACTIVITY_PER_PAGE,
+            activityPage * ACTIVITY_PER_PAGE
+          )
 
-                        <TableCell className="w-fit pl-4 font-medium whitespace-nowrap text-foreground">
-                          {log.message}
-                        </TableCell>
+          return (
+            <>
+              <SearchBar
+                value={activitySearch}
+                onChange={(value) => {
+                  setActivitySearch(value)
+                  setActivityPage(1)
+                }}
+                className="mb-2"
+              />
 
-                        <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
-                          {new Date(
-                            log.createdAt
-                          ).toLocaleString()}
+              <div className="overflow-hidden rounded-lg bg-card">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border/40 hover:bg-transparent">
+                      <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                        User
+                      </TableHead>
+                      <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                        Message
+                      </TableHead>
+                      <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
+                        Timestamp
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedAuditLogs.length === 0 ? (
+                      <TableRow className="border-0 hover:bg-transparent">
+                        <TableCell
+                          colSpan={3}
+                          className="py-8 text-center text-sm text-muted-foreground"
+                        >
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <p>
+                              {activitySearch
+                                ? "No activity matches your search"
+                                : "No recent activity"}
+                            </p>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {auditLogs.length > AUDIT_LOGS_PER_PAGE && (
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setAuditLogPage((p) =>
-                          Math.max(1, p - 1)
-                        )
-                      }}
-                      aria-disabled={auditLogPage === 1}
-                      className={
-                        auditLogPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                  {getPageNumbers(
-                    auditLogPage,
-                    Math.ceil(
-                      auditLogs.length /
-                      AUDIT_LOGS_PER_PAGE
-                    )
-                  ).map((page, idx) =>
-                    page === "..." ? (
-                      <PaginationItem
-                        key={`audit-ellipsis-${idx}`}
-                      >
-                        <PaginationEllipsis />
-                      </PaginationItem>
                     ) : (
+                      paginatedAuditLogs.map((log, index) => (
+                        <TableRow
+                          key={index}
+                          className="border-border/40 transition-colors hover:bg-accent/50"
+                        >
+                          <TableCell className="w-fit pl-4 whitespace-nowrap">
+                            {log.user ? (
+                              <div className="flex items-center gap-2">
+                                <Avatar size="sm">
+                                  <AvatarImage
+                                    src={log.user.image ?? undefined}
+                                    alt={log.user.name}
+                                  />
+                                </Avatar>
+                                <span className="text-sm text-foreground">
+                                  {log.user.name}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">
+                                System
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="w-fit pl-4 font-medium whitespace-nowrap text-foreground">
+                            {log.message}
+                          </TableCell>
+                          <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
+                            {new Date(log.createdAt).toLocaleString()}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {activityTotalPages > 1 && (
+                <Pagination className="mt-2">
+                  <PaginationContent className="justify-center">
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setActivityPage((page) => Math.max(1, page - 1))
+                        }
+                        className={
+                          activityPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                    {Array.from(
+                      { length: activityTotalPages },
+                      (_, index) => index + 1
+                    ).map((page) => (
                       <PaginationItem key={page}>
                         <PaginationLink
-                          href="#"
-                          isActive={
-                            page === auditLogPage
-                          }
-                          onClick={(e) => {
-                            e.preventDefault()
-                            setAuditLogPage(page)
-                          }}
-                          className="border-0"
+                          isActive={page === activityPage}
+                          onClick={() => setActivityPage(page)}
+                          className="cursor-pointer border-0"
                         >
                           {page}
                         </PaginationLink>
                       </PaginationItem>
-                    )
-                  )}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setAuditLogPage((p) =>
-                          Math.min(
-                            Math.ceil(
-                              auditLogs.length /
-                              AUDIT_LOGS_PER_PAGE
-                            ),
-                            p + 1
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setActivityPage((page) =>
+                            Math.min(activityTotalPages, page + 1)
                           )
-                        )
-                      }}
-                      aria-disabled={
-                        auditLogPage ===
-                        Math.ceil(
-                          auditLogs.length /
-                          AUDIT_LOGS_PER_PAGE
-                        )
-                      }
-                      className={
-                        auditLogPage ===
-                          Math.ceil(
-                            auditLogs.length /
-                            AUDIT_LOGS_PER_PAGE
-                          )
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
-        )}
+                        }
+                        className={
+                          activityPage === activityTotalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
+          )
+        })()}
       </div>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Recent Requests</h2>
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h2 className="text-lg font-semibold">Webhooks</h2>
+
+          <Dialog open={createWebhook} onOpenChange={setCreateWebhook}>
+            <DialogTrigger
+              render={<Button className="cursor-pointer" size="sm" />}
+            >
+              Create Webhook
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create Webhook</DialogTitle>
+                <DialogDescription>
+                  Create a webhook to receive events from this project.
+                </DialogDescription>
+              </DialogHeader>
+              <Form<CreateWebhook>
+                onSubmit={async (data) => {
+                  setIsCreatingWebhook(true)
+                  try {
+                    const res = await axios.post(`/api/v1/project/${params.id}/webhooks`, data)
+                    setWebhooks((prev) => [...prev, res.data.data])
+                    toast.success("Created webhook")
+                  } catch {
+                    toast.error("Something went wrong")
+                  } finally {
+                    setIsCreatingWebhook(false)
+                    setCreateWebhook(false)
+                  }
+                }}
+              >
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Webhook Name</Label>
+                    <Form.Field<CreateWebhook>
+                      name="name"
+                      required
+                    >
+                      <Input
+                        placeholder="My Webhook"
+                      />
+                    </Form.Field>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Subscription</Label>
+                    <Form.Field<CreateWebhook>
+                      name="subscription"
+                      required
+                    >
+                      <Input
+                        placeholder="event.created"
+                      />
+                    </Form.Field>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Webhook URL</Label>
+                    <Form.Field<CreateWebhook>
+                      name="url"
+                      required
+                    >
+                      <Input
+                        placeholder="https://example.com/webhook"
+                      />
+                    </Form.Field>
+                  </div>
+                  <DialogFooter>
+                    <Form.Submit>
+                      <Button
+                        disabled={isCreatingWebhook}
+                      >
+                        {isCreatingWebhook
+                          ? "Creating..."
+                          : "Create Webhook"}
+                      </Button>
+                    </Form.Submit>
+                  </DialogFooter>
+                </div>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {requestLogs.length === 0 ? (
-          <div className="rounded-xl bg-card ring-0">
-            <div className="p-4 text-center">
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle>No requests yet</EmptyTitle>
-                  <EmptyDescription>
-                    Requests to this project will appear
-                    here.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <div className="overflow-hidden rounded-xl bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border/40 hover:bg-transparent">
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Method
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Endpoint
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Time
-                    </TableHead>
-                    <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
-                      Details
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[...requestLogs]
-                    .sort(
-                      (a, b) =>
-                        new Date(
-                          b.createdAt
-                        ).getTime() -
-                        new Date(a.createdAt).getTime()
-                    )
-                    .slice(
-                      (requestLogPage - 1) *
-                      REQUEST_LOGS_PER_PAGE,
-                      requestLogPage *
-                      REQUEST_LOGS_PER_PAGE
-                    )
-                    .map((log) => (
-                      <TableRow
-                        key={log.id}
-                        className="border-border/40 transition-colors hover:bg-accent/50"
+        <SearchBar
+          value={webhookSearch}
+          onChange={(value) => setWebhookSearch(value)}
+          className="mb-2"
+        />
+
+        <div className="overflow-hidden rounded-lg bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-border/40 hover:bg-transparent">
+                <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                  Name
+                </TableHead>
+                <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                  URL
+                </TableHead>
+                <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                  Subscription
+                </TableHead>
+                <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                  Status
+                </TableHead>
+                <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                  Last Triggered
+                </TableHead>
+                <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                  Created
+                </TableHead>
+                <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(() => {
+                const filteredWebhooks = webhooks.filter((webhook) =>
+                  webhook.name.toLowerCase().includes(webhookSearch.toLowerCase())
+                )
+
+                if (filteredWebhooks.length === 0) {
+                  return (
+                    <TableRow className="border-0 hover:bg-transparent">
+                      <TableCell
+                        colSpan={7}
+                        className="py-8 text-center text-sm text-muted-foreground"
                       >
-                        <TableCell className="w-fit pl-4 whitespace-nowrap">
-                          <Badge
-                            variant={
-                              log.method === "GET"
-                                ? "default"
-                                : log.method ===
-                                  "POST"
-                                  ? "secondary"
-                                  : log.method ===
-                                    "DELETE"
-                                    ? "destructive"
-                                    : "outline"
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <p>
+                            {webhookSearch
+                              ? "No webhooks match your search"
+                              : "No webhooks configured"}
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+
+                return filteredWebhooks.map((webhook) => (
+                  <TableRow
+                    key={webhook.id}
+                    className="border-border/40 transition-colors hover:bg-accent/50"
+                  >
+                    <TableCell className="w-fit pl-4 font-medium whitespace-nowrap text-foreground">
+                      {webhook.name}
+                    </TableCell>
+                    <TableCell className="max-w-[200px] truncate pl-4 whitespace-nowrap text-muted-foreground">
+                      {webhook.url}
+                    </TableCell>
+                    <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                      {webhook.subscription}
+                    </TableCell>
+                    <TableCell className="w-fit pl-4 whitespace-nowrap">
+                      <span
+                        className={`text-sm font-medium ${webhook.enabled ? "text-green-500" : "text-muted-foreground"}`}
+                      >
+                        {webhook.enabled
+                          ? "Enabled"
+                          : "Disabled"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                      {webhook.lastTriggered
+                        ? new Date(webhook.lastTriggered).toLocaleString()
+                        : "Never"}
+                    </TableCell>
+                    <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                      {new Date(webhook.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => openEditWebhook(webhook)}
+                        >
+                          Edit
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger
+                            render={
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="h-7 text-xs"
+                              />
                             }
                           >
-                            {log.method}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="max-w-[200px] truncate pl-4 font-medium whitespace-nowrap text-foreground">
-                          {log.endpoint}
-                        </TableCell>
-                        <TableCell className="w-fit pl-4 whitespace-nowrap">
-                          <span
-                            className={`text-sm font-medium ${log.status >= 200 && log.status < 300 ? "text-green-500" : log.status >= 400 ? "text-red-500" : "text-yellow-500"}`}
-                          >
-                            {log.status}
-                          </span>
-                        </TableCell>
-                        <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                          {new Date(
-                            log.createdAt
-                          ).toLocaleString()}
-                        </TableCell>
-                        <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedRequestLog(
-                                log
-                              )
-                              setRequestLogDetailOpen(
-                                true
-                              )
-                            }}
-                          >
-                            View
-                          </Button>
+                            Delete
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Delete Webhook?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete the &quot;{webhook.name}&quot; webhook.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
+                                onClick={() => deleteWebhook(webhook.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              })()}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      <Dialog
+        open={editWebhookOpen}
+        onOpenChange={(open) => {
+          setEditWebhookOpen(open)
+          if (!open) {
+            setEditingWebhook(null)
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Webhook</DialogTitle>
+            <DialogDescription>
+              Update webhook settings.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              await updateWebhook({
+                name: editWebhookName,
+                subscription: editWebhookSubscription,
+                url: editWebhookUrl,
+                enabled: editWebhookEnabled,
+              })
+            }}
+            className="space-y-3"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="edit-webhook-name">Name</Label>
+              <Input
+                id="edit-webhook-name"
+                value={editWebhookName}
+                onChange={(e) => setEditWebhookName(e.target.value)}
+                placeholder="My Webhook"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-webhook-subscription">Subscription</Label>
+              <Input
+                id="edit-webhook-subscription"
+                value={editWebhookSubscription}
+                onChange={(e) => setEditWebhookSubscription(e.target.value)}
+                placeholder="event.created"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-webhook-url">URL</Label>
+              <Input
+                id="edit-webhook-url"
+                value={editWebhookUrl}
+                onChange={(e) => setEditWebhookUrl(e.target.value)}
+                placeholder="https://example.com/webhook"
+                type="url"
+                required
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="edit-webhook-enabled"
+                checked={editWebhookEnabled}
+                onCheckedChange={setEditWebhookEnabled}
+              />
+              <Label htmlFor="edit-webhook-enabled" className="text-sm text-muted-foreground">
+                {editWebhookEnabled
+                  ? "Enabled"
+                  : "Disabled"}
+              </Label>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={isEditingWebhook}
+              >
+                {isEditingWebhook
+                  ? "Saving..."
+                  : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h2 className="text-lg font-semibold">API Request Logs</h2>
+        </div>
+
+        {(() => {
+          const filteredRequestLogs = requestLogs.filter((log) =>
+            log.endpoint.toLowerCase().includes(requestLogSearch.toLowerCase())
+          )
+          const sortedRequestLogs = [...filteredRequestLogs].sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+          const requestLogTotalPages = Math.ceil(sortedRequestLogs.length / REQUEST_LOGS_PER_PAGE)
+          const paginatedRequestLogs = sortedRequestLogs.slice(
+            (requestLogPage - 1) * REQUEST_LOGS_PER_PAGE,
+            requestLogPage * REQUEST_LOGS_PER_PAGE
+          )
+
+          return (
+            <>
+              <SearchBar
+                value={requestLogSearch}
+                onChange={(value) => {
+                  setRequestLogSearch(value)
+                  setRequestLogPage(1)
+                }}
+                className="mb-2"
+              />
+
+              <div className="overflow-hidden rounded-lg bg-card">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border/40 hover:bg-transparent">
+                      <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                        Method
+                      </TableHead>
+                      <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                        Endpoint
+                      </TableHead>
+                      <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                        Status
+                      </TableHead>
+                      <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                        Time
+                      </TableHead>
+                      <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
+                        Details
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedRequestLogs.length === 0 ? (
+                      <TableRow className="border-0 hover:bg-transparent">
+                        <TableCell
+                          colSpan={5}
+                          className="py-8 text-center text-sm text-muted-foreground"
+                        >
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <p>
+                              {requestLogSearch
+                                ? "No requests match your search"
+                                : "No requests yet"}
+                            </p>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {requestLogs.length > REQUEST_LOGS_PER_PAGE && (
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setRequestLogPage((p) =>
-                          Math.max(1, p - 1)
-                        )
-                      }}
-                      aria-disabled={requestLogPage === 1}
-                      className={
-                        requestLogPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                  {getPageNumbers(
-                    requestLogPage,
-                    Math.ceil(
-                      requestLogs.length /
-                      REQUEST_LOGS_PER_PAGE
-                    )
-                  ).map((page, idx) =>
-                    page === "..." ? (
-                      <PaginationItem
-                        key={`request-ellipsis-${idx}`}
-                      >
-                        <PaginationEllipsis />
-                      </PaginationItem>
                     ) : (
+                      paginatedRequestLogs.map((log) => (
+                        <TableRow
+                          key={log.id}
+                          className="border-border/40 transition-colors hover:bg-accent/50"
+                        >
+                          <TableCell className="w-fit pl-4 whitespace-nowrap">
+                            <Badge
+                              variant={
+                                log.method === "GET"
+                                  ? "default"
+                                  : log.method === "POST"
+                                    ? "secondary"
+                                    : log.method === "DELETE"
+                                      ? "destructive"
+                                      : "outline"
+                              }
+                            >
+                              {log.method}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate pl-4 font-medium whitespace-nowrap text-foreground">
+                            {log.endpoint}
+                          </TableCell>
+                          <TableCell className="w-fit pl-4 whitespace-nowrap">
+                            <span
+                              className={`text-sm font-medium ${log.status >= 200 && log.status < 300 ? "text-green-500" : log.status >= 400 ? "text-red-500" : "text-yellow-500"}`}
+                            >
+                              {log.status}
+                            </span>
+                          </TableCell>
+                          <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
+                            {new Date(log.createdAt).toLocaleString()}
+                          </TableCell>
+                          <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedRequestLog(log)
+                                setRequestLogDetailOpen(true)
+                              }}
+                            >
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {requestLogTotalPages > 1 && (
+                <Pagination className="mt-2">
+                  <PaginationContent className="justify-center">
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setRequestLogPage((page) => Math.max(1, page - 1))
+                        }
+                        className={
+                          requestLogPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                    {Array.from(
+                      { length: requestLogTotalPages },
+                      (_, index) => index + 1
+                    ).map((page) => (
                       <PaginationItem key={page}>
                         <PaginationLink
-                          href="#"
-                          isActive={
-                            page === requestLogPage
-                          }
-                          onClick={(e) => {
-                            e.preventDefault()
-                            setRequestLogPage(page)
-                          }}
-                          className="border-0"
+                          isActive={page === requestLogPage}
+                          onClick={() => setRequestLogPage(page)}
+                          className="cursor-pointer border-0"
                         >
                           {page}
                         </PaginationLink>
                       </PaginationItem>
-                    )
-                  )}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setRequestLogPage((p) =>
-                          Math.min(
-                            Math.ceil(
-                              requestLogs.length /
-                              REQUEST_LOGS_PER_PAGE
-                            ),
-                            p + 1
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setRequestLogPage((page) =>
+                            Math.min(requestLogTotalPages, page + 1)
                           )
-                        )
-                      }}
-                      aria-disabled={
-                        requestLogPage ===
-                        Math.ceil(
-                          requestLogs.length /
-                          REQUEST_LOGS_PER_PAGE
-                        )
-                      }
-                      className={
-                        requestLogPage ===
-                          Math.ceil(
-                            requestLogs.length /
-                            REQUEST_LOGS_PER_PAGE
-                          )
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
-        )}
+                        }
+                        className={
+                          requestLogPage === requestLogTotalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
+          )
+        })()}
       </div>
 
       <Dialog
         open={requestLogDetailOpen}
         onOpenChange={setRequestLogDetailOpen}
       >
-        <DialogContent className="w-full max-w-[calc(100vw-2rem)] bg-card ring-0 sm:max-w-lg">
+        <DialogContent className="w-full max-w-[calc(100vw-2rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Request Details</DialogTitle>
             <DialogDescription className="break-all">
@@ -1035,9 +1128,7 @@ export default function Page() {
           </DialogHeader>
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">
-                Status:
-              </span>
+              <span className="text-muted-foreground">Status:</span>
               <span
                 className={`font-medium ${selectedRequestLog && selectedRequestLog.status >= 200 && selectedRequestLog.status < 300 ? "text-green-500" : selectedRequestLog && selectedRequestLog.status >= 400 ? "text-red-500" : "text-yellow-500"}`}
               >
@@ -1045,9 +1136,7 @@ export default function Page() {
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">
-                User Agent:
-              </span>
+              <span className="text-muted-foreground">User Agent:</span>
               <span className="font-medium text-foreground">
                 {selectedRequestLog?.userAgent}
               </span>
@@ -1056,9 +1145,7 @@ export default function Page() {
               <span className="text-muted-foreground">Time:</span>
               <span className="font-medium text-foreground">
                 {selectedRequestLog
-                  ? new Date(
-                    selectedRequestLog.createdAt
-                  ).toLocaleString()
+                  ? new Date(selectedRequestLog.createdAt).toLocaleString()
                   : ""}
               </span>
             </div>
@@ -1078,16 +1165,14 @@ export default function Page() {
                   Response Body
                 </Label>
                 <pre className="max-h-[200px] w-full overflow-auto rounded-md bg-black/30 p-3 font-mono text-xs break-all whitespace-pre-wrap">
-                  {formatJson(
-                    selectedRequestLog.responseBody
-                  )}
+                  {formatJson(selectedRequestLog.responseBody)}
                 </pre>
               </div>
             )}
           </div>
           <DialogFooter>
             <Button
-              className="w-fit cursor-pointer"
+              className="w-fit"
               onClick={() => setRequestLogDetailOpen(false)}
             >
               Close
@@ -1096,549 +1181,134 @@ export default function Page() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Webhooks</h2>
-          <Dialog
-            open={createWebhookOpen}
-            onOpenChange={setCreateWebhookOpen}
-          >
-            <DialogTrigger
-              render={<Button className="cursor-pointer" size="sm" />}
-            >
-              Create Webhook
-            </DialogTrigger>
-            <DialogContent className="bg-card ring-0 sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Create Webhook</DialogTitle>
-                <DialogDescription>
-                  Send real-time events to your own endpoint.
-                </DialogDescription>
-              </DialogHeader>
-              <form
-                onSubmit={createWebhook}
-                className="space-y-3"
-              >
-                <div>
-                  <Label htmlFor="webhook-name">Name *</Label>
-                  <Input
-                    id="webhook-name"
-                    placeholder="My Webhook"
-                    value={newWebhookName}
-                    onChange={(e) =>
-                      setNewWebhookName(e.target.value)
-                    }
-                    className="border-0 bg-input"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="webhook-subscription">
-                    Subscription *
-                  </Label>
-                  <Input
-                    id="webhook-subscription"
-                    placeholder="event.created"
-                    value={newWebhookSubscription}
-                    onChange={(e) =>
-                      setNewWebhookSubscription(
-                        e.target.value
-                      )
-                    }
-                    className="border-0 bg-input"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="webhook-url">URL *</Label>
-                  <Input
-                    id="webhook-url"
-                    placeholder="https://example.com/webhook"
-                    value={newWebhookUrl}
-                    onChange={(e) =>
-                      setNewWebhookUrl(e.target.value)
-                    }
-                    className="border-0 bg-input"
-                    type="url"
-                    required
-                  />
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="submit"
-                    className="cursor-pointer"
-                    disabled={isCreatingWebhook}
-                  >
-                    {isCreatingWebhook
-                      ? "Creating..."
-                      : "Create Webhook"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog
-            open={editWebhookOpen}
-            onOpenChange={setEditWebhookOpen}
-          >
-            <DialogContent className="bg-card ring-0 sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Edit Webhook</DialogTitle>
-                <DialogDescription>
-                  Update webhook settings.
-                </DialogDescription>
-              </DialogHeader>
-              <form
-                onSubmit={saveEditWebhook}
-                className="space-y-3"
-              >
-                <div>
-                  <Label htmlFor="edit-webhook-name">
-                    Name *
-                  </Label>
-                  <Input
-                    id="edit-webhook-name"
-                    placeholder="My Webhook"
-                    value={editWebhookName}
-                    onChange={(e) =>
-                      setEditWebhookName(e.target.value)
-                    }
-                    className="border-0 bg-input"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-webhook-subscription">
-                    Subscription *
-                  </Label>
-                  <Input
-                    id="edit-webhook-subscription"
-                    placeholder="event.created"
-                    value={editWebhookSubscription}
-                    onChange={(e) =>
-                      setEditWebhookSubscription(
-                        e.target.value
-                      )
-                    }
-                    className="border-0 bg-input"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-webhook-url">
-                    URL *
-                  </Label>
-                  <Input
-                    id="edit-webhook-url"
-                    placeholder="https://example.com/webhook"
-                    value={editWebhookUrl}
-                    onChange={(e) =>
-                      setEditWebhookUrl(e.target.value)
-                    }
-                    className="border-0 bg-input"
-                    type="url"
-                    required
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="edit-webhook-enabled"
-                    checked={editWebhookEnabled}
-                    onCheckedChange={setEditWebhookEnabled}
-                  />
-                  <Label
-                    htmlFor="edit-webhook-enabled"
-                    className="text-sm text-muted-foreground"
-                  >
-                    {editWebhookEnabled
-                      ? "Enabled"
-                      : "Disabled"}
-                  </Label>
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="submit"
-                    className="cursor-pointer"
-                    disabled={isEditingWebhook}
-                  >
-                    {isEditingWebhook
-                      ? "Saving..."
-                      : "Save Changes"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h2 className="text-lg font-semibold">General Settings</h2>
         </div>
 
-        {webhooks.length === 0 ? (
-          <div className="rounded-xl bg-card ring-0">
-            <div className="p-4 text-center">
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle>No Webhooks Yet</EmptyTitle>
-                  <EmptyDescription>
-                    Create a webhook to receive real-time
-                    events from this project.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <div className="overflow-hidden rounded-xl bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border/40 hover:bg-transparent">
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Name
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      URL
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Subscription
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Last Triggered
-                    </TableHead>
-                    <TableHead className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                      Created
-                    </TableHead>
-                    <TableHead className="w-fit pr-4 pl-4 text-right whitespace-nowrap text-muted-foreground">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {webhooks
-                    .slice(
-                      (webhookPage - 1) *
-                      WEBHOOKS_PER_PAGE,
-                      webhookPage * WEBHOOKS_PER_PAGE
-                    )
-                    .map((webhook) => (
-                      <TableRow
-                        key={webhook.id}
-                        className="border-border/40 transition-colors hover:bg-accent/50"
-                      >
-                        <TableCell className="w-fit pl-4 font-medium whitespace-nowrap text-foreground">
-                          {webhook.name}
-                        </TableCell>
-                        <TableCell className="max-w-[200px] truncate pl-4 whitespace-nowrap text-muted-foreground">
-                          {webhook.url}
-                        </TableCell>
-                        <TableCell className="w-fit pl-4 whitespace-nowrap">
-                          {webhook.subscription}
-                        </TableCell>
-                        <TableCell className="w-fit pl-4 whitespace-nowrap">
-                          <span
-                            className={`text-sm font-medium ${webhook.enabled ? "text-green-500" : "text-muted-foreground"}`}
-                          >
-                            {webhook.enabled
-                              ? "Enabled"
-                              : "Disabled"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                          {webhook.lastTriggered
-                            ? new Date(
-                              webhook.lastTriggered
-                            ).toLocaleString()
-                            : "Never"}
-                        </TableCell>
-                        <TableCell className="w-fit pl-4 whitespace-nowrap text-muted-foreground">
-                          {new Date(
-                            webhook.createdAt
-                          ).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="w-fit pr-4 pl-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="h-7 text-xs"
-                              onClick={() =>
-                                openEditWebhook(
-                                  webhook
-                                )
-                              }
-                            >
-                              Edit
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger
-                                render={
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    className="h-7 text-xs"
-                                  />
-                                }
-                              >
-                                Delete
-                              </AlertDialogTrigger>
-                              <AlertDialogContent className="bg-card ring-0">
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Delete
-                                    Webhook?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This
-                                    will
-                                    permanently
-                                    delete
-                                    the
-                                    &quot;
-                                    {
-                                      webhook.name
-                                    }
-                                    &quot;
-                                    webhook.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel className="border-0">
-                                    Cancel
-                                  </AlertDialogCancel>
-                                  <AlertDialogAction
-                                    className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
-                                    onClick={() =>
-                                      deleteWebhook(
-                                        webhook.id
-                                      )
-                                    }
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </div>
+        <Card>
+          <CardContent>
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold">Project Name</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Change the name of your project as it appears across the dashboard.
+                </p>
+              </div>
 
-            {webhooks.length > WEBHOOKS_PER_PAGE && (
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setWebhookPage((p) =>
-                          Math.max(1, p - 1)
-                        )
-                      }}
-                      aria-disabled={webhookPage === 1}
-                      className={
-                        webhookPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : ""
+              <Dialog open={renameProject} onOpenChange={setRenameProject}>
+                <DialogTrigger
+                  render={<Button variant="secondary" size="sm" />}
+                >
+                  Rename
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Rename Project</DialogTitle>
+                    <DialogDescription>
+                      Change the name of your project as it appears across the dashboard.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form<RenameProject>
+                    onSubmit={async (data) => {
+                      setRenamingProject(true)
+                      try {
+                        await axios.patch('/api/v1/project/' + params.id, data)
+                        toast.success("Project renamed")
+                        getProject()
+                      } catch {
+                        toast.error("Something went wrong")
+                      } finally {
+                        setRenamingProject(false)
+                        setRenameProject(false)
                       }
-                    />
-                  </PaginationItem>
-                  {getPageNumbers(
-                    webhookPage,
-                    Math.ceil(
-                      webhooks.length / WEBHOOKS_PER_PAGE
-                    )
-                  ).map((page, idx) =>
-                    page === "..." ? (
-                      <PaginationItem
-                        key={`webhook-ellipsis-${idx}`}
-                      >
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    ) : (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          href="#"
-                          isActive={
-                            page === webhookPage
-                          }
-                          onClick={(e) => {
-                            e.preventDefault()
-                            setWebhookPage(page)
-                          }}
-                          className="border-0"
+                    }}
+                  >
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="key-name">Name</Label>
+                        <Form.Field<RenameProject>
+                          name="name"
+                          required
                         >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    )
-                  )}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setWebhookPage((p) =>
-                          Math.min(
-                            Math.ceil(
-                              webhooks.length /
-                              WEBHOOKS_PER_PAGE
-                            ),
-                            p + 1
-                          )
-                        )
-                      }}
-                      aria-disabled={
-                        webhookPage ===
-                        Math.ceil(
-                          webhooks.length /
-                          WEBHOOKS_PER_PAGE
-                        )
-                      }
-                      className={
-                        webhookPage ===
-                          Math.ceil(
-                            webhooks.length /
-                            WEBHOOKS_PER_PAGE
-                          )
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Project Settings</h2>
-        </div>
-        <div className="rounded-xl bg-card p-4 ring-0">
-          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold">
-                Project Name
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Change the name of your project as it appears
-                across the dashboard.
-              </p>
+                          <Input
+                            placeholder={project?.name}
+                          />
+                        </Form.Field>
+                      </div>
+                      <DialogFooter>
+                        <Form.Submit>
+                          <Button
+                            disabled={renamingProject}
+                          >
+                            {renamingProject
+                              ? "Renaming..."
+                              : "Rename Project"}
+                          </Button>
+                        </Form.Submit>
+                      </DialogFooter>
+                    </div>
+                  </Form>
+                </DialogContent>
+              </Dialog>
             </div>
-            <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
-              <DialogTrigger
-                render={
-                  <Button
-                    variant="secondary"
-                    className="cursor-pointer"
-                  />
-                }
-              >
-                Rename Project
-              </DialogTrigger>
-              <DialogContent className="bg-card ring-0">
-                <DialogHeader>
-                  <DialogTitle>Rename Project</DialogTitle>
-                  <DialogDescription>
-                    Update the project name shown across the
-                    dashboard and settings pages.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={rename} className="space-y-3">
-                  <div>
-                    <Label htmlFor="project-name">
-                      Project Name
-                    </Label>
-                    <Input
-                      id="project-name"
-                      value={newProjectName}
-                      onChange={(e) =>
-                        setNewProjectName(
-                          e.target.value
-                        )
-                      }
-                      className="border-0 bg-input"
-                    />
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      type="submit"
-                      className="cursor-pointer"
-                      disabled={isSaving}
-                    >
-                      {isSaving
-                        ? "Saving..."
-                        : "Save Changes"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold">Delete Project</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Deleting this project removes API keys and
+                  events permanently.
+                </p>
+              </div>
 
-          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <div>
-              <h3 className="text-sm font-semibold">
-                Delete Project
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Deleting this project removes API keys and
-                events permanently.
-              </p>
-            </div>
-            <AlertDialog
-              open={deleteOpen}
-              onOpenChange={setDeleteOpen}
-            >
-              <AlertDialogTrigger
-                render={
-                  <Button
-                    variant="destructive"
-                    className="cursor-pointer"
-                  />
-                }
-              >
-                Delete Project
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-card ring-0">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Delete Project?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete &quot;
-                    {project?.name}&quot; and all its API
-                    keys and events. This action cannot be
-                    undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="border-0">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
-                    onClick={deleteProject}
-                    disabled={isDeleting}
+              <Dialog open={deleteProject} onOpenChange={setDeleteProject}>
+                <DialogTrigger
+                  render={<Button variant="destructive" size="sm" />}
+                >
+                  Delete
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Are you sure?</DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete the project and all associated data.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form<DeleteProject>
+                    onSubmit={async () => {
+                      setDeletingProject(true)
+                      try {
+                        await axios.delete('/api/v1/project/' + params.id)
+                        toast.success("Project deleted")
+                        await router.replace('/')
+                      } catch {
+                        toast.error("Something went wrong")
+                      } finally {
+                        setDeletingProject(false)
+                        setDeleteProject(false)
+                      }
+                    }}
                   >
-                    {isDeleting
-                      ? "Deleting..."
-                      : "Delete Project"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </div>
+                    <div className="space-y-3">
+                      <DialogFooter>
+                        <Form.Submit>
+                          <Button
+                            disabled={deletingProject}
+                          >
+                            {deletingProject
+                              ? "Deleting..."
+                              : "Confirm Action"}
+                          </Button>
+                        </Form.Submit>
+                      </DialogFooter>
+                    </div>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </div >
   )
 }

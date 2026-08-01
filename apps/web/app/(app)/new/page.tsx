@@ -53,9 +53,14 @@ export default function Page() {
         })
         .then(async (res) => {
           toast.success("Your new project has been created.")
-          await router.push(`/project/${res.data.projectId}`)
+          await router.push(`/project/${res.data.data.id}`)
         })
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message)
+      } else {
+        toast.error("Failed to create project")
+      }
       console.error(error)
     } finally {
       isCreating(false)

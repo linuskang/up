@@ -75,7 +75,7 @@ export async function POST(
 
   await Project.log(id, session.user.id, `Created webhook ${body.name}`)
 
-  return ApiResponse.Success(undefined, webhook)
+  return ApiResponse.Success(undefined, { webhookId: webhook.id })
 }
 
 export async function DELETE(
