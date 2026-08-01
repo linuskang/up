@@ -23,6 +23,7 @@ import {
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -67,6 +68,40 @@ interface Usage {
     current: number
     limit: number
   }
+}
+
+type PaginationPage = number | "ellipsis-start" | "ellipsis-end"
+
+function getPaginationItems(
+  totalPages: number,
+  currentPage: number
+): PaginationPage[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1)
+  }
+
+  const items: PaginationPage[] = []
+  const start = Math.max(2, currentPage - 1)
+  const end = Math.min(totalPages - 1, currentPage + 1)
+
+  items.push(1)
+
+  if (start > 2) {
+    items.push("ellipsis-start")
+  } else {
+    for (let p = 2; p < start; p++) items.push(p)
+  }
+
+  for (let p = start; p <= end; p++) items.push(p)
+
+  if (end < totalPages - 1) {
+    items.push("ellipsis-end")
+  } else {
+    for (let p = end + 1; p < totalPages; p++) items.push(p)
+  }
+
+  items.push(totalPages)
+  return items
 }
 
 export default function Page() {
@@ -345,22 +380,26 @@ export default function Page() {
                       }
                     />
                   </PaginationItem>
-                  {Array.from(
-                    { length: totalPages },
-                    (_, i) => i + 1
-                  ).map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        isActive={page === currentPage}
-                        onClick={() =>
-                          setCurrentPage(page)
-                        }
-                        className="cursor-pointer border-0"
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
+                  {getPaginationItems(totalPages, currentPage).map((page) =>
+                    page === "ellipsis-start" ||
+                    page === "ellipsis-end" ? (
+                      <PaginationItem key={page}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          isActive={page === currentPage}
+                          onClick={() =>
+                            setCurrentPage(page)
+                          }
+                          className="cursor-pointer border-0"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  )}
                   <PaginationItem>
                     <PaginationNext
                       onClick={() =>
@@ -483,20 +522,26 @@ export default function Page() {
                   }
                 />
               </PaginationItem>
-              {Array.from(
-                { length: activityTotalPages },
-                (_, index) => index + 1
-              ).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    isActive={page === activityPage}
-                    onClick={() => setActivityPage(page)}
-                    className="cursor-pointer border-0"
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
+              {getPaginationItems(
+                activityTotalPages,
+                activityPage
+              ).map((page) =>
+                page === "ellipsis-start" || page === "ellipsis-end" ? (
+                  <PaginationItem key={page}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      isActive={page === activityPage}
+                      onClick={() => setActivityPage(page)}
+                      className="cursor-pointer border-0"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
               <PaginationItem>
                 <PaginationNext
                   onClick={() =>
