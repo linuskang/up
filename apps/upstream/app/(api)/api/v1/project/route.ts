@@ -5,6 +5,8 @@ import { createProjectAuditLog } from "@/server/project-audit";
 
 import { NextRequest, NextResponse } from "next/server";
 
+type ProjectTransactionClient = Pick<typeof db, "project" | "projectMember">;
+
 export async function GET(request: NextRequest) {
     const session = await auth.api.getSession(request);
 
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const project = await db.$transaction(async (tx) => {
+    const project = await db.$transaction(async (tx: ProjectTransactionClient) => {
         const created = await tx.project.create({
             data: {
                 name,

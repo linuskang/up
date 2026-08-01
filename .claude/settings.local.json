@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\Code\\\\Upstream\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "PowerShell(robocopy \"D:\\\\Code\\\\Upstream\\\\packages\\\\ui\\\\src\\\\components\" \"D:\\\\Code\\\\UpstreamApp\\\\components\\\\ui\" /E 2>&1 | Select-Object -Last 3; robocopy \"D:\\\\Code\\\\Upstream\\\\packages\\\\ui\\\\src\\\\lib\" \"D:\\\\Code\\\\UpstreamApp\\\\lib\" /E 2>&1 | Select-Object -Last 3)",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
         select: { projectId: true },
     });
 
-    const projectIds = memberships.map((m) => m.projectId);
+    const projectIds = memberships.map((m: any) => m.projectId);
 
     const todayStart = new Date();
     todayStart.setUTCHours(0, 0, 0, 0);

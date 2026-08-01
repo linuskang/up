@@ -13,7 +13,7 @@ async function fireWebhooks(projectId: string, event: Record<string, unknown>) {
     });
 
     // Keep only webhooks subscribed to this event's category
-    const webhooks = allWebhooks.filter((wh) => {
+    const webhooks = allWebhooks.filter((wh: (typeof allWebhooks)[number]) => {
         if (wh.events.includes("*")) return true;
         if (category && wh.events.includes(category)) return true;
         return false;
@@ -25,7 +25,7 @@ async function fireWebhooks(projectId: string, event: Record<string, unknown>) {
     const timestamp = Math.floor(Date.now() / 1000).toString();
 
     await Promise.allSettled(
-        webhooks.map(async (wh) => {
+        webhooks.map(async (wh: (typeof webhooks)[number]) => {
             const signature = createHmac("sha256", wh.secret)
                 .update(`${timestamp}.${payload}`)
                 .digest("hex");
