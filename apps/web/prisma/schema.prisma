@@ -29,22 +29,22 @@ enum Plan {
 }
 
 model User {
-  id            String      @id
-  name          String
-  email         String
-  emailVerified Boolean     @default(false)
-  image         String?
-  pushNotificationsEnabled Boolean @default(true)
-  plan          Plan        @default(FREE)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  projects      Project[]
-  apiKeys       ApiKey[]
-  userUsages         UserUsage[]
-  auditLogs          AuditLog[]
-  pushSubscriptions  PushSubscription[]
+  id                       String             @id
+  name                     String
+  email                    String
+  emailVerified            Boolean            @default(false)
+  image                    String?
+  pushNotificationsEnabled Boolean            @default(true)
+  plan                     Plan               @default(FREE)
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  sessions                 Session[]
+  accounts                 Account[]
+  projects                 Project[]
+  apiKeys                  ApiKey[]
+  userUsages               UserUsage[]
+  auditLogs                AuditLog[]
+  pushSubscriptions        PushSubscription[]
 
   @@unique([email])
   @@map("user")
@@ -128,20 +128,20 @@ model ApiKey {
 }
 
 model Event {
-  id        String   @id @default(uuid())
-  title     String
-  icon      String @default("~")
-  description   String?
-  category  String?
-  fields    Json?
-  data      Json?
-  actions   Json?
-  contextStart Boolean @default(false)
-  contextId String?
-  createdAt DateTime @default(now())
-  pushNotify Boolean @default(false)
-  projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  title        String
+  icon         String   @default("~")
+  description  String?
+  category     String?
+  fields       Json?
+  data         Json?
+  actions      Json?
+  contextStart Boolean  @default(false)
+  contextId    String?
+  createdAt    DateTime @default(now())
+  pushNotify   Boolean  @default(false)
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId, contextId])
   @@index([projectId, createdAt])
