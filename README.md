@@ -17,9 +17,9 @@ This is a passion project I've been developing for the past few months, and usin
 
 Basically, Upstream is a easy way to integrate logging into your own applications. It takes minutes to setup - you create a account, project, API key, and integrate it with your project using my SDK.
 
-<img width="1058" height="1161" alt="image" src="https://github.com/user-attachments/assets/dca4b617-ec34-46d1-a48a-5c33305d4536" />
+<img width="2523" height="1265" alt="image" src="https://github.com/user-attachments/assets/bd8359a4-4776-4617-b15b-89c8678c9497" />
 
-### Check out the homepage at https://ups.linuskang.au
+### Check it out at https://up.linus.my
 
 ## I want to try Upstream!
 
@@ -33,29 +33,15 @@ npm i @uplabs/sdk
 ```ts
 import { Upstream } from '@uplabs/sdk'
 
-const up = new Upstream("YOUR_API_KEY")
+const up = new Upstream({
+  apiKey: "YOUR_API_KEY"
+})
 
 up.events.ingest({
-    title: "Project Deployed",
+    title: "Hello, World!",
     icon: "😁",
 });
 ```
-
-That's just scratching the surface. You can log complex events with json, events, descriptions, fields, and even add action buttons.
-
-| Field      | Type              | Required | Example |
-|------------|-------------------|----------|---------|
-| `title`    | `string`          | Yes      | `"Payment Processed"` |
-| `icon`     | `string`          | Yes      | `"💰"` |
-| `category` | `string`          | No       | `"billing"` |
-| `content`  | `string`          | No       | `"Your subscription was renewed successfully."` |
-| `fields`   | `Field[]`         | No       | `[{"name":"Plan","value":"Pro"}]` |
-| `events`   | `TimelineEvent[]` | No       | `[{"icon":"✅","time":"12:00 PM","content":"Subscription renewed."}]` |
-| `data`     | `unknown`         | No       | `{"subscriptionId":"sub_abc123"}` |
-| `actions`  | `Action[]`        | No       | `[{"title":"View Invoice","type":"default","url":"https://example.com"}]` |
-
-
-If you need help getting started, check out [linusdotmy/upstream-playground](https://github.com/linusdotmy/upstream-playground) for example usage.
 
 ## Self-host
 
