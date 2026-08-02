@@ -63,7 +63,7 @@ class EventsSDK {
         headers: {
           "Content-Type": "application/json",
           "x-api-key": this.config.apiKey,
-          "User-Agent": "@uplabs-sdk/0.3.0",
+          "User-Agent": "@uplabs-sdk/0.3.1",
         },
       })
 

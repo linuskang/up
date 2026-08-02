@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "log": "tsx index.ts"
+    "log": "npm run build --prefix ../../packages/sdk && tsx index.ts"
   },
   "keywords": [],
   "author": "",
