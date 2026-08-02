@@ -27,7 +27,7 @@ import { plans } from "@/subscription-types"
 // Types
 const Payload = z.object({
   title: z.string().min(1),
-  icon: z.string().min(1).max(1).optional(),
+  icon: z.string().min(1).max(32).optional(),
 
   description: z.string().optional().nullable(),
   category: z.string().optional().nullable(),

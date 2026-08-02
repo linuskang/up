@@ -221,7 +221,7 @@ export const openApiSpec = {
                 required: ["title"],
                 properties: {
                   title: { type: "string", minLength: 1 },
-                  icon: { type: "string", minLength: 1, maxLength: 1 },
+                  icon: { type: "string", minLength: 1, maxLength: 32 },
                   description: { type: "string", nullable: true },
                   category: { type: "string", nullable: true },
                   fields: {
