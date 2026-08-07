@@ -2,7 +2,7 @@
   <img width="192" height="192" alt="192x192" src="https://github.com/user-attachments/assets/4c97f877-4fba-4146-885c-26f945bb6682" />
 </p>
 
-<h1 align="center">Upstream: Simple and open logging</h1>
+<h1 align="center">Upstream: Simple and open events logging platform for SaSS</h1>
 
 <p align="center">
   <img src="https://img.shields.io/npm/v/@uplabs/sdk" alt="npm version" />
@@ -15,7 +15,7 @@
 
 This is a passion project I've been developing for the past few months, and using it internally across my apps. I needed a simple logging platform that was quick to setup for new projects, had awesome logging capabilities, and beautiful UI, hence, this is what I came up with.
 
-Basically, Upstream is a easy way to integrate logging into your own applications. It takes minutes to setup - you create a account, project, API key, and integrate it with your project using my SDK.
+Basically, Upstream is a easy way to integrate logging into your own applications. It takes minutes to setup - you create a account, project, API key, and integrate it with your project using my SDK. For me, I'm mostly using Upstream for product logs like user signups, reports, etc as I can easily view these alerts on the mobile app with push notifications support for essential events!
 
 <img width="2523" height="1265" alt="image" src="https://github.com/user-attachments/assets/bd8359a4-4776-4617-b15b-89c8678c9497" />
 
