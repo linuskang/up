@@ -2,7 +2,7 @@
   <img width="192" height="192" alt="192x192" src="https://github.com/user-attachments/assets/4c97f877-4fba-4146-885c-26f945bb6682" />
 </p>
 
-<h1 align="center">Upstream: Simple and open events logging platform for SaSS</h1>
+<h1 align="center">Upstream: Simple and open events logging platform for your SaSS projects.</h1>
 
 <p align="center">
   <img src="https://img.shields.io/npm/v/@uplabs/sdk" alt="npm version" />
