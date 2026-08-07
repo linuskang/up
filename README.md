@@ -43,6 +43,32 @@ up.events.ingest({
 });
 ```
 
+## Running locally for development
+
+Pretty straightforward. Heres how:
+
+1. ``git clone https://github.com/linuskang/up && cd up``
+
+2. ``npm install``
+
+3. ``cd apps/web && npx prisma generate``
+
+4. Add your ``.env`` into the root directory at ``/apps/web``
+
+4. Run db migrations ``npx prisma migrate dev``
+
+Finally, run the development server using ``npm run dev``
+
+After, go to ``http://localhost:3000`` and start editing!
+
+### Contributing.
+
+Please see the [CONTRIBUTING](CONTRIBUTING.md) guide for more information. Upstream isn't currently accepting PRs, however, if your wanting to fix small bugs, create a PR and I will take a look.
+
+Before creating PRs, please create an issue to discuss with me what you are planning to add/fix and I will let you know whether we are ok with this (dont want to waste your time!).
+
+After we exit beta, all public contributions will be accepted!
+
 ## Self-host
 
 Lucky for you, you can self-host using docker!
