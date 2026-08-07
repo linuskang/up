@@ -45,15 +45,74 @@ up.events.ingest({
 
 ## Self-host
 
-Lucky for you, I've made a convenient install script!
+Lucky for you, you can self-host using docker!
 
-Just ensure that you have docker installed on your system, and run
+Here's the ``docker-compose.yml`` for you to get started.
 
-```bash
-curl -fsSL https://get.lkang.au/upstream | sh
+1. Copy paste this into your directory:
+
+```yml
+services:
+  app:
+    image: ghcr.io/linuskang/up:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - upstream_net
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: upstream
+      POSTGRES_PASSWORD: upstream
+      POSTGRES_DB: upstream
+    volumes:
+      - upstream_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - upstream_net
+volumes:
+  upstream_data:
+networks:
+  upstream_net:
+    driver: bridge
 ```
 
-After, just run ``docker compose up -d`` and go to port 3000.
+2. Add your ``.env`` in the same directory:
+
+```
+DATABASE_URL=""
+BASE_URL=""
+
+BETTER_AUTH_SECRET=""
+BETTER_AUTH_URL=""
+
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
+
+RESEND_API_KEY=""
+RESEND_EMAIL_FROM=""
+
+CRON_SECRET=""
+ALLOW_SIGNUP=""
+
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=""
+VAPID_PRIVATE_KEY=""
+```
+
+3. Run ``docker compose up -d``
+
+4. Apply the database migrations using ``npx prisma migrate deploy``
+
+5. Visit the site at ``0.0.0.0:3000``
 
 ## Some notes
 
