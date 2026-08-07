@@ -146,7 +146,7 @@ We are very very early in this project. Expect bugs.
 
 We are not accepting contributions yet.
 
-There's no public docs site yet, checkout the markdown files in [docs](/docs).
+Documentation lives in [apps/docs](/apps/docs) and can be deployed as a standalone Fumadocs site.
 
 ### If you REALLY want to contibute still...
 

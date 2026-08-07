@@ -26,6 +26,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@workspace/ui": "^0.0.0",
     "geist": "^1.7.2"
   }
 }
