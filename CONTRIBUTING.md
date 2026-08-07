@@ -1,6 +1,6 @@
 # Contributing
 
-> ![NOTE]
+> [!NOTE]
 > This guide isn't done yet and is still being worked on. I've tried my best to get everything you need to start tinkering with Upstream here but there might be some stuff missing. Apologies.
 
 ## Upstream App: Setting up dev environment

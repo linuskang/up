@@ -4,14 +4,15 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "log": "npm run build --prefix ../../packages/sdk && tsx index.ts"
+    "log": "npm run build --prefix ../../packages/sdk && tsx index.ts",
+    "log2": "npm run build --prefix ../../packages/sdk && tsx contextId-example-notifications.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@uplabs/sdk": "^0.3.0"
+    "@uplabs/sdk": "^0.3.1"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
