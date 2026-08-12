@@ -122,13 +122,6 @@ export class Usage {
     const plan = user.plan as keyof typeof plans
     const planConfig = plans[plan]
 
-
-    console.log({
-      userPlan: user.plan,
-      plan,
-      availablePlans: Object.keys(plans),
-    })
-
     const planDisplay = (user?.plan ?? "FREE")
       .toLowerCase()
       .replace(/^\w/, (c) => c.toUpperCase())
