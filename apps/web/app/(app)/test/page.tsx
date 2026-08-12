@@ -18,9 +18,10 @@ export default function Page() {
       {
         id: "test-event",
         title: "daily billing sync started",
-        createdAt: now.toISOString(),
-        pushNotify: true,
-        icon: "📄",
+         createdAt: now.toISOString(),
+         pushNotify: true,
+         emailNotify: false,
+         icon: "📄",
         description: "Automated billing sync initiated for the workspace.",
         category: "billing",
         fields: [
@@ -42,9 +43,10 @@ export default function Page() {
           {
             id: "test-event-1",
             title: "processed invoices",
-            createdAt: new Date(now.getTime() + 1200).toISOString(),
-            pushNotify: false,
-            icon: "📄",
+             createdAt: new Date(now.getTime() + 1200).toISOString(),
+             pushNotify: false,
+             emailNotify: false,
+             icon: "📄",
             description: "Batch processed all pending invoices.",
             category: "billing",
             fields: [
@@ -58,9 +60,10 @@ export default function Page() {
           {
             id: "test-event-2",
             title: "daily billing sync finished",
-            createdAt: new Date(now.getTime() + 3400).toISOString(),
-            pushNotify: true,
-            icon: "✅",
+             createdAt: new Date(now.getTime() + 3400).toISOString(),
+             pushNotify: true,
+             emailNotify: false,
+             icon: "✅",
             description: "Sync completed with a few failures.",
             category: "billing",
             fields: [
@@ -83,9 +86,10 @@ export default function Page() {
       {
         id: "second-event",
         title: "user signed up",
-        createdAt: new Date(now.getTime() - 1000 * 60 * 5).toISOString(),
-        pushNotify: false,
-        icon: "🚀",
+         createdAt: new Date(now.getTime() - 1000 * 60 * 5).toISOString(),
+         pushNotify: false,
+         emailNotify: false,
+         icon: "🚀",
         description: "A new user completed the onboarding flow.",
         category: "auth",
         fields: [

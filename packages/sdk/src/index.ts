@@ -16,6 +16,7 @@ export interface EventContext {
   contextId?: string | null
   contextStart?: boolean
   pushNotify?: boolean
+  emailNotify?: boolean
 }
 
 export interface IngestedEvent {
@@ -31,6 +32,7 @@ export interface IngestedEvent {
   contextId?: string | null
   contextStart: boolean
   pushNotify: boolean
+  emailNotify: boolean
   createdAt: string
 }
 
@@ -63,7 +65,7 @@ class EventsSDK {
         headers: {
           "Content-Type": "application/json",
           "x-api-key": this.config.apiKey,
-          "User-Agent": "@uplabs-sdk/0.3.1",
+          "User-Agent": "@uplabs-sdk/0.3.2",
         },
       })
 

@@ -123,6 +123,10 @@ export const auth = betterAuth({
         type: "boolean",
         defaultValue: true,
       },
-    }
-  }
+      emailNotificationsEnabled: {
+        type: "boolean",
+        defaultValue: true,
+      },
+    },
+  },
 });

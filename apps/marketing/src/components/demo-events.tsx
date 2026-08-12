@@ -6,11 +6,13 @@ export const DemoEvents: EventProps[] = [
     pushNotify: true,
     title: "hello, world!",
     icon: "👋",
+    emailNotify: false,
     createdAt: new Date().toISOString(),
   },
   {
     id: "2",
     pushNotify: false,
+    emailNotify: false,
     title: "webhook delivered",
     icon: "🔗",
     fields: [
@@ -24,6 +26,7 @@ export const DemoEvents: EventProps[] = [
     icon: "🚨",
     id: "3",
     pushNotify: true,
+    emailNotify: false,
     description: "Stripe has detected a potential fraud on your account.",
     data: {
       id: "pi_3O1234567890abcdef",
@@ -53,6 +56,7 @@ export const DemoEvents: EventProps[] = [
   {
     id: "7",
     pushNotify: false,
+    emailNotify: false,
     title: "user signed up",
     icon: "🙅",
     category: "auth",
@@ -72,12 +76,14 @@ export const DemoEvents: EventProps[] = [
       {
         title: "user: account created",
         icon: "🆕",
+        emailNotify: false,
         createdAt: new Date().toISOString(),
         id: "4",
         pushNotify: false,
       },
       {
         title: "user: email sent",
+        emailNotify: false,
         icon: "📧",
         createdAt: new Date().toISOString(),
         id: "5",
@@ -85,6 +91,7 @@ export const DemoEvents: EventProps[] = [
       },
       {
         title: "user: email verified",
+        emailNotify: false,
         icon: "✅",
         createdAt: new Date().toISOString(),
         id: "6",
@@ -105,4 +112,5 @@ export const DemoEvents: EventProps[] = [
     ],
     createdAt: new Date().toISOString(),
   },
+
 ]

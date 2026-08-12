@@ -19,10 +19,11 @@ import { Usage } from "@/server/usage"
 import { Project } from "@/server/project"
 import { User } from "@/server/user"
 
-import { sendPushNotification } from "@/server/notification"
+import { sendPushNotification, sendEmailNotification } from "@/server/notification"
 
 import { ApiResponse } from "@/app/api/responses"
 import { plans } from "@/subscription-types"
+import { env } from "@/env"
 
 // Types
 const Payload = z.object({
@@ -57,6 +58,7 @@ const Payload = z.object({
   contextStart: z.boolean().default(false),
 
   pushNotify: z.boolean().default(false),
+  emailNotify: z.boolean().default(false),
 })
 
 export async function POST(req: NextRequest) {
@@ -168,6 +170,7 @@ export async function POST(req: NextRequest) {
       contextId: event.contextId ?? undefined,
       contextStart: event.contextStart,
       pushNotify: event.pushNotify,
+      emailNotify: event.emailNotify,
     },
   })
 
@@ -189,6 +192,16 @@ export async function POST(req: NextRequest) {
     await sendPushNotification(user.id, {
       title: res.title,
       body: res.description ?? "triggered a notification",
+    })
+  }
+
+  if (res.emailNotify) {
+    const eventUrl = `${env.BASE_URL}/project/${project.id}/?search=%40id%3D"${res.id}"`
+    const eventDetails = JSON.stringify(res, null, 2)
+
+    await sendEmailNotification(user.id, {
+      subject: `Event triggered: ${res.title} in ${project.name}`,
+      body: `${eventDetails}\n\nGo to event: ${eventUrl}\n\nTo stop recieving these notifications, disable email subscriptions in your account settings.`,
     })
   }
 

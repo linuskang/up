@@ -20,6 +20,7 @@ export function Event({
   fields,
   actions,
   data,
+  emailNotify,
   events,
   pushNotify,
   createdAt,
@@ -58,7 +59,7 @@ export function Event({
       >
         <div className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-background text-lg">
           {icon || "~"}
-          {pushNotify && (
+          {(pushNotify || emailNotify) && (
             <div className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
               !
             </div>

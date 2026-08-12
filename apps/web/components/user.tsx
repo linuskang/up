@@ -59,24 +59,13 @@ export function User() {
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-
         <DropdownMenuItem>
           <Link
-            href="https://up.linus.my/home"
-            target="_blank"
-            className="flex cursor-pointer items-center gap-2"
-          >
-            <ExternalLink className="size-3.5 text-muted-foreground" />
-            Homepage
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link
-            href="/pwa"
+            href="/settings/pwa"
             className="flex cursor-pointer items-center gap-2"
           >
             <Download className="size-3.5 text-muted-foreground" />
-            PWA App
+            Install PWA
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

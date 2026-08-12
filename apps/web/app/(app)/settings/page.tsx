@@ -9,6 +9,7 @@ import {
   BriefcaseBusiness,
   AppWindow,
   CreditCard,
+  Bell,
 } from "lucide-react"
 import Link from "next/link"
 import {
@@ -104,7 +105,19 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <CreditCard className="size-5 text-muted-foreground" />
             <span className="text-lg font-medium text-foreground">
-              Billing / Plan
+              Billing
+            </span>
+          </div>
+          <ChevronRight className="size-4 text-muted-foreground" />
+        </Link>
+        <Link
+          href="/settings/email-notifications"
+          className="flex items-center justify-between border-b border-border/40 px-4 py-4 transition-colors hover:bg-accent/50"
+        >
+          <div className="flex items-center gap-3">
+            <Bell className="size-5 text-muted-foreground" />
+            <span className="text-lg font-medium text-foreground">
+              Email Notifications
             </span>
           </div>
           <ChevronRight className="size-4 text-muted-foreground" />
@@ -116,7 +129,7 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <AppWindow className="size-5 text-muted-foreground" />
             <span className="text-lg font-medium text-foreground">
-              PWA / Notifications
+              PWA App
             </span>
           </div>
           <ChevronRight className="size-4 text-muted-foreground" />

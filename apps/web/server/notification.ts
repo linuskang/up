@@ -1,5 +1,6 @@
 import webpush, { WebPushError } from 'web-push'
 import { prisma } from '@/server/db'
+import { Email } from '@/server/email'
 
 let vapidConfigured = false
 function setupWebPush() {
@@ -24,6 +25,43 @@ export interface PushNotificationPayload {
   title?: string
   body: string
   icon?: string
+}
+
+export interface EmailNotificationPayload {
+  subject: string
+  body: string
+  html?: string
+}
+
+export async function sendEmailNotification(
+  userId: string,
+  payload: EmailNotificationPayload
+) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    }
+  })
+
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  if (!user.emailNotificationsEnabled) {
+    return { success: false, error: 'Email notifications are disabled for this user' }
+  }
+
+  try {
+    await Email.send(
+      user.email,
+      payload.subject,
+      payload.body,
+      payload.html
+    )
+  } catch (error) {
+    return { success: false, error: 'Failed to send email notification' }
+  }
 }
 
 export async function sendPushNotification(

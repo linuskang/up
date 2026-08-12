@@ -23,6 +23,7 @@ export interface Event {
   contextId?: string
 
   pushNotify: boolean
+  emailNotify: boolean
 
   projectId?: string
   project?: {

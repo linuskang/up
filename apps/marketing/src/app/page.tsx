@@ -146,6 +146,7 @@ export default function Home() {
 
           <Event
             id="1"
+            emailNotify={false}
             pushNotify={false}
             title="hello, world!"
             icon="👋"
@@ -179,6 +180,7 @@ export default function Home() {
             id="2"
             pushNotify={false}
             title="hello, world!"
+            emailNotify={false}
             icon="👋"
             description="this is a more detailed event"
             fields={[
@@ -207,6 +209,7 @@ export default function Home() {
             pushNotify={false}
             title="sophisticated event with actions"
             icon="🚨"
+            emailNotify={false}
             category="important"
             actions={[
               {
@@ -252,6 +255,7 @@ export default function Home() {
                 title: "This triggered a notification inside the event!",
                 icon: "🚨",
                 id: "5",
+                emailNotify: false,
                 createdAt: new Date().toISOString(),
                 pushNotify: true,
                 data: {
@@ -273,6 +277,7 @@ export default function Home() {
                 ]
               }
             ]}
+            emailNotify={false}
           />
 
           <p className="text-lg text-muted-foreground">
@@ -283,6 +288,7 @@ export default function Home() {
             id="8"
             pushNotify={true}
             title="checkout completed"
+            emailNotify={false}
             icon="🛒"
             category="commerce"
             description="A user completed checkout for a subscription upgrade. This event chains the whole purchase flow as nested context events and triggers a push notification."
@@ -330,6 +336,7 @@ export default function Home() {
               {
                 id: "9",
                 pushNotify: false,
+                emailNotify: false,
                 title: "checkout session created",
                 icon: "🛒",
                 category: "commerce",
@@ -341,6 +348,7 @@ export default function Home() {
                 title: "payment intent succeeded",
                 icon: "💳",
                 category: "commerce",
+                emailNotify: false,
                 fields: [
                   { title: "Status", value: "succeeded" },
                   { title: "Amount", value: "$19.00" },
@@ -350,6 +358,7 @@ export default function Home() {
               {
                 id: "11",
                 pushNotify: false,
+                emailNotify: false,
                 title: "webhook delivered",
                 icon: "🔗",
                 category: "commerce",
@@ -368,6 +377,7 @@ export default function Home() {
                   {
                     id: "13",
                     pushNotify: false,
+                    emailNotify: false,
                     title: "webhook: signature verified",
                     icon: "🔐",
                     category: "commerce",
@@ -382,6 +392,7 @@ export default function Home() {
                 id: "12",
                 pushNotify: true,
                 title: "license key provisioned",
+                emailNotify: false,
                 icon: "🔑",
                 category: "commerce",
                 description:
