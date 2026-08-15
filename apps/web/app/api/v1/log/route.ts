@@ -17,13 +17,14 @@ import { prisma } from "@/server/db"
 import { Api } from "@/server/api"
 import { Usage } from "@/server/usage"
 import { Project } from "@/server/project"
+
+import { env } from "@/env"
 import { User } from "@/server/user"
 
 import { sendPushNotification, sendEmailNotification } from "@/server/notification"
 
 import { ApiResponse } from "@/app/api/responses"
 import { plans } from "@/subscription-types"
-import { env } from "@/env"
 
 // Types
 const Payload = z.object({
@@ -188,20 +189,23 @@ export async function POST(req: NextRequest) {
     await Project.triggerWebhooks(project.id, res.category, res)
   }
 
+  const eventUrl = new URL(`/project/${project.id}/`, req.url)
+  eventUrl.searchParams.set("search", `@id="${res.id}"`)
+
   if (res.pushNotify) {
     await sendPushNotification(user.id, {
       title: res.title,
       body: res.description ?? "triggered a notification",
+      url: `/project/${project.id}/?search=%40id%3D"${res.id}"`,
     })
   }
 
   if (res.emailNotify) {
-    const eventUrl = `${env.BASE_URL}/project/${project.id}/?search=%40id%3D"${res.id}"`
     const eventDetails = JSON.stringify(res, null, 2)
 
     await sendEmailNotification(user.id, {
       subject: `Event triggered: ${res.title} in ${project.name}`,
-      body: `${eventDetails}\n\nGo to event: ${eventUrl}\n\nTo stop recieving these notifications, disable email subscriptions in your account settings.`,
+      body: `${eventDetails}\n\nGo to event: ${env.BASE_URL}/project/${project.id}/?search=%40id%3D"${res.id}"\n\nTo stop recieving these notifications, disable email subscriptions in your account settings.`,
     })
   }
 

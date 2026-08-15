@@ -1,24 +1,14 @@
 import webpush, { WebPushError } from 'web-push'
 import { prisma } from '@/server/db'
 import { Email } from '@/server/email'
+import { env } from "@/env"
 
-let vapidConfigured = false
 function setupWebPush() {
-  if (vapidConfigured) return
-  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-  const privateKey = process.env.VAPID_PRIVATE_KEY
-  if (!publicKey || !privateKey) {
-    console.error(
-      "[push] VAPID keys missing (NEXT_PUBLIC_VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY); push notifications will fail"
-    )
-    return
-  }
   webpush.setVapidDetails(
     "mailto:m@linus.id.au",
-    publicKey,
-    privateKey
+    env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    env.VAPID_PRIVATE_KEY
   )
-  vapidConfigured = true
 }
 
 export interface PushNotificationPayload {
@@ -27,15 +17,13 @@ export interface PushNotificationPayload {
   icon?: string
 }
 
-export interface EmailNotificationPayload {
-  subject: string
-  body: string
-  html?: string
-}
-
 export async function sendEmailNotification(
   userId: string,
-  payload: EmailNotificationPayload
+  payload: {
+    subject: string
+    body: string
+    html?: string
+  }
 ) {
   const user = await prisma.user.findUnique({
     where: {
@@ -43,13 +31,12 @@ export async function sendEmailNotification(
     }
   })
 
-
   if (!user) {
-    return { success: false, error: 'User not found' }
+    return false
   }
 
   if (!user.emailNotificationsEnabled) {
-    return { success: false, error: 'Email notifications are disabled for this user' }
+    return false
   }
 
   try {
@@ -59,14 +46,18 @@ export async function sendEmailNotification(
       payload.body,
       payload.html
     )
-  } catch (error) {
-    return { success: false, error: 'Failed to send email notification' }
+  } catch {
+    return false
   }
 }
 
 export async function sendPushNotification(
   userId: string,
-  payload: PushNotificationPayload
+  payload: {
+    title: string
+    body: string
+    url?: string
+  }
 ) {
   setupWebPush()
   const user = await prisma.user.findUnique({
@@ -76,29 +67,23 @@ export async function sendPushNotification(
   })
 
   if (!user) {
-    console.error(`[push] User not found: ${userId}`)
-    return { success: false, error: 'User not found' }
+    return false
   }
 
   if (!user.pushNotificationsEnabled) {
-    console.error(`[push] Push notifications disabled for user: ${userId}`)
-    return { success: false, error: 'Push notifications are disabled for this user' }
+    return false
   }
 
   const subscriptions = await prisma.pushSubscription.findMany({
     where: { userId },
   })
 
-  if (subscriptions.length === 0) {
-    console.error(`[push] No push subscriptions for user: ${userId}`)
-    return { success: false, error: 'No subscriptions found for user' }
-  }
-
   const body = JSON.stringify({
-    title: payload.title ?? 'Notification',
+    title: payload.title,
     body: payload.body,
-    icon: payload.icon ?? '/icon.png',
+    icon: '/icon.png',
     badge: '/badge.png',
+    url: payload.url ?? '/'
   })
 
   const results = await Promise.allSettled(
@@ -121,17 +106,14 @@ export async function sendPushNotification(
     const result = results[i]
     if (!result) continue
     if (result.status === 'rejected') {
-      const error = result.reason
-      if (error instanceof WebPushError && (error.statusCode === 404 || error.statusCode === 410)) {
-        const subscription = subscriptions[i]
-        if (!subscription) continue
-        await prisma.pushSubscription.delete({
-          where: { endpoint: subscription.endpoint },
-        })
-        removed++
-      }
+      const subscription = subscriptions[i]
+      if (!subscription) continue
+      await prisma.pushSubscription.delete({
+        where: { endpoint: subscription.endpoint },
+      })
+      removed++
     }
   }
 
-  return { success: true, sent: subscriptions.length - removed }
+  return true
 }

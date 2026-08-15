@@ -47,5 +47,8 @@ export async function sendNotificationToMe(message: string) {
     throw new Error('Not authenticated')
   }
 
-  return sendPushNotification(session.user.id, { body: message })
+  return sendPushNotification(session.user.id, {
+    title: 'Test notification',
+    body: message,
+  })
 }
