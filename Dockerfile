@@ -27,6 +27,7 @@ ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY="BCPa_p_M-CkigwhRXiJnRAVpbKlfayVU6X_O71kkgUG84g
 ENV GITHUB_CLIENT_ID="ci-placeholder"
 ENV GITHUB_CLIENT_SECRET="ci-placeholder"
 ENV RESEND_API_KEY="ci-placeholder"
+ENV VAPID_EMAIL="noreply@localhost.com"
 ENV RESEND_EMAIL_FROM="noreply@localhost"
 
 WORKDIR /app/apps/web
