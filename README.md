@@ -152,6 +152,10 @@ Documentation lives in [apps/docs](/apps/docs) and can be deployed as a standalo
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or PR. We use vouch to organise trust levels in this repository.
 
+## AI Declaration
+
+See [ai.md](ai.md)
+
 ## License
 
 Upstream is licensed under **CC BY-NC 4.0**.
